@@ -1,0 +1,39 @@
+{
+  "name": "ticbuild-vs-code",
+  "displayName": "ticbuild VS Code support",
+  "version": "0.0.2",
+  "author": {
+    "name": "Carl Corcoran"
+  },
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thenfour/ticbuild_vscode"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "files": [
+    "package.json",
+    "README.md",
+    "LICENSE.md",
+    "syntaxes/**"
+  ],
+  "contributes": {
+    "grammars": [
+      {
+        "scopeName": "source.ticbuild.preproc.injection",
+        "path": "./syntaxes/ticbuild-preproc.tmLanguage.json",
+        "injectTo": [
+          "source.lua",
+          "source.lua.embedded",
+          "meta.embedded.block.lua",
+          "text.html.markdown"
+        ]
+      }
+    ]
+  }
+}

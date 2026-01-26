@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ticbuild VS Code support",
+  "scopeName": "source.ticbuild.preproc.injection",
+  "injectionSelector": "L:source.lua, L:source.lua.embedded, L:comment.line.double-dash.lua, L:meta.embedded.block.lua",
+  "patterns": [
+    {
+      "name": "meta.preprocessor.ticbuild",
+      "begin": "^(\\s*--#)\\s*",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.comment.lua"
+        }
+      },
+      "end": "$",
+      "patterns": [
+        {
+          "match": "(?i)\\G(warning|error)\\b\\s*(.*)$",
+          "captures": {
+            "1": {
+              "name": "meta.preprocessor.ticbuild.directive"
+            },
+            "2": {
+              "name": "string.quoted.double.lua"
+            }
+          }
+        },
+        {
+          "name": "meta.preprocessor.ticbuild.directive",
+          "match": "(?i)\\G(?:if|elif|elseif|else|endif|ifdef|ifndef|define|undef|include|pragma)\\b"
+        },
+        {
+          "name": "comment.line.double-dash.lua",
+          "match": "--.*$",
+          "captures": {
+            "0": {
+              "name": "comment.line.double-dash.lua"
+            },
+            "1": {
+              "name": "punctuation.definition.comment.lua"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

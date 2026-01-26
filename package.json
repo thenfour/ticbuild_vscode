@@ -1,11 +1,12 @@
 {
   "name": "ticbuild-vs-code",
+  "description": "ticbuild syntax highlighting for VS Code",
   "displayName": "ticbuild VS Code support",
   "version": "0.0.2",
   "author": {
     "name": "Carl Corcoran"
   },
-  "publisher": "local",
+  "publisher": "TridentLoop",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -19,8 +20,9 @@
   "files": [
     "package.json",
     "README.md",
-    "LICENSE.md",
-    "syntaxes/**"
+    "LICENSE",
+    "syntaxes/**",
+    ".attachments/**"
   ],
   "contributes": {
     "grammars": [

@@ -7,6 +7,18 @@ This is a VS Code extension adding some syntax highlighting to support
 [TIC-80](https://tic80.com/), and it adds preprocessor support to the Lua
 programming language.
 
+## Links
+
+- [TIC-80 homepage](https://tic80.com/)
+- [ticbuild on Github](https://github.com/thenfour/ticbuild)
+- [ticbuild_vscode on Github (this project)](https://github.com/thenfour/ticbuild_vscode)
+- [Discord](https://discord.gg/kkf9gQfKAd)
+- [Somatic - web-based TIC-80 music tracker](https://somatic.tenfourmusic.net/)
+
+This project is free, a labor of love; if you find it useful, please support by spreading the word or,
+
+[![Support me on ko-fi](.attachments/support_me_on_kofi_beige.png)](https://ko-fi.com/E1E71QVJ5Z)
+
 # Installation
 
 ```bash

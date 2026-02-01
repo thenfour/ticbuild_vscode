@@ -104,7 +104,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   let controlSurfaceCounter = 1;
   let panelCounter = 1;
-  let sidebarCounter = 1;
+  const sidebarId = 'sidebar-default';
 
   let refreshTimer: NodeJS.Timeout | undefined;
   let refreshPending = false;
@@ -210,6 +210,11 @@ export function activate(context: vscode.ExtensionContext): void {
   updateContextKeys();
   updatePoller();
   updateUiRefreshTimer();
+  void vscode.commands.executeCommand(
+    'setContext',
+    'tic80.controlSurfaceSidebar.visible',
+    true,
+  );
 
   setupAutoConnectWatcher({
     context,
@@ -368,6 +373,7 @@ export function activate(context: vscode.ExtensionContext): void {
         panel.webview.html = buildControlSurfaceWebviewHtml(
           panel.webview,
           context.extensionPath,
+          'panel',
         );
         controlSurfaceRegistry.add({
           id,
@@ -412,56 +418,39 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
 
     vscode.commands.registerCommand(
-      'tic80.addSidebar',
+      'tic80.showSidebar',
       async () => {
-        const title = await vscode.window.showInputBox({
-          title: 'New Control Surface Sidebar',
-          prompt: 'Enter a sidebar title',
-          value: `Control Surface Sidebar ${sidebarCounter}`,
-          ignoreFocusOut: true,
-        });
-        if (!title) {
-          return;
+        if (!controlSurfaceRegistry.getById(sidebarId)) {
+          controlSurfaceRegistry.add({
+            id: sidebarId,
+            kind: 'sidebar',
+            title: 'Control Surface Sidebar',
+            createdAt: Date.now(),
+          });
         }
-        const id = `sidebar-${Date.now()}-${controlSurfaceCounter++}`;
-        sidebarCounter += 1;
-        controlSurfaceRegistry.add({
-          id,
-          kind: 'sidebar',
-          title,
-          createdAt: Date.now(),
-        });
-        controlSurfaceRegistry.setActiveSidebarId(id);
-        sidebarProvider.reveal();
+        controlSurfaceRegistry.setActiveSidebarId(sidebarId);
+        void vscode.commands.executeCommand(
+          'setContext',
+          'tic80.controlSurfaceSidebar.visible',
+          true,
+        );
+        await sidebarProvider.reveal();
         updateControlSurfaceViews();
       },
     ),
 
     vscode.commands.registerCommand(
-      'tic80.removeSidebar',
-      async (node?: ControlSurfaceNode) => {
-        const sidebars = controlSurfaceRegistry.getSidebars();
-        if (sidebars.length === 0) {
-          void vscode.window.showInformationMessage('No control surface sidebars to remove.');
-          return;
-        }
-        let targetId = node?.kind === 'sidebar' ? node.viewId : undefined;
-        if (!targetId) {
-          const sidebarItems: vscode.QuickPickItem[] = sidebars.map((sidebar) => ({
-            label: sidebar.title,
-            description: sidebar.id,
-          }));
-          const pick = await vscode.window.showQuickPick(
-            sidebarItems,
-            { title: 'Remove Control Surface Sidebar' },
-          );
-          if (!pick?.description) {
-            return;
-          }
-          targetId = pick.description;
-        }
-        controlSurfaceRegistry.removeById(targetId);
-        updateControlSurfaceViews();
+      'tic80.hideSidebar',
+      async () => {
+        void vscode.commands.executeCommand(
+          'setContext',
+          'tic80.controlSurfaceSidebar.visible',
+          false,
+        );
+        void vscode.commands.executeCommand(
+          'tic80ControlSurfaceSidebar.focus',
+        );
+        void vscode.commands.executeCommand('workbench.action.closeView');
       },
     ),
 

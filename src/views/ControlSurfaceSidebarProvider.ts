@@ -21,6 +21,21 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
 
     resolveWebviewView(webviewView: vscode.WebviewView): void {
         this.view = webviewView;
+        webviewView.onDidDispose(() => {
+            if (this.view === webviewView) {
+                this.view = undefined;
+            }
+        }, undefined, this.disposables);
+        const id = 'sidebar-default';
+        if (!this.registry.getById(id)) {
+            this.registry.add({
+                id,
+                kind: 'sidebar',
+                title: 'Control Surface Sidebar',
+                createdAt: Date.now(),
+            });
+        }
+        this.registry.setActiveSidebarId(id);
         const { webview } = webviewView;
         webview.options = {
             enableScripts: true,
@@ -33,12 +48,22 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
             undefined,
             this.disposables,
         );
-        webview.html = buildControlSurfaceWebviewHtml(webview, this.extensionPath);
+        webview.html = buildControlSurfaceWebviewHtml(
+            webview,
+            this.extensionPath,
+            'sidebar',
+        );
         this.update();
     }
 
-    reveal(preserveFocus = true): void {
-        this.view?.show?.(preserveFocus);
+    async reveal(preserveFocus = true): Promise<void> {
+        try {
+            this.view?.show?.(preserveFocus);
+            return;
+        } catch (error) {
+            this.view = undefined;
+        }
+        await vscode.commands.executeCommand('tic80ControlSurfaceSidebar.focus');
     }
 
     update(): void {

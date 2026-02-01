@@ -97,12 +97,12 @@
         "title": "TIC-80: Reload Devtools Config"
       },
       {
-        "command": "tic80.addSidebar",
-        "title": "TIC-80: Add Sidebar"
+        "command": "tic80.showSidebar",
+        "title": "TIC-80: Show Sidebar"
       },
       {
-        "command": "tic80.removeSidebar",
-        "title": "TIC-80: Remove Sidebar"
+        "command": "tic80.hideSidebar",
+        "title": "TIC-80: Hide Sidebar"
       },
       {
         "command": "tic80.addPanel",
@@ -154,7 +154,8 @@
         {
           "id": "tic80ControlSurfaceSidebar",
           "name": "TIC-80 Control Surfaces",
-          "type": "webview"
+          "type": "webview",
+          "when": "tic80.controlSurfaceSidebar.visible"
         }
       ]
     },
@@ -167,10 +168,10 @@
           "command": "tic80.reloadDevtools"
         },
         {
-          "command": "tic80.addSidebar"
+          "command": "tic80.showSidebar"
         },
         {
-          "command": "tic80.removeSidebar"
+          "command": "tic80.hideSidebar"
         },
         {
           "command": "tic80.addPanel"
@@ -215,8 +216,8 @@
           "group": "inline"
         },
         {
-          "command": "tic80.addSidebar",
-          "when": "view == tic80Watches && viewItem == tic80ControlSurfacesGroup",
+          "command": "tic80.showSidebar",
+          "when": "view == tic80Watches && viewItem == tic80ControlSurfacesGroup && !tic80.controlSurfaceSidebar.visible",
           "group": "inline"
         },
         {
@@ -225,8 +226,8 @@
           "group": "inline"
         },
         {
-          "command": "tic80.removeSidebar",
-          "when": "view == tic80Watches && viewItem == tic80ControlSurfaceSidebarItem",
+          "command": "tic80.hideSidebar",
+          "when": "view == tic80Watches && viewItem == tic80ControlSurfaceSidebarItem && tic80.controlSurfaceSidebar.visible",
           "group": "inline"
         },
         {

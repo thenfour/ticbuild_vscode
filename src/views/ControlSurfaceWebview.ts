@@ -9,6 +9,7 @@ import { WatchItem } from '../watches/watchTypes';
 export function buildControlSurfaceWebviewHtml(
     webview: vscode.Webview,
     extensionPath: string,
+    viewKind: 'panel' | 'sidebar',
 ): string {
     const scriptPath = vscode.Uri.file(
         path.join(extensionPath, 'ControlSurfaceUI', 'dist', 'bundle.js'),
@@ -24,6 +25,9 @@ export function buildControlSurfaceWebviewHtml(
 </head>
 <body>
   <div id="root"></div>
+    <script>
+        window.__tic80ControlSurfaceViewKind = "${viewKind}";
+    </script>
   <script src="${scriptUri}"></script>
 </body>
 </html>`;

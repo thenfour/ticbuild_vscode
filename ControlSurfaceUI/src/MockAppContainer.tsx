@@ -259,6 +259,7 @@ export function MockAppContainer(): JSX.Element {
         api={api}
         dataSource={dataSource}
         initialState={payload}
+        viewKind="panel"
       />
     </div>
   );

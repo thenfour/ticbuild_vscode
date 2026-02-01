@@ -66,6 +66,8 @@ export type ControlSurfaceApi = {
   postMessage: (message: unknown) => void;
 };
 
+export type ControlSurfaceViewKind = "panel" | "sidebar";
+
 export type ControlSurfaceDataSource = {
   subscribe: (listener: (payload: ControlSurfaceState) => void) => () => void;
 };
@@ -102,6 +104,7 @@ export type ControlSurfaceAppProps = {
   api?: ControlSurfaceApi;
   dataSource?: ControlSurfaceDataSource;
   initialState?: ControlSurfaceState;
+  viewKind?: ControlSurfaceViewKind;
 };
 
 type PageOption = {
@@ -152,6 +155,7 @@ export function ControlSurfaceApp({
   api,
   dataSource,
   initialState: initialStateOverride,
+  viewKind,
 }: ControlSurfaceAppProps): JSX.Element {
   const [state, setState] = React.useState<ControlSurfaceState>(
     initialStateOverride ?? initialState,
@@ -199,6 +203,17 @@ export function ControlSurfaceApp({
       <h1 style={{ fontSize: 14, margin: "0 0 12px 0" }}>
         TIC-80 Control Surfaces
       </h1>
+      {viewKind ? (
+        <div
+          style={{
+            marginBottom: 8,
+            color: "var(--vscode-descriptionForeground)",
+            fontSize: 11,
+          }}
+        >
+          View: {viewKind}
+        </div>
+      ) : null}
       <div
         style={{
           display: "flex",

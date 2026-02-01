@@ -32,10 +32,18 @@ const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
 export function AppWrapper(): JSX.Element {
   const api = React.useMemo(() => getVsCodeApi(), []);
   const dataSource = React.useMemo(() => createWindowMessageDataSource(), []);
+  const viewKind = React.useMemo(() => {
+    const globalAny = window as typeof window & {
+      __tic80ControlSurfaceViewKind?: "panel" | "sidebar";
+    };
+    return globalAny.__tic80ControlSurfaceViewKind;
+  }, []);
 
   if (!api) {
     return <MockAppContainer />;
   }
 
-  return <ControlSurfaceApp api={api} dataSource={dataSource} />;
+  return (
+    <ControlSurfaceApp api={api} dataSource={dataSource} viewKind={viewKind} />
+  );
 }

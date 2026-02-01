@@ -15,8 +15,9 @@ import { ControlSurfaceTriggerButton } from "./ControlSurfaceControls/ControlSur
 export const renderControlSurfaceControl = (
     node: ControlSurfaceNode,
     index: number,
-    api?: ControlSurfaceApi,
-    symbolValues?: Record<string, any>,
+    api: ControlSurfaceApi,
+    symbolValues: Record<string, any>,
+    pollIntervalMs: number,
 ): JSX.Element => {
     switch (node.type) {
         case "divider":
@@ -29,7 +30,7 @@ export const renderControlSurfaceControl = (
             return <ControlSurfaceKnob key={`knob-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
 
         case "label":
-            return <ControlSurfaceLabel key={`label-${index}`} {...node} api={api} />;
+            return <ControlSurfaceLabel key={`label-${index}`} {...node} api={api} pollIntervalMs={pollIntervalMs} />;
 
         case "number":
             return <ControlSurfaceNumber key={`number-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
@@ -54,6 +55,7 @@ export const renderControlSurfaceControl = (
                     api={api}
                     renderControl={renderControlSurfaceControl}
                     symbolValues={symbolValues}
+                    pollIntervalMs={pollIntervalMs}
                 />
             );
 
@@ -65,6 +67,7 @@ export const renderControlSurfaceControl = (
                     api={api}
                     renderControl={renderControlSurfaceControl}
                     symbolValues={symbolValues}
+                    pollIntervalMs={pollIntervalMs}
                 />
             );
 
@@ -74,7 +77,7 @@ export const renderControlSurfaceControl = (
                     <h3 className="control-surface-page-title">{node.label}</h3>
                     <div className="control-surface-page-content">
                         {node.controls.map((child, childIndex) =>
-                            renderControlSurfaceControl(child, childIndex, api, symbolValues),
+                            renderControlSurfaceControl(child, childIndex, api, symbolValues, pollIntervalMs),
                         )}
                     </div>
                 </div>

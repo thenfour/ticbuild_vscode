@@ -270,7 +270,7 @@ const devtoolsSchema = {
                         label: { type: 'string', minLength: 1 },
                         expression: { type: 'string', minLength: 1 },
                     },
-                    required: ['type', 'label', 'expression'],
+                    required: ['type', 'expression'],
                 },
                 {
                     type: 'object',

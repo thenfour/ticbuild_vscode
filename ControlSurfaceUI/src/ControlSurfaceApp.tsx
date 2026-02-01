@@ -256,8 +256,8 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
       {/* main control surface body */}
 
-      {activePage ? (
-        <ControlSurfacePage page={activePage} api={resolvedApi} symbolValues={state.symbolValues} />
+      {activePage && resolvedApi && state.symbolValues && state.pollIntervalMs ? (
+        <ControlSurfacePage page={activePage} api={resolvedApi} symbolValues={state.symbolValues} pollIntervalMs={state.pollIntervalMs} />
       ) : (
         <div
           style={{

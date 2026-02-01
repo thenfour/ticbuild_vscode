@@ -18,16 +18,18 @@ import { TabPanel, Tab } from "../basic/Tabs";
 import { ControlSurfaceTabsSpec, ControlSurfaceApi } from "../defs";
 
 export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
-    api?: ControlSurfaceApi;
-    renderControl: (node: any, index: number, api?: ControlSurfaceApi, symbolValues?: Record<string, any>) => JSX.Element;
-    symbolValues?: Record<string, any>;
+    api: ControlSurfaceApi;
+    renderControl: (node: any, index: number, api: ControlSurfaceApi, symbolValues: Record<string, any>, pollIntervalMs: number) => JSX.Element;
+    symbolValues: Record<string, any>;
+    pollIntervalMs: number;
 }
 
 export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     tabs,
     api,
     renderControl,
-    symbolValues
+    symbolValues,
+    pollIntervalMs
 }) => {
     const [selectedTabId, setSelectedTabId] = React.useState<number>(0);
 
@@ -49,7 +51,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                 >
                     <div className="control-surface-tab-content">
                         {tab.controls.map((child, childIndex) =>
-                            renderControl(child, childIndex, api, symbolValues)
+                            renderControl(child, childIndex, api, symbolValues, pollIntervalMs)
                         )}
                     </div>
                 </Tab>

@@ -16,6 +16,7 @@ export type ControlSurfaceState = {
     watches: WatchItem[];
     controlSurfaceRoot: ControlSurfaceNode[];
     symbolValues?: Record<string, any>; // map of symbol names to their current values
+    pollIntervalMs?: number; // interval for polling expressions in ms
 };
 
 export type ControlSurfacePageSpec = {
@@ -75,7 +76,7 @@ export type ControlSurfaceEnumButtonsSpec = {
 
 export type ControlSurfaceLabelSpec = {
     type: "label";
-    label: string;
+    label?: string;
     expression: string;
 };
 

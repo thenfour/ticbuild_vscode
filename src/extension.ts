@@ -131,6 +131,7 @@ export function activate(context: vscode.ExtensionContext): void {
       watchStore.getAll(),
       watchStore.getControlSurfaceRoot(),
       (expr) => session.evalExpr(expr),
+      getPollHz(),
       controlSurfaceRegistry.getActiveSidebarId(),
     );
 

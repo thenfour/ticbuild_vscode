@@ -14,10 +14,11 @@ import React from "react";
 import { ControlSurfaceLabelSpec, ControlSurfaceApi } from "../defs";
 
 export interface ControlSurfaceLabelProps extends ControlSurfaceLabelSpec {
-  api?: ControlSurfaceApi;
+  api: ControlSurfaceApi;
+  pollIntervalMs: number;
 }
 
-export const ControlSurfaceLabel: React.FC<ControlSurfaceLabelProps> = ({ label, expression, api }) => {
+export const ControlSurfaceLabel: React.FC<ControlSurfaceLabelProps> = ({ label, expression, api, pollIntervalMs }) => {
   const [displayValue, setDisplayValue] = React.useState<string>("");
   const [error, setError] = React.useState<string | null>(null);
 
@@ -45,17 +46,17 @@ export const ControlSurfaceLabel: React.FC<ControlSurfaceLabelProps> = ({ label,
     };
 
     evaluate(); // Initial evaluation
-    const interval = setInterval(evaluate, 100); // Update 10 times per second
+    const interval = setInterval(evaluate, pollIntervalMs);
 
     return () => {
       mounted = false;
       clearInterval(interval);
     };
-  }, [expression, api]);
+  }, [expression, api, pollIntervalMs]);
 
   return (
     <div className="control-surface-label">
-      <span className="control-surface-label-title">{label}:</span>
+      {label && <span className="control-surface-label-title">{label}: </span>}
       <span className="control-surface-label-value" style={{ color: error ? 'var(--vscode-errorForeground)' : undefined }}>
         {error ? `Error: ${error}` : displayValue || expression}
       </span>

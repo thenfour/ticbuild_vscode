@@ -60,12 +60,14 @@ export function buildControlSurfaceWebviewPayload(
     snapshot: SessionSnapshot,
     watches: WatchItem[],
     controlSurfaceRoot: DevtoolsControlNode[],
+    pollHz: number,
     activeSidebarId?: string,
 ): {
     status: string;
     watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>;
     controlSurfaceRoot: DevtoolsControlNode[];
     symbolValues?: Record<string, any>;
+    pollIntervalMs: number;
     activeSidebarId?: string;
 } {
     const status = snapshot.state === 'Connected'
@@ -75,6 +77,8 @@ export function buildControlSurfaceWebviewPayload(
             : snapshot.state === 'Error'
                 ? 'Error'
                 : 'Disconnected';
+
+    const pollIntervalMs = Math.max(Math.floor(1000 / pollHz), 10); // At least 10ms
 
     return {
         status,
@@ -86,6 +90,7 @@ export function buildControlSurfaceWebviewPayload(
             error: watch.lastError,
         })),
         controlSurfaceRoot,
+        pollIntervalMs,
         activeSidebarId,
     };
 }
@@ -98,18 +103,21 @@ export async function buildControlSurfaceWebviewPayloadWithSymbols(
     watches: WatchItem[],
     controlSurfaceRoot: DevtoolsControlNode[],
     evalExpr: (expression: string) => Promise<string>,
+    pollHz: number,
     activeSidebarId?: string,
 ): Promise<{
     status: string;
     watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>;
     controlSurfaceRoot: DevtoolsControlNode[];
     symbolValues?: Record<string, any>;
+    pollIntervalMs: number;
     activeSidebarId?: string;
 }> {
     const basePayload = buildControlSurfaceWebviewPayload(
         snapshot,
         watches,
         controlSurfaceRoot,
+        pollHz,
         activeSidebarId,
     );
 

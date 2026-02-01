@@ -39,9 +39,10 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
 };
 
 export interface ControlSurfaceGroupProps extends ControlSurfaceGroupSpec {
-  api?: ControlSurfaceApi;
-  renderControl: (node: any, index: number, api?: ControlSurfaceApi, symbolValues?: Record<string, any>) => JSX.Element;
-  symbolValues?: Record<string, any>;
+  api: ControlSurfaceApi;
+  renderControl: (node: any, index: number, api: ControlSurfaceApi, symbolValues: Record<string, any>, pollIntervalMs: number) => JSX.Element;
+  symbolValues: Record<string, any>;
+  pollIntervalMs: number;
 }
 
 export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
@@ -50,13 +51,14 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   controls,
   api,
   renderControl,
-  symbolValues
+  symbolValues,
+  pollIntervalMs
 }) => {
   return <ControlSurfaceGroupBase
     label={label}
     orientation={orientation}
   >
-    {controls.map((child, index) => renderControl(child, index, api, symbolValues))}
+    {controls.map((child, index) => renderControl(child, index, api, symbolValues, pollIntervalMs))}
   </ControlSurfaceGroupBase>;
   // return (
   //   <div className="control-surface-group">

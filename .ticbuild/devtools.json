@@ -96,7 +96,8 @@
         },
         {
           "type": "label",
-          "expression": "Adjust advanced settings carefully."
+          "label": "this should not be required",
+          "expression": "\"x=\"..x"
         }
       ]
     }

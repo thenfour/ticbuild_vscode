@@ -7,14 +7,16 @@ import {
 
 interface ControlSurfacePageProps {
   page: ControlSurfacePageSpec;
-  api?: ControlSurfaceApi;
-  symbolValues?: Record<string, any>;
+  api: ControlSurfaceApi;
+  symbolValues: Record<string, any>;
+  pollIntervalMs: number;
 }
 
 export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
   page,
   api,
   symbolValues,
+  pollIntervalMs,
 }) => {
   if (!page.controls || page.controls.length === 0) {
     return (
@@ -27,7 +29,7 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
   return (
     <div className="controlSurfaceControl controlSurfaceControl-page">
       {page.controls.map((node, index) =>
-        renderControlSurfaceControl(node, index, api, symbolValues),
+        renderControlSurfaceControl(node, index, api, symbolValues, pollIntervalMs),
       )}
     </div>
   );

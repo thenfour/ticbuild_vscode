@@ -1,7 +1,9 @@
 import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 
 const Ajv = require('ajv');
-import { DEVTOOLS_FILE_NAME } from './baseDefs';
+import { DEVTOOLS_DIR_NAME, DEVTOOLS_FILE_NAME, DEVTOOLS_SCHEMA_FILE_NAME } from './baseDefs';
+import { dirExists, fileExists } from './utils';
 
 export type DevtoolsWatch =
     | { type: 'global'; symbol: string;[key: string]: unknown }
@@ -249,4 +251,51 @@ export async function loadDevtoolsWatches(
 ): Promise<DevtoolsWatch[]> {
     const data = await readDevtoolsFile(devtoolsPath, output);
     return Array.isArray(data.watches) ? data.watches : [];
+}
+
+export async function ensureDevtoolsSchemaForWorkspace(
+    workspaceRoot?: string,
+    output?: { appendLine: (value: string) => void },
+): Promise<void> {
+    if (!workspaceRoot) {
+        return;
+    }
+
+    const devtoolsDir = path.join(workspaceRoot, DEVTOOLS_DIR_NAME);
+    if (!(await dirExists(devtoolsDir))) {
+        return;
+    }
+
+    const devtoolsPath = path.join(devtoolsDir, DEVTOOLS_FILE_NAME);
+    if (!(await fileExists(devtoolsPath))) {
+        return;
+    }
+
+    const schemaPath = path.join(devtoolsDir, DEVTOOLS_SCHEMA_FILE_NAME);
+    if (await fileExists(schemaPath)) {
+        return;
+    }
+
+    try {
+        await fs.writeFile(schemaPath, JSON.stringify(devtoolsSchema, null, 2), 'utf8');
+    } catch (error) {
+        output?.appendLine(`[devtools] failed to write ${DEVTOOLS_SCHEMA_FILE_NAME}`);
+        return;
+    }
+
+    // inject $schema reference into devtools.json
+    try {
+        const raw = await fs.readFile(devtoolsPath, 'utf8');
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') {
+            return;
+        }
+        const updated = {
+            $schema: `./${DEVTOOLS_SCHEMA_FILE_NAME}`,
+            ...parsed,
+        };
+        await fs.writeFile(devtoolsPath, JSON.stringify(updated, null, 2), 'utf8');
+    } catch (error) {
+        output?.appendLine(`[devtools] failed to update ${DEVTOOLS_FILE_NAME} schema reference`);
+    }
 }

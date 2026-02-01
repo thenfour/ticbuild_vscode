@@ -1,5 +1,5 @@
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { REMOTING_HELLO_V1 } from './baseDefs';
 
 // takes tic80 instance info and formats a label
 export function formatInstanceLabel(
@@ -58,3 +58,23 @@ export function parseHostPort(value: string): { host: string; port: number } | u
     }
     return { host: hostPart.trim(), port };
 }
+
+
+export const fileExists = async (filePath: string): Promise<boolean> => {
+    try {
+        await fs.access(filePath);
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
+export const dirExists = async (dirPath: string): Promise<boolean> => {
+    try {
+        const stats = await fs.stat(dirPath);
+        return stats.isDirectory();
+    } catch (error) {
+        return false;
+    }
+};
+

@@ -25,6 +25,7 @@ import { formatDateDiff, formatInstanceLabel, parseHostPort } from './utils';
 import { buildControlSurfaceWebviewHtml, buildControlSurfaceWebviewPayload } from './views/ControlSurfaceWebview';
 import { ControlSurfaceRegistry } from './views/ControlSurfaceRegistry';
 import { ControlSurfaceSidebarProvider } from './views/ControlSurfaceSidebarProvider';
+import { ensureDevtoolsSchemaForWorkspace } from './devtoolsModel';
 
 export function activate(context: vscode.ExtensionContext): void {
   const output = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
@@ -33,6 +34,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const session = new RemoteSessionManager(output);
   const workspaceRoot = getWorkspaceRoot();
+  void ensureDevtoolsSchemaForWorkspace(workspaceRoot, output);
   const watchStore = new WatchStore(workspaceRoot, output);
   const controlSurfaceRegistry = new ControlSurfaceRegistry();
   const watchProvider =

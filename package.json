@@ -41,8 +41,9 @@
     "ControlSurfaceUI/dist/**"
   ],
   "scripts": {
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "typecheck": "tsc -p ./ --noEmit",
+    "compile": "npm run typecheck && node ./esbuild.js",
+    "watch": "node ./esbuild.js --watch",
     "vscode:prepublish": "npm run compile"
   },
   "dependencies": {
@@ -51,6 +52,7 @@
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/vscode": "^1.80.0",
+    "esbuild": "^0.20.2",
     "typescript": "^5.3.3",
     "vscode": "^1.1.37"
   },

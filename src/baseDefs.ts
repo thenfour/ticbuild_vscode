@@ -18,6 +18,7 @@ export const REMOTING_HELLO_V1 = 'tic-80 remoting v1';
 
 export const DEVTOOLS_DIR_NAME = '.ticbuild';
 export const DEVTOOLS_FILE_NAME = 'devtools.json';
+export const DEVTOOLS_SCHEMA_FILE_NAME = 'devtools.schema.json';
 export const MEMORY_WATCH_UNSUPPORTED = 'Memory watches not supported yet';
 
 export const TICBUILD_SESSION_DIR_REL = '.ticbuild/remoting/sessions';

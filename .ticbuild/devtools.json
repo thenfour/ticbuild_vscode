@@ -53,6 +53,14 @@
               "min": 0,
               "max": 100,
               "step": 1
+            },
+            {
+              "type": "slider",
+              "label": "curve",
+              "symbol": "curve",
+              "min": 0,
+              "max": 100,
+              "step": 1
             }
           ]
         }

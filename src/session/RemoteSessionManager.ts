@@ -139,6 +139,13 @@ export class RemoteSessionManager implements vscode.Disposable {
     return this.client.evalExpr(expression);
   }
 
+  async eval(statement: string): Promise<string> {
+    if (!this.client || this.state !== 'Connected') {
+      throw new Error('Not connected to TIC-80');
+    }
+    return this.client.eval(statement);
+  }
+
   private updateState(state: SessionState): void {
     this.state = state;
     this.emitter.fire(this.snapshot);

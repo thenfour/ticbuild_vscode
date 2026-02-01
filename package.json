@@ -93,6 +93,10 @@
         "title": "TIC-80: Attach..."
       },
       {
+        "command": "tic80.reloadDevtools",
+        "title": "TIC-80: Reload Devtools Config"
+      },
+      {
         "command": "tic80.addSidebar",
         "title": "TIC-80: Add Sidebar"
       },
@@ -158,6 +162,9 @@
       "commandPalette": [
         {
           "command": "tic80.attach"
+        },
+        {
+          "command": "tic80.reloadDevtools"
         },
         {
           "command": "tic80.addSidebar"

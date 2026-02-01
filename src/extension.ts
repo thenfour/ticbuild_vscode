@@ -51,6 +51,37 @@ export function activate(context: vscode.ExtensionContext): void {
       case 'clearWatches':
         void vscode.commands.executeCommand('tic80.clearWatches');
         break;
+      case 'eval': {
+        if (!session.isConnected()) {
+          output.appendLine('[controlSurface] eval ignored (not connected)');
+          break;
+        }
+        const expr = (message as { expression?: string }).expression;
+        if (!expr) {
+          break;
+        }
+        void session.evalExpr(expr).catch((error) => {
+          output.appendLine(`[controlSurface] eval error: ${String(error)}`);
+        });
+        break;
+      }
+      case 'setSymbol': {
+        if (!session.isConnected()) {
+          output.appendLine('[controlSurface] setSymbol ignored (not connected)');
+          break;
+        }
+        const payload = message as { symbol?: string; value?: unknown };
+        if (!payload.symbol) {
+          break;
+        }
+        const serialized = JSON.stringify(payload.value ?? null);
+        const expr = `${payload.symbol} = ${serialized}`;
+        output.appendLine(`[controlSurface] setSymbol: ${expr}`);
+        void session.eval(expr).catch((error) => {
+          output.appendLine(`[controlSurface] setSymbol error: ${String(error)}`);
+        });
+        break;
+      }
       default:
         break;
     }
@@ -60,6 +91,7 @@ export function activate(context: vscode.ExtensionContext): void {
     buildControlSurfaceWebviewPayload(
       session.snapshot,
       watchStore.getAll(),
+      watchStore.getControlSurfaceRoot(),
       controlSurfaceRegistry.getActiveSidebarId(),
     );
 
@@ -287,6 +319,17 @@ export function activate(context: vscode.ExtensionContext): void {
             `TIC-80 attach failed: ${message}`);
         }
       }),
+
+    vscode.commands.registerCommand(
+      'tic80.reloadDevtools',
+      async () => {
+        await watchStore.reloadFromDisk();
+        watchProvider.refresh();
+        updateControlSurfaceViews();
+        void vscode.window.showInformationMessage(
+          'Reloaded devtools.json.');
+      },
+    ),
 
     vscode.commands.registerCommand(
       'tic80.addPanel',

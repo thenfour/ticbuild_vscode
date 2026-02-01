@@ -54,11 +54,11 @@ export class WatchPoller implements vscode.Disposable {
 
   private async tick(): Promise<void> {
     if (this.busy) {
-      this.log('[poller] tick skipped (busy)');
+      //this.log('[poller] tick skipped (busy)');
       return;
     }
     if (!this.session.isConnected()) {
-      this.log('[poller] tick skipped (not connected)');
+      //this.log('[poller] tick skipped (not connected)');
       this.store.markAllStale();
       this.onUpdate();
       return;
@@ -66,7 +66,7 @@ export class WatchPoller implements vscode.Disposable {
 
     const watches = this.store.getAll();
     if (watches.length === 0) {
-      this.log('[poller] tick skipped (no watches)');
+      //this.log('[poller] tick skipped (no watches)');
       return;
     }
 

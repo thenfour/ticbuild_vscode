@@ -3,12 +3,13 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 
 import { DEVTOOLS_DIR_NAME, DEVTOOLS_FILE_NAME } from '../baseDefs';
-import { readDevtoolsFile } from '../devtoolsModel';
+import { DevtoolsControlNode, readDevtoolsFile } from '../devtoolsModel';
 import { LuaExprWatch, LuaGlobalWatch, MemoryWatch, WatchItem } from './watchTypes';
 
 export class WatchStore {
   private readonly emitter = new vscode.EventEmitter<void>();
   private watches: WatchItem[] = [];
+  private controlSurfaceRoot: DevtoolsControlNode[] = [];
   private output?: vscode.OutputChannel;
   private readonly devtoolsPath?: string;
 
@@ -33,6 +34,20 @@ export class WatchStore {
 
   getAll(): WatchItem[] {
     return [...this.watches];
+  }
+
+  getControlSurfaceRoot(): DevtoolsControlNode[] {
+    return [...this.controlSurfaceRoot];
+  }
+
+  async reloadFromDisk(): Promise<void> {
+    if (!this.devtoolsPath) {
+      this.log('[watchStore] reload skipped (no workspace root)');
+      return;
+    }
+    const data = await readDevtoolsFile(this.devtoolsPath, this.output);
+    this.applyDevtoolsData(data);
+    this.log('[watchStore] reloaded devtools.json');
   }
 
   addGlobal(name: string): LuaGlobalWatch {
@@ -143,11 +158,18 @@ export class WatchStore {
     if (!this.devtoolsPath) {
       return;
     }
-    const watches = (await readDevtoolsFile(this.devtoolsPath, this.output)).watches;
-    if (watches.length === 0) {
-      return;
-    }
+    const data = await readDevtoolsFile(this.devtoolsPath, this.output);
+    this.applyDevtoolsData(data);
+    this.log(`[watchStore] load (count=${this.watches.length})`);
+  }
 
+  private applyDevtoolsData(data: { watches?: unknown; controlSurfaceRoot?: unknown }): void {
+    const watches = Array.isArray(data.watches) ? data.watches : [];
+    const controlSurfaceRoot = Array.isArray(data.controlSurfaceRoot)
+      ? data.controlSurfaceRoot
+      : [];
+
+    this.controlSurfaceRoot = controlSurfaceRoot;
     this.watches = watches
       .map((item) => this.deserializeWatch(item))
       .filter((item): item is WatchItem => !!item)
@@ -158,7 +180,6 @@ export class WatchStore {
       }));
 
     this.emitter.fire();
-    this.log(`[watchStore] load (count=${this.watches.length})`);
   }
 
   private async persist(): Promise<void> {

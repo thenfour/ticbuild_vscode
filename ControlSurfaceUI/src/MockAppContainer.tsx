@@ -5,6 +5,7 @@ import {
   ControlSurfaceApp,
   ControlSurfaceDataSource,
   ControlSurfaceState,
+  ControlSurfaceNode,
   WatchItem,
 } from "./ControlSurfaceApp";
 
@@ -64,8 +65,12 @@ const createMockWatch = (index: number, kind: MockValueKind): MockWatch => {
 export function MockAppContainer(): JSX.Element {
   const [connected, setConnected] = React.useState(false);
   const [watches, setWatches] = React.useState<MockWatch[]>([]);
+  const [controlSurfaceRoot, setControlSurfaceRoot] = React.useState<
+    ControlSurfaceNode[]
+  >([]);
   const [nextId, setNextId] = React.useState(1);
   const [addKind, setAddKind] = React.useState<MockValueKind>("auto");
+  const [clipboardNotice, setClipboardNotice] = React.useState<string>("");
 
   const subscribersRef = React.useRef(
     new Set<(payload: ControlSurfaceState) => void>(),
@@ -73,6 +78,7 @@ export function MockAppContainer(): JSX.Element {
   const latestPayloadRef = React.useRef<ControlSurfaceState>({
     status: "Disconnected (mock)",
     watches: [],
+    controlSurfaceRoot: [],
   });
 
   React.useEffect(() => {
@@ -127,8 +133,9 @@ export function MockAppContainer(): JSX.Element {
     return {
       status: connected ? "Connected (mock)" : "Disconnected (mock)",
       watches: mappedWatches,
+      controlSurfaceRoot,
     };
-  }, [connected, watches]);
+  }, [connected, controlSurfaceRoot, watches]);
 
   React.useEffect(() => {
     latestPayloadRef.current = payload;
@@ -163,6 +170,42 @@ export function MockAppContainer(): JSX.Element {
 
   const handleRemoveWatch = () => {
     setWatches((current) => current.slice(0, -1));
+  };
+
+  const handleCopyControlSurfaceRoot = async () => {
+    setClipboardNotice("");
+    try {
+      if (!navigator.clipboard?.writeText) {
+        setClipboardNotice("Clipboard API unavailable.");
+        return;
+      }
+      await navigator.clipboard.writeText(
+        JSON.stringify(controlSurfaceRoot, null, 2),
+      );
+      setClipboardNotice("controlSurfaceRoot copied.");
+    } catch (error) {
+      setClipboardNotice("Failed to copy controlSurfaceRoot.");
+    }
+  };
+
+  const handlePasteControlSurfaceRoot = async () => {
+    setClipboardNotice("");
+    try {
+      if (!navigator.clipboard?.readText) {
+        setClipboardNotice("Clipboard API unavailable.");
+        return;
+      }
+      const text = await navigator.clipboard.readText();
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed)) {
+        setClipboardNotice("Clipboard data must be an array.");
+        return;
+      }
+      setControlSurfaceRoot(parsed as ControlSurfaceNode[]);
+      setClipboardNotice("controlSurfaceRoot pasted.");
+    } catch (error) {
+      setClipboardNotice("Failed to paste controlSurfaceRoot.");
+    }
   };
 
   return (
@@ -200,6 +243,17 @@ export function MockAppContainer(): JSX.Element {
         <button onClick={handleRemoveWatch} disabled={watches.length === 0}>
           Remove Watch
         </button>
+        <button onClick={handleCopyControlSurfaceRoot}>
+          Copy controlSurfaceRoot
+        </button>
+        <button onClick={handlePasteControlSurfaceRoot}>
+          Paste controlSurfaceRoot
+        </button>
+        {clipboardNotice ? (
+          <span style={{ color: "var(--vscode-descriptionForeground)" }}>
+            {clipboardNotice}
+          </span>
+        ) : null}
       </div>
       <ControlSurfaceApp
         api={api}

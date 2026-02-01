@@ -2,6 +2,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 
 import { SessionSnapshot } from '../session/RemoteSessionManager';
+import { DevtoolsControlNode } from '../devtoolsModel';
 import { WatchItem } from '../watches/watchTypes';
 
 
@@ -31,8 +32,14 @@ export function buildControlSurfaceWebviewHtml(
 export function buildControlSurfaceWebviewPayload(
     snapshot: SessionSnapshot,
     watches: WatchItem[],
+    controlSurfaceRoot: DevtoolsControlNode[],
     activeSidebarId?: string,
-): { status: string; watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>; activeSidebarId?: string } {
+): {
+    status: string;
+    watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>;
+    controlSurfaceRoot: DevtoolsControlNode[];
+    activeSidebarId?: string;
+} {
     const status = snapshot.state === 'Connected'
         ? `Connected ${snapshot.host}:${snapshot.port}`
         : snapshot.state === 'Connecting'
@@ -50,6 +57,7 @@ export function buildControlSurfaceWebviewPayload(
             stale: watch.stale,
             error: watch.lastError,
         })),
+        controlSurfaceRoot,
         activeSidebarId,
     };
 }

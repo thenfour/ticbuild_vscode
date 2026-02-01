@@ -89,6 +89,12 @@ export class Tic80RemotingClient {
     return response.data;
   }
 
+  async eval(statement: string): Promise<string> {
+    const encoded = this.encodeString(statement);
+    const response = await this.sendCommand('eval', encoded);
+    return response.data;
+  }
+
   async cartPath(): Promise<string> {
     const response = await this.sendCommand('cartpath');
     return response.data;

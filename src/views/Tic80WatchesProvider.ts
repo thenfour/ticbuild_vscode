@@ -99,6 +99,7 @@ class SessionNode extends vscode.TreeItem {
     const description = snapshot.state === 'Connected' ? `Connected ${snapshot.host}:${snapshot.port}` :
       snapshot.state === 'Connecting' ? 'Connecting' : 'Disconnected';
     super('Session', vscode.TreeItemCollapsibleState.None);
+    this.contextValue = 'tic80SessionNode';
     this.description = description;
     if (snapshot.lastError) {
       this.tooltip = `Last error: ${snapshot.lastError}`;
@@ -109,6 +110,7 @@ class SessionNode extends vscode.TreeItem {
 class WatchesGroupNode extends vscode.TreeItem {
   constructor(count: number) {
     super('Watches', vscode.TreeItemCollapsibleState.Expanded);
+    this.contextValue = 'tic80WatchesGroup';
     this.description = count > 0 ? `${count}` : undefined;
   }
 }

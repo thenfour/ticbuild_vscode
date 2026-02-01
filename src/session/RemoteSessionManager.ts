@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 
-import {Tic80RemotingClient} from '../remoting/Tic80RemotingClient';
+import { Tic80RemotingClient } from '../remoting/Tic80RemotingClient';
+import { LUA_GLOBALS_TO_IGNORE } from '../baseDefs';
 
-export type SessionState = 'NotConnected'|'Connecting'|'Connected'|'Error';
+export type SessionState = 'NotConnected' | 'Connecting' | 'Connected' | 'Error';
 
 export interface SessionSnapshot {
   state: SessionState;
@@ -18,11 +19,11 @@ export class RemoteSessionManager implements vscode.Disposable {
   private port = 0;
   private lastError?: string;
   private connectedAt?: number;
-  private client: Tic80RemotingClient|undefined;
+  private client: Tic80RemotingClient | undefined;
   private readonly emitter = new vscode.EventEmitter<SessionSnapshot>();
   private disconnecting = false;
 
-  constructor(private output: vscode.OutputChannel) {}
+  constructor(private output: vscode.OutputChannel) { }
 
   dispose(): void {
     this.emitter.dispose();
@@ -30,7 +31,7 @@ export class RemoteSessionManager implements vscode.Disposable {
   }
 
   onDidChangeState(listener: (snapshot: SessionSnapshot) => void):
-      vscode.Disposable {
+    vscode.Disposable {
     return this.emitter.event(listener);
   }
 
@@ -123,7 +124,12 @@ export class RemoteSessionManager implements vscode.Disposable {
     if (!this.client || this.state !== 'Connected') {
       throw new Error('Not connected to TIC-80');
     }
-    return this.client.listGlobals();
+    const globals = await this.client.listGlobals();
+    // sanitize the list.
+    const filtered = globals.filter((name) => {
+      return !LUA_GLOBALS_TO_IGNORE.includes(name);
+    });
+    return filtered;
   }
 
   async evalExpr(expression: string): Promise<string> {

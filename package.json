@@ -152,6 +152,31 @@
       ],
       "view/item/context": [
         {
+          "command": "tic80.openControlSurfaces",
+          "when": "view == tic80Watches && viewItem == tic80SessionNode",
+          "group": "inline"
+        },
+        {
+          "command": "tic80.attach",
+          "when": "view == tic80Watches && viewItem == tic80SessionNode",
+          "group": "inline"
+        },
+        {
+          "command": "tic80.detach",
+          "when": "view == tic80Watches && viewItem == tic80SessionNode && tic80.remote.connected",
+          "group": "inline"
+        },
+        {
+          "command": "tic80.addWatch",
+          "when": "view == tic80Watches && viewItem == tic80WatchesGroup",
+          "group": "inline"
+        },
+        {
+          "command": "tic80.clearWatches",
+          "when": "view == tic80Watches && viewItem == tic80WatchesGroup",
+          "group": "inline"
+        },
+        {
           "command": "tic80.removeWatch",
           "when": "view == tic80Watches && viewItem == tic80WatchItem",
           "group": "inline"

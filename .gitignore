@@ -7,6 +7,9 @@ out/
 dist/
 *.vsix
 
+# written automatically
+.ticbuild/devtools.schema.json
+
 # IDE settings
 .vscode-test/
 .vscode/settings.json

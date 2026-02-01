@@ -1,6 +1,6 @@
 import React from "react";
 
-type WatchItem = {
+export type WatchItem = {
   id: string;
   label: string;
   value: string;
@@ -8,9 +8,17 @@ type WatchItem = {
   error?: string;
 };
 
-type ControlSurfaceState = {
+export type ControlSurfaceState = {
   status: string;
   watches: WatchItem[];
+};
+
+export type ControlSurfaceApi = {
+  postMessage: (message: unknown) => void;
+};
+
+export type ControlSurfaceDataSource = {
+  subscribe: (listener: (payload: ControlSurfaceState) => void) => () => void;
 };
 
 const initialState: ControlSurfaceState = {
@@ -18,29 +26,56 @@ const initialState: ControlSurfaceState = {
   watches: [],
 };
 
-export function ControlSurfaceApp(): JSX.Element {
-  const [state, setState] = React.useState<ControlSurfaceState>(initialState);
-  const vscodeApi = React.useMemo(() => {
-    const globalAny = window as typeof window & {
-      acquireVsCodeApi?: () => { postMessage: (message: unknown) => void };
-    };
-    return globalAny.acquireVsCodeApi
-      ? globalAny.acquireVsCodeApi()
-      : undefined;
-  }, []);
+const getWindowApi = (): ControlSurfaceApi | undefined => {
+  const globalAny = window as typeof window & {
+    acquireVsCodeApi?: () => { postMessage: (message: unknown) => void };
+  };
+  return globalAny.acquireVsCodeApi ? globalAny.acquireVsCodeApi() : undefined;
+};
 
-  React.useEffect(() => {
+const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
+  subscribe: (listener) => {
     const handleMessage = (event: MessageEvent) => {
       const payload = event.data as ControlSurfaceState | undefined;
-      if (!payload || !payload.watches) {
+      if (!payload || !Array.isArray(payload.watches)) {
         return;
       }
-      setState(payload);
+      listener(payload);
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  },
+});
+
+export type ControlSurfaceAppProps = {
+  api?: ControlSurfaceApi;
+  dataSource?: ControlSurfaceDataSource;
+  initialState?: ControlSurfaceState;
+};
+
+export function ControlSurfaceApp({
+  api,
+  dataSource,
+  initialState: initialStateOverride,
+}: ControlSurfaceAppProps): JSX.Element {
+  const [state, setState] = React.useState<ControlSurfaceState>(
+    initialStateOverride ?? initialState,
+  );
+  const resolvedApi = React.useMemo(() => api ?? getWindowApi(), [api]);
+  const resolvedDataSource = React.useMemo(
+    () => dataSource ?? createWindowMessageDataSource(),
+    [dataSource],
+  );
+
+  React.useEffect(() => {
+    const unsubscribe = resolvedDataSource.subscribe((payload) => {
+      setState(payload);
+    });
+    return () => {
+      unsubscribe?.();
+    };
+  }, [resolvedDataSource]);
 
   return (
     <div
@@ -54,14 +89,16 @@ export function ControlSurfaceApp(): JSX.Element {
         TIC-80 Control Surfaces
       </h1>
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        <button onClick={() => vscodeApi?.postMessage({ type: "addWatch" })}>
+        <button onClick={() => resolvedApi?.postMessage({ type: "addWatch" })}>
           Add Watch
         </button>
-        <button onClick={() => vscodeApi?.postMessage({ type: "removeWatch" })}>
+        <button
+          onClick={() => resolvedApi?.postMessage({ type: "removeWatch" })}
+        >
           Remove Watch
         </button>
         <button
-          onClick={() => vscodeApi?.postMessage({ type: "clearWatches" })}
+          onClick={() => resolvedApi?.postMessage({ type: "clearWatches" })}
         >
           Clear Watches
         </button>

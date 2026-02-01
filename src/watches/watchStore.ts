@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 
 import { DEVTOOLS_DIR_NAME, DEVTOOLS_FILE_NAME } from '../baseDefs';
+import { readDevtoolsFile } from '../devtoolsModel';
 import { LuaExprWatch, LuaGlobalWatch, MemoryWatch, WatchItem } from './watchTypes';
 
 export class WatchStore {
@@ -142,31 +143,12 @@ export class WatchStore {
     if (!this.devtoolsPath) {
       return;
     }
-    let raw: string;
-    try {
-      raw = await fs.readFile(this.devtoolsPath, 'utf8');
-    } catch (error) {
+    const watches = (await readDevtoolsFile(this.devtoolsPath, this.output)).watches;
+    if (watches.length === 0) {
       return;
     }
 
-    let payload: unknown;
-    try {
-      payload = JSON.parse(raw);
-    } catch (error) {
-      this.log('[watchStore] devtools.json parse error');
-      return;
-    }
-
-    if (!payload || typeof payload !== 'object') {
-      return;
-    }
-
-    const data = payload as { watches?: unknown[] };
-    if (!Array.isArray(data.watches)) {
-      return;
-    }
-
-    this.watches = data.watches
+    this.watches = watches
       .map((item) => this.deserializeWatch(item))
       .filter((item): item is WatchItem => !!item)
       .map((watch) => ({
@@ -192,7 +174,7 @@ export class WatchStore {
       return;
     }
 
-    const existing = await this.readDevtoolsFile();
+    const existing = await readDevtoolsFile(this.devtoolsPath, this.output);
     const updated = {
       ...existing,
       watches: this.watches.map((watch) => this.serializeWatch(watch)),
@@ -207,22 +189,6 @@ export class WatchStore {
     } catch (error) {
       this.log('[watchStore] failed to write devtools.json');
     }
-  }
-
-  private async readDevtoolsFile(): Promise<Record<string, unknown>> {
-    if (!this.devtoolsPath) {
-      return {};
-    }
-    try {
-      const raw = await fs.readFile(this.devtoolsPath, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') {
-        return parsed as Record<string, unknown>;
-      }
-    } catch (error) {
-      // ignore
-    }
-    return {};
   }
 
   private createId(): string {

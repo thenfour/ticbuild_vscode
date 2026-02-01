@@ -1,4 +1,5 @@
 {
+  "$schema": "./devtools.schema.json",
   "watches": [
     {
       "type": "global",

@@ -42,6 +42,13 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const handleControlSurfaceMessage = (message: { type?: string }, webview?: vscode.Webview) => {
     switch (message?.type) {
+      case 'log': {
+        const logMessage = (message as { message?: string }).message;
+        if (logMessage) {
+          output.appendLine(`[webview] ${logMessage}`);
+        }
+        break;
+      }
       case 'addWatch':
         void vscode.commands.executeCommand('tic80.addWatch');
         break;
@@ -70,6 +77,7 @@ export function activate(context: vscode.ExtensionContext): void {
         void (async () => {
           try {
             const result = await session.evalExpr(payload.expression!);
+            output.appendLine(`[controlSurface] evalExpression: "${payload.expression}" => "${result}"`);
             if (webview) {
               void webview.postMessage({
                 type: 'evalResult',
@@ -78,6 +86,7 @@ export function activate(context: vscode.ExtensionContext): void {
               });
             }
           } catch (error) {
+            output.appendLine(`[controlSurface] evalExpression error: ${String(error)}`);
             if (webview) {
               void webview.postMessage({
                 type: 'evalResult',

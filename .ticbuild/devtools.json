@@ -96,7 +96,6 @@
         },
         {
           "type": "label",
-          "label": "this should not be required",
           "expression": "\"x=\"..x"
         }
       ]

@@ -24,23 +24,26 @@ export const ControlSurfaceLabel: React.FC<ControlSurfaceLabelProps> = ({ label,
 
   // Poll expression value periodically
   React.useEffect(() => {
-    if (!api?.evalExpression) {
-      setDisplayValue(expression);
-      return;
-    }
+    // api.log?.(`ControlSurfaceLabel mounted. API keys: ${Object.keys(api).join(", ")}`);
+    // api.log?.(`evalExpression type: ${typeof api.evalExpression}`);
+
 
     let mounted = true;
 
     const evaluate = async () => {
       try {
+        //api.log?.(`Evaluating expression: ${expression}`);
         const result = await api.evalExpression!(expression);
+        //api.log?.(`Result: ${result}`);
         if (mounted) {
           setDisplayValue(result);
           setError(null);
         }
       } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        api.log?.(`Evaluation error: ${errorMsg}`);
         if (mounted) {
-          setError(err instanceof Error ? err.message : String(err));
+          setError(errorMsg);
         }
       }
     };

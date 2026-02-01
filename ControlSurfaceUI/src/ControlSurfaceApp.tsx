@@ -30,6 +30,7 @@ const getWindowApi = (): ControlSurfaceApi | undefined => {
   }
 
   const vscodeApi = globalAny.acquireVsCodeApi();
+
   const pendingEvaluations = new Map<string, { resolve: (value: string) => void; reject: (error: Error) => void }>();
 
   // Listen for evaluation responses
@@ -48,8 +49,16 @@ const getWindowApi = (): ControlSurfaceApi | undefined => {
     }
   });
 
-  return {
-    postMessage: (message: unknown) => vscodeApi.postMessage(message),
+  const wrappedApi: ControlSurfaceApi = {
+    postMessage: (message: unknown) => {
+      vscodeApi.postMessage(message);
+    },
+    log: (message: string) => {
+      vscodeApi.postMessage({
+        type: "log",
+        message,
+      });
+    },
     evalExpression: async (expression: string): Promise<string> => {
       const requestId = `eval_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
@@ -72,6 +81,11 @@ const getWindowApi = (): ControlSurfaceApi | undefined => {
       });
     },
   };
+
+  // wrappedApi.log?.(`getWindowApi: Raw vscodeApi keys: ${Object.keys(vscodeApi).join(", ")}`);
+  // wrappedApi.log?.(`getWindowApi: Wrapped API keys: ${Object.keys(wrappedApi).join(", ")}`);
+
+  return wrappedApi;
 };
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
@@ -151,7 +165,17 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
     initialStateOverride ?? initialState,
   );
   const [selectedPageId, setSelectedPageId] = React.useState("root");
-  const resolvedApi = React.useMemo(() => api ?? getWindowApi(), [api]);
+  const resolvedApi = React.useMemo(() => {
+    const result = api ?? getWindowApi();
+    // Use postMessage to log since we might not have the log method yet
+    if (result) {
+      result.postMessage?.({
+        type: "log",
+        message: `ControlSurfaceApp: resolvedApi keys: ${Object.keys(result).join(", ")}, api prop was ${api ? "provided" : "undefined"}`,
+      });
+    }
+    return result;
+  }, [api]);
   const resolvedDataSource = React.useMemo(
     () => dataSource ?? createWindowMessageDataSource(),
     [dataSource],

@@ -1,15 +1,8 @@
 import React from "react";
 
 import { MockAppContainer } from "./MockAppContainer";
-import { ControlSurfaceApi, ControlSurfaceDataSource, ControlSurfaceState, ControlSurfaceViewKind } from "./defs";
+import { ControlSurfaceDataSource, ControlSurfaceState, ControlSurfaceViewKind } from "./defs";
 import { ControlSurfaceApp } from "./ControlSurfaceApp";
-
-const getVsCodeApi = (): ControlSurfaceApi | undefined => {
-  const globalAny = window as typeof window & {
-    acquireVsCodeApi?: () => { postMessage: (message: unknown) => void };
-  };
-  return globalAny.acquireVsCodeApi ? globalAny.acquireVsCodeApi() : undefined;
-};
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
   subscribe: (listener) => {
@@ -26,20 +19,25 @@ const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
 });
 
 export function AppWrapper(): JSX.Element {
-  const api = React.useMemo(() => getVsCodeApi(), []);
   const dataSource = React.useMemo(() => createWindowMessageDataSource(), []);
   const viewKind = React.useMemo(() => {
     const globalAny = window as typeof window & {
       __tic80ControlSurfaceViewKind?: ControlSurfaceViewKind;
+      acquireVsCodeApi?: () => unknown;
     };
     return globalAny.__tic80ControlSurfaceViewKind;
   }, []);
 
-  if (!api) {
+  // Check if we're in a real VS Code webview or mock environment
+  const globalAny = window as typeof window & {
+    acquireVsCodeApi?: () => unknown;
+  };
+
+  if (!globalAny.acquireVsCodeApi) {
     return <MockAppContainer />;
   }
 
   return (
-    <ControlSurfaceApp api={api} dataSource={dataSource} viewKind={viewKind} />
+    <ControlSurfaceApp dataSource={dataSource} viewKind={viewKind} />
   );
 }

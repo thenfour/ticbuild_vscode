@@ -115,6 +115,7 @@ export type ControlSurfaceNode =
 export type ControlSurfaceApi = {
     postMessage: (message: unknown) => void;
     evalExpression?: (expression: string) => Promise<string>;
+    log?: (message: string) => void;
 };
 
 export type ControlSurfaceDataSource = {

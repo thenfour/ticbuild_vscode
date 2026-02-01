@@ -83,3 +83,17 @@ npm run build
 ```
 
 then build the extension.
+
+watch / dev
+
+```bash
+npm run watch
+```
+
+and serve in yet another terminal:
+
+```bash
+npm run serve
+```
+
+for dev we launch in a browser, but mock the data and vscodeapi.

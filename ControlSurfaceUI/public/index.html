@@ -7,5 +7,36 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      if (!window.acquireVsCodeApi) {
+        window.acquireVsCodeApi = () => ({
+          postMessage: (message) => {
+            console.log("[dev] postMessage", message);
+          },
+        });
+
+        // bring in vscode_mock.css styles for dev
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "/public/vscode_mock.css";
+        document.head.appendChild(link);
+      }
+
+      let counter = 0;
+      setInterval(() => {
+        counter += 1;
+        window.postMessage(
+          {
+            status: "Disconnected (dev mock)",
+            watches: [
+              { id: "t", label: "t", value: String(1000 + counter) },
+              { id: "x", label: "x", value: "96" },
+            ],
+          },
+          "*",
+        );
+      }, 1000);
+    </script>
+    <script src="/dist/bundle.js"></script>
   </body>
 </html>

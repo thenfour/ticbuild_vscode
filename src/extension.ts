@@ -52,11 +52,25 @@ export function activate(context: vscode.ExtensionContext): void {
       case 'addControl': {
         const payload = message as { parentPath?: string[]; control?: unknown };
         output.appendLine(`[controlSurface] addControl request: parentPath=${JSON.stringify(payload.parentPath)}, control=${JSON.stringify(payload.control)}`);
-        // TODO: implement adding control to devtools.json
-        if (webview) {
-          void webview.postMessage({
-            type: 'log',
-            message: 'addControl',
+
+        if (payload.control && payload.parentPath) {
+          void watchStore.addControl(payload.parentPath, payload.control as any).then(() => {
+            output.appendLine('[controlSurface] addControl completed successfully');
+            // Send response back to webview
+            if (webview) {
+              void webview.postMessage({
+                type: 'log',
+                message: 'Control added successfully',
+              });
+            }
+          }).catch((error) => {
+            output.appendLine(`[controlSurface] addControl failed: ${String(error)}`);
+            if (webview) {
+              void webview.postMessage({
+                type: 'log',
+                message: `Failed to add control: ${String(error)}`,
+              });
+            }
           });
         }
         break;
@@ -89,7 +103,7 @@ export function activate(context: vscode.ExtensionContext): void {
         void (async () => {
           try {
             const result = await session.evalExpr(payload.expression!);
-            output.appendLine(`[controlSurface] evalExpression: "${payload.expression}" => "${result}"`);
+            //output.appendLine(`[controlSurface] evalExpression: "${payload.expression}" => "${result}"`);
             if (webview) {
               void webview.postMessage({
                 type: 'evalResult',

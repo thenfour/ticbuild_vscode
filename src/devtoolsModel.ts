@@ -13,7 +13,7 @@ export type DevtoolsWatch =
 export type DevtoolsControlNode =
     | {
         type: 'knob';
-        label: string;
+        label?: string;
         symbol: string;
         min?: number;
         max?: number;
@@ -23,13 +23,13 @@ export type DevtoolsControlNode =
     }
     | {
         type: 'triggerButton';
-        label: string;
+        label?: string;
         eval: string;
         [key: string]: unknown;
     }
     | {
         type: 'slider';
-        label: string;
+        label?: string;
         symbol: string;
         min?: number;
         max?: number;
@@ -38,19 +38,19 @@ export type DevtoolsControlNode =
     }
     | {
         type: 'toggle';
-        label: string;
+        label?: string;
         symbol: string;
         [key: string]: unknown;
     }
     | {
         type: 'page';
-        label: string;
+        label?: string;
         controls: DevtoolsControlNode[];
         [key: string]: unknown;
     }
     | {
         type: 'group';
-        label: string;
+        label?: string;
         orientation?: 'horizontal' | 'vertical';
         controls: DevtoolsControlNode[];
         [key: string]: unknown;
@@ -61,20 +61,20 @@ export type DevtoolsControlNode =
     }
     | {
         type: 'enumButtons';
-        label: string;
+        label?: string;
         symbol: string;
         options: { label?: string; value: string | number }[];
         [key: string]: unknown;
     }
     | {
         type: 'label';
-        label: string;
+        label?: string; // this needs to be optional!
         expression: string;
         [key: string]: unknown;
     }
     | {
         type: 'number';
-        label: string;
+        label?: string;
         symbol: string;
         min?: number;
         max?: number;
@@ -83,14 +83,14 @@ export type DevtoolsControlNode =
     }
     | {
         type: 'string';
-        label: string;
+        label?: string;
         symbol: string;
         [key: string]: unknown;
     }
     | {
         type: 'tabs';
         tabs: {
-            label: string;
+            label?: string;
             controls: DevtoolsControlNode[];
         }[];
         [key: string]: unknown;
@@ -161,67 +161,67 @@ const devtoolsSchema = {
                     additionalProperties: true,
                     properties: {
                         type: { const: 'knob' },
-                        label: { type: 'string', minLength: 1 },
+                        label: { type: 'string' },
                         symbol: { type: 'string', minLength: 1 },
                         min: { type: 'number' },
                         max: { type: 'number' },
                         step: { type: 'number' },
                         size: { type: 'string', enum: ['small', 'medium', 'large'] },
                     },
-                    required: ['type', 'label', 'symbol'],
+                    required: ['type', 'symbol'],
                 },
                 {
                     type: 'object',
                     additionalProperties: true,
                     properties: {
                         type: { const: 'triggerButton' },
-                        label: { type: 'string', minLength: 1 },
+                        label: { type: 'string' },
                         eval: { type: 'string', minLength: 1 },
                     },
-                    required: ['type', 'label', 'eval'],
+                    required: ['type', 'eval'],
                 },
                 {
                     type: 'object',
                     additionalProperties: true,
                     properties: {
                         type: { const: 'slider' },
-                        label: { type: 'string', minLength: 1 },
+                        label: { type: 'string' },
                         symbol: { type: 'string', minLength: 1 },
                         min: { type: 'number' },
                         max: { type: 'number' },
                         step: { type: 'number' },
                     },
-                    required: ['type', 'label', 'symbol'],
+                    required: ['type', 'symbol'],
                 },
                 {
                     type: 'object',
                     additionalProperties: true,
                     properties: {
                         type: { const: 'toggle' },
-                        label: { type: 'string', minLength: 1 },
+                        label: { type: 'string' },
                         symbol: { type: 'string', minLength: 1 },
                     },
-                    required: ['type', 'label', 'symbol'],
+                    required: ['type', 'symbol'],
                 },
                 {
                     type: 'object',
                     additionalProperties: true,
                     properties: {
                         type: { const: 'page' },
-                        label: { type: 'string', minLength: 1 },
+                        label: { type: 'string' },
                         controls: {
                             type: 'array',
                             items: { $ref: '#/$defs/controlNode' },
                         },
                     },
-                    required: ['type', 'label', 'controls'],
+                    required: ['type', 'controls'],
                 },
                 {
                     type: 'object',
                     additionalProperties: true,
                     properties: {
                         type: { const: 'group' },
-                        label: { type: 'string', minLength: 1 },
+                        label: { type: 'string' },
                         orientation: {
                             type: 'string',
                             enum: ['horizontal', 'vertical'],
@@ -231,7 +231,7 @@ const devtoolsSchema = {
                             items: { $ref: '#/$defs/controlNode' },
                         },
                     },
-                    required: ['type', 'label', 'controls'],
+                    required: ['type', 'controls'],
                 },
                 {
                     type: 'object',
@@ -246,7 +246,7 @@ const devtoolsSchema = {
                     additionalProperties: true,
                     properties: {
                         type: { const: 'enumButtons' },
-                        label: { type: 'string', minLength: 1 },
+                        label: { type: 'string' },
                         symbol: { type: 'string', minLength: 1 },
                         options: {
                             type: 'array',
@@ -260,14 +260,14 @@ const devtoolsSchema = {
                             },
                         },
                     },
-                    required: ['type', 'label', 'symbol', 'options'],
+                    required: ['type', 'symbol', 'options'],
                 },
                 {
                     type: 'object',
                     additionalProperties: true,
                     properties: {
                         type: { const: 'label' },
-                        label: { type: 'string', minLength: 1 },
+                        label: { type: 'string' },
                         expression: { type: 'string', minLength: 1 },
                     },
                     required: ['type', 'expression'],
@@ -277,23 +277,23 @@ const devtoolsSchema = {
                     additionalProperties: true,
                     properties: {
                         type: { const: 'number' },
-                        label: { type: 'string', minLength: 1 },
+                        label: { type: 'string' },
                         symbol: { type: 'string', minLength: 1 },
                         min: { type: 'number' },
                         max: { type: 'number' },
                         step: { type: 'number' },
                     },
-                    required: ['type', 'label', 'symbol'],
+                    required: ['type', 'symbol'],
                 },
                 {
                     type: 'object',
                     additionalProperties: true,
                     properties: {
                         type: { const: 'string' },
-                        label: { type: 'string', minLength: 1 },
+                        label: { type: 'string' },
                         symbol: { type: 'string', minLength: 1 },
                     },
-                    required: ['type', 'label', 'symbol'],
+                    required: ['type', 'symbol'],
                 },
                 {
                     type: 'object',
@@ -305,13 +305,13 @@ const devtoolsSchema = {
                             items: {
                                 type: 'object',
                                 properties: {
-                                    label: { type: 'string', minLength: 1 },
+                                    label: { type: 'string' },
                                     controls: {
                                         type: 'array',
                                         items: { $ref: '#/$defs/controlNode' },
                                     },
                                 },
-                                required: ['label', 'controls'],
+                                required: ['controls'],
                             },
                         },
                     },

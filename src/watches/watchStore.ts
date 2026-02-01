@@ -154,6 +154,96 @@ export class WatchStore {
     this.log('[watchStore] markAllStale');
   }
 
+  async addControl(parentPath: string[], control: DevtoolsControlNode): Promise<void> {
+    if (!this.devtoolsPath) {
+      this.log('[watchStore] addControl skipped (no workspace root)');
+      return;
+    }
+
+    // Read current devtools file to get the latest state
+    const existing = await readDevtoolsFile(this.devtoolsPath, this.output);
+    const controlSurfaceRoot = Array.isArray(existing.controlSurfaceRoot)
+      ? existing.controlSurfaceRoot
+      : [];
+
+    // Navigate to the parent and add the control
+    if (parentPath.length === 0 || (parentPath.length === 1 && parentPath[0] === 'root')) {
+      // Add to root
+      controlSurfaceRoot.push(control);
+      this.log(`[watchStore] added control to root, new count: ${controlSurfaceRoot.length}`);
+    } else {
+      // Navigate through the hierarchy to find the parent container
+      const pathToNavigate = parentPath[0] === 'root' ? parentPath.slice(1) : parentPath;
+
+      let currentContainer: any = { controls: controlSurfaceRoot };
+      let success = false;
+
+      for (let i = 0; i < pathToNavigate.length; i++) {
+        const index = parseInt(pathToNavigate[i], 10);
+
+        if (isNaN(index) || !Array.isArray(currentContainer.controls) || index < 0 || index >= currentContainer.controls.length) {
+          this.log(`[watchStore] addControl failed: invalid path at index ${i}, value=${pathToNavigate[i]}`);
+          break;
+        }
+
+        const node = currentContainer.controls[index];
+
+        // Check if this is the last segment of the path
+        if (i === pathToNavigate.length - 1) {
+          // This is the parent container - add the control here
+          if (Array.isArray(node.controls)) {
+            node.controls.push(control);
+            this.log(`[watchStore] added control to path ${parentPath.join('/')}, type=${node.type}`);
+            success = true;
+          } else {
+            this.log(`[watchStore] addControl failed: parent at ${parentPath.join('/')} has no controls array`);
+          }
+        } else {
+          // Continue navigating
+          currentContainer = node;
+        }
+      }
+
+      if (!success) {
+        this.log(`[watchStore] addControl failed: could not navigate to ${parentPath.join('/')}`);
+        return;
+      }
+    }
+
+    // Update in-memory state
+    this.controlSurfaceRoot = controlSurfaceRoot;
+
+    // Write back to devtools.json
+    const updated = {
+      ...existing,
+      watches: this.watches.map((watch) => this.serializeWatch(watch)),
+      controlSurfaceRoot,
+    };
+
+    const dir = path.dirname(this.devtoolsPath);
+    try {
+      await fs.mkdir(dir, { recursive: true });
+    } catch (error) {
+      this.log('[watchStore] failed to create devtools dir');
+      return;
+    }
+
+    try {
+      await fs.writeFile(
+        this.devtoolsPath,
+        JSON.stringify(updated, null, 2),
+        'utf8',
+      );
+      this.log(`[watchStore] added control type=${(control as any).type} to path=${parentPath.join('/')}`);
+    } catch (error) {
+      this.log('[watchStore] failed to write devtools.json');
+      return;
+    }
+
+    // Trigger a change event to refresh the UI
+    this.emitter.fire();
+  }
+
   private async load(): Promise<void> {
     if (!this.devtoolsPath) {
       return;
@@ -199,6 +289,7 @@ export class WatchStore {
     const updated = {
       ...existing,
       watches: this.watches.map((watch) => this.serializeWatch(watch)),
+      controlSurfaceRoot: this.controlSurfaceRoot, // Include control surface root
     };
 
     try {

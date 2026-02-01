@@ -222,7 +222,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
       <ComponentTester />
 
       {/* view kind */}
-
+      {/* 
       {viewKind ? (
         <div
           style={{
@@ -238,8 +238,18 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
               ? "Explorer Sidebar"
               : "Activity Bar"}
         </div>
-      ) : null}
+      ) : null} */}
 
+      {/* system status */}
+
+      <div
+        style={{
+          marginBottom: 12,
+          color: "var(--vscode-descriptionForeground)",
+        }}
+      >
+        {state.status}
+      </div>
       {/* Controls */}
 
       <ButtonGroup>
@@ -251,7 +261,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             options={pages.map((val => ({ label: val.label, value: val.id })))}
           />
         </label>
-        <Divider />
+        {/* <Divider />
         <Button onClick={() => resolvedApi?.postMessage({ type: "addWatch" })}>
           Add Watch
         </Button>
@@ -264,19 +274,9 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
           onClick={() => resolvedApi?.postMessage({ type: "clearWatches" })}
         >
           Clear Watches
-        </Button>
+        </Button> */}
       </ButtonGroup>
 
-      {/* system status */}
-
-      <div
-        style={{
-          marginBottom: 12,
-          color: "var(--vscode-descriptionForeground)",
-        }}
-      >
-        {state.status}
-      </div>
 
       {/* main control surface body */}
 
@@ -295,7 +295,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
       )}
 
       {/* watches (maybe remove later?) */}
-
+      {/* 
       <div style={{ marginTop: 16 }}>
         <h2 style={{ fontSize: 12, margin: "0 0 6px 0" }}>Watches</h2>
         {state.watches.length === 0 ? (
@@ -333,7 +333,9 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             </tbody>
           </table>
         )}
-      </div>
+      </div> */}
+
+
     </div>
   );
 };

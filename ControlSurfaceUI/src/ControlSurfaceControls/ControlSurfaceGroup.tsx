@@ -11,6 +11,7 @@
 import React from "react";
 import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { ControlSurfaceGroupSpec, ControlSurfaceApi } from "../defs";
+import { AddControlControl } from "../AddControlControl";
 
 
 export interface ControlSurfaceGroupBaseProps {
@@ -43,6 +44,7 @@ export interface ControlSurfaceGroupProps extends ControlSurfaceGroupSpec {
   renderControl: (node: any, index: number, api: ControlSurfaceApi, symbolValues: Record<string, any>, pollIntervalMs: number) => JSX.Element;
   symbolValues: Record<string, any>;
   pollIntervalMs: number;
+  parentPath?: string[];
 }
 
 export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
@@ -52,20 +54,14 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   api,
   renderControl,
   symbolValues,
-  pollIntervalMs
+  pollIntervalMs,
+  parentPath = []
 }) => {
   return <ControlSurfaceGroupBase
     label={label}
     orientation={orientation}
   >
     {controls.map((child, index) => renderControl(child, index, api, symbolValues, pollIntervalMs))}
+    <AddControlControl api={api} parentPath={parentPath} />
   </ControlSurfaceGroupBase>;
-  // return (
-  //   <div className="control-surface-group">
-  //     <div className="control-surface-group-label">{label}</div>
-  //     <ButtonGroup orientation={orientation}>
-  //       {controls.map((child, index) => renderControl(child, index, api))}
-  //     </ButtonGroup>
-  //   </div>
-  // );
 };

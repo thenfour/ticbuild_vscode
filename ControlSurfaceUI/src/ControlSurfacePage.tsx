@@ -4,12 +4,14 @@ import {
   ControlSurfaceApi,
   ControlSurfacePageSpec
 } from "./defs";
+import { AddControlControl } from "./AddControlControl";
 
 interface ControlSurfacePageProps {
   page: ControlSurfacePageSpec;
   api: ControlSurfaceApi;
   symbolValues: Record<string, any>;
   pollIntervalMs: number;
+  pageId?: string;
 }
 
 export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
@@ -17,20 +19,20 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
   api,
   symbolValues,
   pollIntervalMs,
+  pageId = "root",
 }) => {
-  if (!page.controls || page.controls.length === 0) {
-    return (
-      <div className="controlSurfaceControl controlSurfaceControl-page controlSurfaceControl-page--empty">
-        No controls on this page.
-      </div>
-    );
-  }
-
   return (
     <div className="controlSurfaceControl controlSurfaceControl-page">
-      {page.controls.map((node, index) =>
-        renderControlSurfaceControl(node, index, api, symbolValues, pollIntervalMs),
+      {page.controls && page.controls.length > 0 ? (
+        page.controls.map((node, index) =>
+          renderControlSurfaceControl(node, index, api, symbolValues, pollIntervalMs),
+        )
+      ) : (
+        <div className="controlSurfaceControl controlSurfaceControl-page--empty" style={{ marginBottom: "8px" }}>
+          No controls on this page.
+        </div>
       )}
+      <AddControlControl api={api} parentPath={[pageId]} />
     </div>
   );
 };

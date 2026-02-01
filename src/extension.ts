@@ -49,6 +49,18 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         break;
       }
+      case 'addControl': {
+        const payload = message as { parentPath?: string[]; control?: unknown };
+        output.appendLine(`[controlSurface] addControl request: parentPath=${JSON.stringify(payload.parentPath)}, control=${JSON.stringify(payload.control)}`);
+        // TODO: implement adding control to devtools.json
+        if (webview) {
+          void webview.postMessage({
+            type: 'log',
+            message: 'addControl',
+          });
+        }
+        break;
+      }
       case 'addWatch':
         void vscode.commands.executeCommand('tic80.addWatch');
         break;

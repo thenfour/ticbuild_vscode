@@ -22,7 +22,7 @@ export type DevtoolsControlNode =
         [key: string]: unknown;
     }
     | {
-        type: 'button';
+        type: 'triggerButton';
         label: string;
         eval: string;
         [key: string]: unknown;
@@ -134,7 +134,7 @@ const devtoolsSchema = {
                     type: 'object',
                     additionalProperties: true,
                     properties: {
-                        type: { const: 'button' },
+                        type: { const: 'triggerButton' },
                         label: { type: 'string', minLength: 1 },
                         eval: { type: 'string', minLength: 1 },
                     },

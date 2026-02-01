@@ -1,13 +1,9 @@
 import React from "react";
 
 import {
-  ControlSurfaceApi,
   ControlSurfaceApp,
-  ControlSurfaceDataSource,
-  ControlSurfaceState,
-  ControlSurfaceNode,
-  WatchItem,
 } from "./ControlSurfaceApp";
+import { ControlSurfaceApi, ControlSurfaceDataSource, ControlSurfaceNode, ControlSurfaceState, WatchItem } from "./defs";
 
 type MockValueKind = "auto" | "string" | "number" | "boolean";
 

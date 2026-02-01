@@ -1,0 +1,54 @@
+.integer-up-down {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    /* border-radius: 4px; */
+    overflow: hidden;
+}
+
+.integer-up-down__input {
+    width: 40px;
+    border: none;
+    padding: 4px 8px;
+    font-size: var(--ff-size-1x);
+    text-align: center;
+    outline: none;
+}
+
+.integer-up-down__input:disabled {
+    background-color: var(--panel);
+    color: var(--muted);
+}
+
+.integer-up-down.integer-up-down--invalid input {
+    border-color: var(--error-surface-border);
+    background-color: var(--error-surface-bg);
+    color: var(--error-surface-text);
+}
+/* Numeric (float) up-down styles */
+.numeric-up-down {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.numeric-up-down__input {
+    width: 60px;
+    border: none;
+    padding: 4px 8px;
+    font-size: var(--ff-size-1x);
+    text-align: center;
+    outline: none;
+}
+
+.numeric-up-down__input:disabled {
+    background-color: var(--panel);
+    color: var(--muted);
+}
+
+.numeric-up-down.numeric-up-down--invalid input {
+    border-color: var(--error-surface-border);
+    background-color: var(--error-surface-bg);
+    color: var(--error-surface-text);
+}

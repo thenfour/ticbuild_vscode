@@ -1,0 +1,169 @@
+.somatic-button-base {
+    /* --button-background-enabled: #0ff;
+    --button-foreground-enabled: #000;
+    --button-background-hovered: #f80;
+    --button-foreground-hovered: #000;
+    --button-background-disabled: #333;
+    --button-foreground-disabled: #888;
+    --button-background-highlighted: #808;
+    --button-foreground-highlighted: #fff; */
+
+    /* doesn't really work with dividers; need to emit more classes for beginning & ends of sub groups*/
+    --button-border-radius: 0;
+
+    background-color: var(--button-background-enabled);
+    color: var(--button-foreground-enabled);
+    border: 1px solid var(--border);
+    border-radius: var(--button-border-radius);
+    padding: 3px 8px;
+    margin: 2px;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+/* focus rect */
+.somatic-button-base:focus-visible {
+    outline: 1px solid var(--button-foreground-highlighted);
+    /* outline-offset: 2px; */
+}
+
+.somatic-button-base.somatic-button-base--disabled {
+    background-color: var(--button-background-disabled);
+    color: var(--button-foreground-disabled);
+    cursor: not-allowed;
+    /* Keep a visible border for disabled buttons so disabled+disabled and edge cases render logically.
+       Enabled borders will take priority inside ButtonGroup via z-index overlap rules. */
+    /* border-color: color-mix(in srgb, var(--border) 55%, transparent); */
+    border-color: transparent;
+}
+
+.somatic-button-base:hover:not(.somatic-button-base--disabled) {
+    background-color: var(--button-background-hovered);
+    color: var(--button-foreground-hovered);
+}
+
+.somatic-button-base.somatic-button-base--not-highlighted {}
+
+.somatic-button-base.somatic-button-base--highlighted {
+    background-color: var(--button-background-highlighted);
+    color: var(--button-foreground-highlighted);
+}
+
+.somatic-button-group {
+    display: inline-flex;
+    --button-group-gap: 6px;
+}
+
+.somatic-button-group.somatic-button-group--horizontal {
+    flex-direction: row;
+}
+
+.somatic-button-group.somatic-button-group--vertical {
+    flex-direction: column;
+}
+
+/* butt buttons next to each other */
+.somatic-button-group .somatic-button-base {
+    border-radius: 0;
+    margin: 0;
+    /* border-right: 1px solid transparent; */
+    position: relative;
+}
+
+.somatic-button-group .somatic-button-base {
+    z-index: 1;
+}
+
+.somatic-button-group .somatic-button-base.somatic-button-base--disabled {
+    z-index: 0;
+}
+
+.somatic-button-group .somatic-button-base:focus-visible {
+    z-index: 3;
+}
+
+.somatic-button-group .somatic-button-base:hover:not(.somatic-button-base--disabled) {
+    z-index: 2;
+}
+
+.somatic-button-group.somatic-button-group--horizontal .somatic-button-base+.somatic-button-base {
+    /* use z-index + overlapping borders to let enabled button borders to take priority over disabled */
+    margin-left: -1px;
+}
+
+.somatic-button-group.somatic-button-group--vertical .somatic-button-base+.somatic-button-base {
+    /* use z-index + overlapping borders to let enabled button borders to take priority over disabled */
+    margin-top: -1px;
+}
+
+
+/* subtle vertical divider between buttons */
+.somatic-button-group .somatic-divider {
+    width: 1px;
+    /* background: var(--border); */
+    margin-left: var(--button-group-gap);
+    margin-right: var(--button-group-gap);
+}
+
+.somatic-button-group--vertical .somatic-divider {
+    height: 1px;
+    width: auto;
+    margin: 0;
+    margin-top: var(--button-group-gap);
+    margin-bottom: var(--button-group-gap);
+}
+
+/* icon buttons */
+
+.somatic-button-base.somatic-icon-button {
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+}
+
+.somatic-checkbox-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.somatic-checkbox-button .somatic-checkbox-button__checkmark {
+    display: inline-flex;
+    --checkbox-size: 16px;
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+    margin-right: 6px;
+    border: 2px solid var(--text);
+    border-radius: 2px;
+    box-sizing: border-box;
+}
+
+.somatic-checkbox-button .somatic-checkbox-button__checkmark svg {}
+
+.somatic-button-group.somatic-button-group--vertical .somatic-checkbox-button {
+    /*
+    vertically-align checkbox buttons in vertical button groups
+    */
+    justify-content: flex-start;
+}
+
+.somatic-button-group--subtle {
+    gap: 4px;
+}
+
+.somatic-button-group--subtle .somatic-button-base  {
+    font-size:11px;
+    text-transform: uppercase;
+    height:25px;
+    border-radius: 2px;
+    opacity: 80%;
+}
+
+.somatic-button-group.somatic-button-group--horizontal.somatic-button-group--subtle  {
+    align-items: center;
+}

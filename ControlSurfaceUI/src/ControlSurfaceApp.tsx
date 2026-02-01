@@ -1,76 +1,17 @@
 import React from "react";
 
+import { Divider } from "./basic/Divider";
+import { ButtonGroup } from "./Buttons/ButtonGroup";
+import { Button } from "./Buttons/PushButton";
+import { ComponentTester } from "./ComponentTester";
 import { ControlSurfacePage } from "./ControlSurfacePage";
-
-export type ControlSurfaceViewKind = "panel" | "explorer" | "activity";
-
-export type WatchItem = {
-  id: string;
-  label: string;
-  value: string;
-  stale?: boolean;
-  error?: string;
-};
-
-export type ControlSurfaceState = {
-  status: string;
-  watches: WatchItem[];
-  controlSurfaceRoot: ControlSurfaceNode[];
-};
-
-export type ControlSurfaceNode =
-  | {
-      type: "knob";
-      label: string;
-      symbol: string;
-      min?: number;
-      max?: number;
-      step?: number;
-      size?: "small" | "medium" | "large";
-      [key: string]: unknown;
-    }
-  | {
-      type: "button";
-      label: string;
-      eval: string;
-      [key: string]: unknown;
-    }
-  | {
-      type: "slider";
-      label: string;
-      symbol: string;
-      min?: number;
-      max?: number;
-      step?: number;
-      [key: string]: unknown;
-    }
-  | {
-      type: "toggle";
-      label: string;
-      symbol: string;
-      [key: string]: unknown;
-    }
-  | {
-      type: "page";
-      label: string;
-      controls: ControlSurfaceNode[];
-      [key: string]: unknown;
-    }
-  | {
-      type: "group";
-      label: string;
-      orientation?: "horizontal" | "vertical";
-      controls: ControlSurfaceNode[];
-      [key: string]: unknown;
-    };
-
-export type ControlSurfaceApi = {
-  postMessage: (message: unknown) => void;
-};
-
-export type ControlSurfaceDataSource = {
-  subscribe: (listener: (payload: ControlSurfaceState) => void) => () => void;
-};
+import {
+  ControlSurfaceApi,
+  ControlSurfaceDataSource,
+  ControlSurfaceNode,
+  ControlSurfaceState,
+  ControlSurfaceViewKind,
+} from "./defs";
 
 const initialState: ControlSurfaceState = {
   status: "Disconnected",
@@ -113,6 +54,7 @@ type PageOption = {
   page: Extract<ControlSurfaceNode, { type: "page" }>;
 };
 
+// builds a flat list of all pages in the control surface hierarchy.
 const buildPageOptions = (
   controlSurfaceRoot: ControlSurfaceNode[],
 ): PageOption[] => {
@@ -151,12 +93,12 @@ const buildPageOptions = (
   return pages;
 };
 
-export function ControlSurfaceApp({
+export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   api,
   dataSource,
   initialState: initialStateOverride,
   viewKind,
-}: ControlSurfaceAppProps): JSX.Element {
+}) => {
   const [state, setState] = React.useState<ControlSurfaceState>(
     initialStateOverride ?? initialState,
   );
@@ -203,6 +145,12 @@ export function ControlSurfaceApp({
       <h1 style={{ fontSize: 14, margin: "0 0 12px 0" }}>
         TIC-80 Control Surfaces
       </h1>
+
+      {/* control gallery. */}
+      <ComponentTester />
+
+      {/* view kind */}
+
       {viewKind ? (
         <div
           style={{
@@ -219,15 +167,10 @@ export function ControlSurfaceApp({
               : "Activity Bar"}
         </div>
       ) : null}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 12,
-        }}
-      >
+
+      {/* Controls */}
+
+      <ButtonGroup>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           Page
           <select
@@ -241,20 +184,24 @@ export function ControlSurfaceApp({
             ))}
           </select>
         </label>
-        <button onClick={() => resolvedApi?.postMessage({ type: "addWatch" })}>
+        <Divider />
+        <Button onClick={() => resolvedApi?.postMessage({ type: "addWatch" })}>
           Add Watch
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => resolvedApi?.postMessage({ type: "removeWatch" })}
         >
           Remove Watch
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => resolvedApi?.postMessage({ type: "clearWatches" })}
         >
           Clear Watches
-        </button>
-      </div>
+        </Button>
+      </ButtonGroup>
+
+      {/* system status */}
+
       <div
         style={{
           marginBottom: 12,
@@ -263,6 +210,8 @@ export function ControlSurfaceApp({
       >
         {state.status}
       </div>
+
+      {/* main control surface body */}
 
       {activePage ? (
         <ControlSurfacePage page={activePage} api={resolvedApi} />
@@ -277,6 +226,8 @@ export function ControlSurfaceApp({
           No controls.
         </div>
       )}
+
+      {/* watches (maybe remove later?) */}
 
       <div style={{ marginTop: 16 }}>
         <h2 style={{ fontSize: 12, margin: "0 0 6px 0" }}>Watches</h2>
@@ -318,4 +269,4 @@ export function ControlSurfaceApp({
       </div>
     </div>
   );
-}
+};

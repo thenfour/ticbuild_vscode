@@ -37,7 +37,7 @@
       "label": "Main",
       "controls": [
         {
-          "type": "button",
+          "type": "triggerButton",
           "label": "Reset",
           "eval": "reset()"
         },

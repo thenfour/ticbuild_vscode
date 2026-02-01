@@ -1,0 +1,59 @@
+/* Knob Component Styles */
+
+.somatic-knob {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+}
+
+.somatic-knob-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.somatic-knob-svg {
+    display: block;
+}
+
+.somatic-knob-value {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* SVG Elements */
+
+.somatic-knob-track {
+    stroke: var(--knob-track);
+}
+
+.somatic-knob-highlight {
+    stroke: var(--knob-highlight);
+}
+
+.somatic-knob-thumb {
+    fill: var(--knob-thumb);
+}
+
+.somatic-knob-thumb--error {
+    fill: var(--knob-thumb-error);
+}
+
+/* Disabled State */
+
+.somatic-knob:has(svg[aria-disabled="true"]) {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.somatic-knob:has(svg[aria-disabled="true"]) .somatic-knob-svg {
+    cursor: not-allowed;
+}

@@ -1,0 +1,37 @@
+
+:root {
+  --bg: #1a1c2c;
+  --panel: #29366f;
+  --panel-strong: #257179;
+  --text: #f4f4f4;
+  --muted: #3b5dc9;
+  --border: #333c57;
+  --border-strong: #566c86;
+  --accent: #41a6f6;
+  --accent-strong: #73eff7;
+  --tooltip-bg: #1a1c2c;
+  --tooltip-text: #f4f4f4;
+  --success-accent: #38b764;
+  --error-accent: #b13e53;
+  --error-surface-bg: #b13e53;
+  --error-surface-text: #ffcd75;
+  --error-surface-border: #ef7d57;
+  --knob-track: #257179;
+  --knob-highlight: #73eff7;
+  --knob-thumb: #ffcd75;
+  --knob-thumb-error: #b13e53;
+  --button-background-enabled: #3b5dc9;
+  --button-foreground-enabled: #f4f4f4;
+  --button-background-hovered: #41a6f6;
+  --button-foreground-hovered: #f4f4f4;
+  --button-background-disabled: #333c57;
+  --button-foreground-disabled: #566c86;
+  --button-background-highlighted: #38b764;
+  --button-foreground-highlighted: #fff;
+
+}
+
+
+button {
+
+}

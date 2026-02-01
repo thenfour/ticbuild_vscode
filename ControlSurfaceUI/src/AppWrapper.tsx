@@ -1,13 +1,8 @@
 import React from "react";
 
-import {
-  ControlSurfaceApi,
-  ControlSurfaceApp,
-  ControlSurfaceDataSource,
-  ControlSurfaceState,
-  ControlSurfaceViewKind,
-} from "./ControlSurfaceApp";
 import { MockAppContainer } from "./MockAppContainer";
+import { ControlSurfaceApi, ControlSurfaceDataSource, ControlSurfaceState, ControlSurfaceViewKind } from "./defs";
+import { ControlSurfaceApp } from "./ControlSurfaceApp";
 
 const getVsCodeApi = (): ControlSurfaceApi | undefined => {
   const globalAny = window as typeof window & {

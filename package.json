@@ -87,6 +87,10 @@
         "title": "TIC-80: Attach..."
       },
       {
+        "command": "tic80.openWatchesWebview",
+        "title": "TIC-80: Open Watches Webview"
+      },
+      {
         "command": "tic80.detach",
         "title": "TIC-80: Detach"
       },
@@ -131,6 +135,9 @@
       "commandPalette": [
         {
           "command": "tic80.attach"
+        },
+        {
+          "command": "tic80.openWatchesWebview"
         },
         {
           "command": "tic80.detach"

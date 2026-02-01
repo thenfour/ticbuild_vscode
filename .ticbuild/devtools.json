@@ -15,6 +15,10 @@
     {
       "type": "global",
       "symbol": "y"
+    },
+    {
+      "type": "global",
+      "symbol": "t"
     }
   ],
   "controls": [

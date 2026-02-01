@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 
-import { RemoteSessionManager } from './session/RemoteSessionManager';
+import { RemoteSessionManager, SessionSnapshot } from './session/RemoteSessionManager';
 import { Tic80WatchesProvider, WatchNode } from './views/Tic80WatchesProvider';
 import { WatchPoller } from './watches/watchPoller';
 import { WatchStore } from './watches/watchStore';
+import { WatchItem } from './watches/watchTypes';
 
 import {
   CONFIG_CONNECT_TIMEOUT_MS,
@@ -31,12 +32,23 @@ export function activate(context: vscode.ExtensionContext): void {
   const workspaceRoot = getWorkspaceRoot();
   const watchStore = new WatchStore(workspaceRoot, output);
   const watchProvider = new Tic80WatchesProvider(session, watchStore, output);
+  let watchesWebview: vscode.WebviewPanel | undefined;
 
   let refreshTimer: NodeJS.Timeout | undefined;
   let refreshPending = false;
 
   const scheduleUiRefresh = () => {
     refreshPending = true;
+  };
+
+  const updateWatchesWebview = () => {
+    if (!watchesWebview) {
+      return;
+    }
+    watchesWebview.webview.html = buildWatchesWebviewHtml(
+      session.snapshot,
+      watchStore.getAll(),
+    );
   };
 
 
@@ -105,6 +117,7 @@ export function activate(context: vscode.ExtensionContext): void {
       if (refreshPending) {
         refreshPending = false;
         watchProvider.refresh();
+        updateWatchesWebview();
       }
     }, intervalMs);
   };
@@ -126,6 +139,7 @@ export function activate(context: vscode.ExtensionContext): void {
     updateContextKeys();
     updatePoller();
     watchProvider.refresh();
+    updateWatchesWebview();
   });
 
   context.subscriptions.push(
@@ -215,6 +229,27 @@ export function activate(context: vscode.ExtensionContext): void {
             `TIC-80 attach failed: ${message}`);
         }
       }),
+
+    vscode.commands.registerCommand(
+      'tic80.openWatchesWebview',
+      () => {
+        if (watchesWebview) {
+          watchesWebview.reveal();
+          updateWatchesWebview();
+          return;
+        }
+        watchesWebview = vscode.window.createWebviewPanel(
+          'tic80WatchesWebview',
+          'TIC-80 Watches',
+          vscode.ViewColumn.Beside,
+          { enableScripts: false },
+        );
+        watchesWebview.onDidDispose(() => {
+          watchesWebview = undefined;
+        }, undefined, context.subscriptions);
+        updateWatchesWebview();
+      },
+    ),
 
     vscode.commands.registerCommand(
       'tic80.detach',
@@ -351,6 +386,62 @@ export function activate(context: vscode.ExtensionContext): void {
 
 export function deactivate(): void {
   return;
+}
+
+function buildWatchesWebviewHtml(
+  snapshot: SessionSnapshot,
+  watches: WatchItem[],
+): string {
+  const status = snapshot.state === 'Connected'
+    ? `Connected ${snapshot.host}:${snapshot.port}`
+    : snapshot.state === 'Connecting'
+      ? 'Connecting'
+      : snapshot.state === 'Error'
+        ? 'Error'
+        : 'Disconnected';
+
+  const rows = watches.map((watch) => {
+    const value = watch.lastError
+      ? '(error)'
+      : watch.stale
+        ? '(stale)'
+        : watch.lastValueText ?? '';
+    return `<tr><td class="label">${escapeHtml(watch.label)}</td><td class="value">${escapeHtml(value)}</td></tr>`;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: var(--vscode-font-family); color: var(--vscode-foreground); padding: 12px; }
+    h1 { font-size: 14px; margin: 0 0 8px 0; }
+    .status { margin-bottom: 12px; color: var(--vscode-descriptionForeground); }
+    table { width: 100%; border-collapse: collapse; }
+    td { padding: 4px 6px; border-bottom: 1px solid var(--vscode-editorGroup-border); }
+    .label { font-weight: 600; }
+    .value { text-align: right; color: var(--vscode-descriptionForeground); }
+    .empty { color: var(--vscode-descriptionForeground); font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>TIC-80 Watches</h1>
+  <div class="status">${escapeHtml(status)}</div>
+  ${watches.length === 0
+      ? '<div class="empty">No watches.</div>'
+      : `<table>${rows}</table>`}
+</body>
+</html>`;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function getPollHz(): number {

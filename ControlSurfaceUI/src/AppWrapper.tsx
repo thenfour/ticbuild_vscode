@@ -3,6 +3,7 @@ import React from "react";
 import { MockAppContainer } from "./MockAppContainer";
 import { ControlSurfaceDataSource, ControlSurfaceState, ControlSurfaceViewKind } from "./defs";
 import { ControlSurfaceApp } from "./ControlSurfaceApp";
+import { VsCodeApiProvider } from "./VsCodeApiContext";
 import { vscodeApi } from "./vscodeApi";
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
@@ -49,6 +50,8 @@ export function AppWrapper(): JSX.Element {
   }
 
   return (
-    <ControlSurfaceApp dataSource={dataSource} viewKind={viewKind} />
+    <VsCodeApiProvider>
+      <ControlSurfaceApp dataSource={dataSource} viewKind={viewKind} />
+    </VsCodeApiProvider>
   );
 }

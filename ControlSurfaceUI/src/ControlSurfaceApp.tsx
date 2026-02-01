@@ -13,7 +13,7 @@ import {
 } from "./defs";
 import { ComponentTester } from "./ComponentTester";
 import { Dropdown } from "./basic/Dropdown";
-import { vscodeApi } from "./vscodeApi";
+import { useVsCodeApi } from "./VsCodeApiContext";
 
 const initialState: ControlSurfaceState = {
   status: "Disconnected",
@@ -21,8 +21,8 @@ const initialState: ControlSurfaceState = {
   controlSurfaceRoot: [],
 };
 
-const getWindowApi = (): ControlSurfaceApi | undefined => {
-  if (!vscodeApi) {
+const getWindowApi = (api: { postMessage: (message: unknown) => void } | undefined): ControlSurfaceApi | undefined => {
+  if (!api) {
     return undefined;
   }
 
@@ -46,10 +46,10 @@ const getWindowApi = (): ControlSurfaceApi | undefined => {
 
   const wrappedApi: ControlSurfaceApi = {
     postMessage: (message: unknown) => {
-      vscodeApi.postMessage(message);
+      api.postMessage(message);
     },
     log: (message: string) => {
-      vscodeApi.postMessage({
+      api.postMessage({
         type: "log",
         message,
       });
@@ -60,7 +60,7 @@ const getWindowApi = (): ControlSurfaceApi | undefined => {
       return new Promise((resolve, reject) => {
         pendingEvaluations.set(requestId, { resolve, reject });
 
-        vscodeApi.postMessage({
+        api.postMessage({
           type: "evalExpression",
           requestId,
           expression,
@@ -159,11 +159,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   const [state, setState] = React.useState<ControlSurfaceState>(
     initialStateOverride ?? initialState,
   );
+  const vsCodeApi = useVsCodeApi();
   const [selectedPageId, setSelectedPageId] = React.useState(
     initialStateOverride?.selectedPageId ?? initialState.selectedPageId ?? "root"
   );
   const resolvedApi = React.useMemo(() => {
-    const result = api ?? getWindowApi();
+    const result = api ?? getWindowApi(vsCodeApi ?? undefined);
     // Use postMessage to log since we might not have the log method yet
     if (result) {
       result.postMessage?.({
@@ -172,7 +173,8 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
       });
     }
     return result;
-  }, [api]);
+  }, [api, vsCodeApi]);
+
   const resolvedDataSource = React.useMemo(
     () => dataSource ?? createWindowMessageDataSource(),
     [dataSource],
@@ -193,19 +195,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
   React.useEffect(() => {
     const unsubscribe = resolvedDataSource.subscribe((payload) => {
-      // console.log('[ControlSurfaceApp] Received payload:', {
-      //   viewId: payload.viewId,
-      //   selectedPageId: payload.selectedPageId,
-      //   controlsCount: payload.controlSurfaceRoot?.length ?? 0,
-      // });
-
       setState({
         ...payload,
         controlSurfaceRoot: payload.controlSurfaceRoot ?? [],
       });
       // Update selected page if it's provided in the payload
       if (payload.selectedPageId) {
-        //console.log('[ControlSurfaceApp] Setting selectedPageId to:', payload.selectedPageId);
         setSelectedPageId(payload.selectedPageId);
       }
     });
@@ -349,7 +344,6 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
           </table>
         )}
       </div> */}
-
 
     </div>
   );

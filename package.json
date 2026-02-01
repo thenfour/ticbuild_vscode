@@ -1,8 +1,9 @@
 {
   "name": "ticbuild-vs-code",
-  "description": "ticbuild syntax highlighting for VS Code",
-  "displayName": "ticbuild VS Code support",
-  "version": "0.0.2",
+  "description": "TIC-80 + ticbuild support: syntax highlighting and remote watches for VS Code",
+  "displayName": "TIC-80 ticbuild support",
+  "version": "0.0.3",
+  "main": "./out/extension.js",
   "author": {
     "name": "Carl Corcoran"
   },
@@ -10,6 +11,9 @@
   "engines": {
     "vscode": "^1.80.0"
   },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/thenfour/ticbuild_vscode"
@@ -17,14 +21,92 @@
   "categories": [
     "Programming Languages"
   ],
+  "keywords": [
+    "TIC-80",
+    "TIC80",
+    "ticbuild",
+    "fantasy console",
+    "Lua",
+    "watch",
+    "remoting",
+    "TIC"
+  ],
   "files": [
     "package.json",
     "README.md",
     "LICENSE",
     "syntaxes/**",
+    "out/**",
     ".attachments/**"
   ],
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.3.3",
+    "vscode": "^1.1.37"
+  },
   "contributes": {
+    "configuration": {
+      "title": "TIC-80 Remoting",
+      "properties": {
+        "tic80.remote.host": {
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "Default TIC-80 remoting host."
+        },
+        "tic80.remote.port": {
+          "type": "number",
+          "default": 9977,
+          "description": "Default TIC-80 remoting port."
+        },
+        "tic80.pollHz": {
+          "type": "number",
+          "default": 10,
+          "description": "Polling rate (Hz) for watch updates."
+        },
+        "tic80.uiRefreshMs": {
+          "type": "number",
+          "default": 217,
+          "description": "UI refresh interval (ms) for TIC-80 watch tree updates."
+        },
+        "tic80.connectTimeoutMs": {
+          "type": "number",
+          "default": 3000,
+          "description": "Timeout in milliseconds for connecting to TIC-80 remoting."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "tic80.attach",
+        "title": "TIC-80: Attach..."
+      },
+      {
+        "command": "tic80.detach",
+        "title": "TIC-80: Detach"
+      },
+      {
+        "command": "tic80.addWatch",
+        "title": "TIC-80: Add Watch..."
+      },
+      {
+        "command": "tic80.removeWatch",
+        "title": "TIC-80: Remove Watch"
+      },
+      {
+        "command": "tic80.clearWatches",
+        "title": "TIC-80: Clear Watches"
+      },
+      {
+        "command": "tic80.copyWatchValue",
+        "title": "TIC-80: Copy Watch Value"
+      }
+    ],
     "grammars": [
       {
         "scopeName": "source.ticbuild.preproc.injection",
@@ -36,6 +118,42 @@
           "text.html.markdown"
         ]
       }
-    ]
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "tic80Watches",
+          "name": "TIC-80 Watches"
+        }
+      ]
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "tic80.attach"
+        },
+        {
+          "command": "tic80.detach"
+        },
+        {
+          "command": "tic80.addWatch"
+        },
+        {
+          "command": "tic80.clearWatches"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "tic80.removeWatch",
+          "when": "view == tic80Watches && viewItem == tic80WatchItem",
+          "group": "inline"
+        },
+        {
+          "command": "tic80.copyWatchValue",
+          "when": "view == tic80Watches && viewItem == tic80WatchItem",
+          "group": "inline"
+        }
+      ]
+    }
   }
 }

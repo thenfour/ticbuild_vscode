@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+reference/
 
 # Build output
 out/

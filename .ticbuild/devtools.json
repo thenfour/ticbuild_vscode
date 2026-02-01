@@ -1,0 +1,32 @@
+{
+  "watches": [
+    {
+      "type": "global",
+      "symbol": "x"
+    },
+    {
+      "type": "expression",
+      "expression": "x + 1"
+    },
+    {
+      "type": "memory",
+      "expression": "(u16le)0x7fff,12"
+    },
+    {
+      "type": "global",
+      "symbol": "y"
+    }
+  ],
+  "controls": [
+    {
+      "type": "button",
+      "label": "Increment x",
+      "eval": "x = x + 1"
+    },
+    {
+      "type": "knob",
+      "label": "Set x",
+      "eval": "x = {value}"
+    }
+  ]
+}

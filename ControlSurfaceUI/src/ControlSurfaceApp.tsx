@@ -164,7 +164,9 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   const [state, setState] = React.useState<ControlSurfaceState>(
     initialStateOverride ?? initialState,
   );
-  const [selectedPageId, setSelectedPageId] = React.useState("root");
+  const [selectedPageId, setSelectedPageId] = React.useState(
+    initialStateOverride?.selectedPageId ?? initialState.selectedPageId ?? "root"
+  );
   const resolvedApi = React.useMemo(() => {
     const result = api ?? getWindowApi();
     // Use postMessage to log since we might not have the log method yet
@@ -200,11 +202,15 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         ...payload,
         controlSurfaceRoot: payload.controlSurfaceRoot ?? [],
       });
+      // Update selected page if it's provided in the payload
+      if (payload.selectedPageId && payload.selectedPageId !== selectedPageId) {
+        setSelectedPageId(payload.selectedPageId);
+      }
     });
     return () => {
       unsubscribe?.();
     };
-  }, [resolvedDataSource]);
+  }, [resolvedDataSource, selectedPageId]);
 
   return (
     <div
@@ -257,7 +263,14 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
           Page
           <Dropdown
             value={selectedPageId}
-            onChange={(newValue) => setSelectedPageId(newValue)}
+            onChange={(newValue) => {
+              setSelectedPageId(newValue);
+              resolvedApi?.postMessage({
+                type: "setSelectedPage",
+                pageId: newValue,
+                viewId: state.viewId
+              });
+            }}
             options={pages.map((val => ({ label: val.label, value: val.id })))}
           />
         </label>

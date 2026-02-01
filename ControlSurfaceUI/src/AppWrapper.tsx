@@ -8,6 +8,16 @@ const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
   subscribe: (listener) => {
     const handleMessage = (event: MessageEvent) => {
       const payload = event.data as ControlSurfaceState | undefined;
+
+      // Handle state persistence command from extension
+      if (payload && (payload as any).type === '__setState') {
+        const vscodeApi = (window as any).acquireVsCodeApi?.();
+        if (vscodeApi?.setState) {
+          vscodeApi.setState((payload as any).state);
+        }
+        return;
+      }
+
       if (!payload || !Array.isArray(payload.watches)) {
         return;
       }

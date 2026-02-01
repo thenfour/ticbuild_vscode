@@ -48,7 +48,11 @@ export class WatchPoller implements vscode.Disposable {
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = undefined;
-      this.output.appendLine('[poller] stop');
+      try {
+        this.output.appendLine('[poller] stop');
+      } catch {
+        // Output channel may be disposed during extension deactivation
+      }
     }
   }
 

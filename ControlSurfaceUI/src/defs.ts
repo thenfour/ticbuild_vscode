@@ -9,7 +9,7 @@ export type WatchItem = {
     error?: string;
 };
 
-// basically the same schema as in TIC-80 control surface JSON definition;
+// the serialized state of the control surface UI;
 // this is what's sent from the extension host to the webview
 export type ControlSurfaceState = {
     status: string;
@@ -17,6 +17,8 @@ export type ControlSurfaceState = {
     controlSurfaceRoot: ControlSurfaceNode[];
     symbolValues?: Record<string, any>; // map of symbol names to their current values
     pollIntervalMs?: number; // interval for polling expressions in ms
+    selectedPageId?: string; // persisted selected page ID
+    viewId?: string; // unique ID for this view (panel or sidebar)
 };
 
 export type ControlSurfacePageSpec = {

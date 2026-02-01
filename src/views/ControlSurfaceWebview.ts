@@ -62,6 +62,8 @@ export function buildControlSurfaceWebviewPayload(
     controlSurfaceRoot: DevtoolsControlNode[],
     pollHz: number,
     activeSidebarId?: string,
+    selectedPageId?: string,
+    viewId?: string,
 ): {
     status: string;
     watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>;
@@ -69,6 +71,8 @@ export function buildControlSurfaceWebviewPayload(
     symbolValues?: Record<string, any>;
     pollIntervalMs: number;
     activeSidebarId?: string;
+    selectedPageId?: string;
+    viewId?: string;
 } {
     const status = snapshot.state === 'Connected'
         ? `Connected ${snapshot.host}:${snapshot.port}`
@@ -92,6 +96,8 @@ export function buildControlSurfaceWebviewPayload(
         controlSurfaceRoot,
         pollIntervalMs,
         activeSidebarId,
+        selectedPageId,
+        viewId,
     };
 }
 
@@ -105,6 +111,8 @@ export async function buildControlSurfaceWebviewPayloadWithSymbols(
     evalExpr: (expression: string) => Promise<string>,
     pollHz: number,
     activeSidebarId?: string,
+    selectedPageId?: string,
+    viewId?: string,
 ): Promise<{
     status: string;
     watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>;
@@ -112,6 +120,8 @@ export async function buildControlSurfaceWebviewPayloadWithSymbols(
     symbolValues?: Record<string, any>;
     pollIntervalMs: number;
     activeSidebarId?: string;
+    selectedPageId?: string;
+    viewId?: string;
 }> {
     const basePayload = buildControlSurfaceWebviewPayload(
         snapshot,
@@ -119,6 +129,8 @@ export async function buildControlSurfaceWebviewPayloadWithSymbols(
         controlSurfaceRoot,
         pollHz,
         activeSidebarId,
+        selectedPageId,
+        viewId,
     );
 
     // If not connected, return base payload without symbol values

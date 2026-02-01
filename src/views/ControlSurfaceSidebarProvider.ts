@@ -11,7 +11,7 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
     constructor(
         private readonly extensionPath: string,
         private readonly registry: ControlSurfaceRegistry,
-        private readonly getPayload: () => unknown | Promise<unknown>,
+        private readonly getPayload: (viewId?: string) => unknown | Promise<unknown>,
         private readonly handleMessage: (message: { type?: string }, webview?: vscode.Webview) => void,
         private readonly viewKind: ControlSurfaceKind,
         private readonly registryId: string,
@@ -73,7 +73,7 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
         if (!this.view) {
             return;
         }
-        const payload = await Promise.resolve(this.getPayload());
+        const payload = await Promise.resolve(this.getPayload(this.registryId));
         this.view.webview.postMessage(payload);
     }
 

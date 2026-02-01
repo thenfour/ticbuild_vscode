@@ -13,6 +13,7 @@ import {
 } from "./defs";
 import { ComponentTester } from "./ComponentTester";
 import { Dropdown } from "./basic/Dropdown";
+import { vscodeApi } from "./vscodeApi";
 
 const initialState: ControlSurfaceState = {
   status: "Disconnected",
@@ -21,15 +22,9 @@ const initialState: ControlSurfaceState = {
 };
 
 const getWindowApi = (): ControlSurfaceApi | undefined => {
-  const globalAny = window as typeof window & {
-    acquireVsCodeApi?: () => { postMessage: (message: unknown) => void };
-  };
-
-  if (!globalAny.acquireVsCodeApi) {
+  if (!vscodeApi) {
     return undefined;
   }
-
-  const vscodeApi = globalAny.acquireVsCodeApi();
 
   const pendingEvaluations = new Map<string, { resolve: (value: string) => void; reject: (error: Error) => void }>();
 
@@ -198,19 +193,26 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
   React.useEffect(() => {
     const unsubscribe = resolvedDataSource.subscribe((payload) => {
+      // console.log('[ControlSurfaceApp] Received payload:', {
+      //   viewId: payload.viewId,
+      //   selectedPageId: payload.selectedPageId,
+      //   controlsCount: payload.controlSurfaceRoot?.length ?? 0,
+      // });
+
       setState({
         ...payload,
         controlSurfaceRoot: payload.controlSurfaceRoot ?? [],
       });
       // Update selected page if it's provided in the payload
-      if (payload.selectedPageId && payload.selectedPageId !== selectedPageId) {
+      if (payload.selectedPageId) {
+        //console.log('[ControlSurfaceApp] Setting selectedPageId to:', payload.selectedPageId);
         setSelectedPageId(payload.selectedPageId);
       }
     });
     return () => {
       unsubscribe?.();
     };
-  }, [resolvedDataSource, selectedPageId]);
+  }, [resolvedDataSource]);
 
   return (
     <div

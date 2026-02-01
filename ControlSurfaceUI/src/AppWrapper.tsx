@@ -3,6 +3,7 @@ import React from "react";
 import { MockAppContainer } from "./MockAppContainer";
 import { ControlSurfaceDataSource, ControlSurfaceState, ControlSurfaceViewKind } from "./defs";
 import { ControlSurfaceApp } from "./ControlSurfaceApp";
+import { vscodeApi } from "./vscodeApi";
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
   subscribe: (listener) => {
@@ -11,9 +12,14 @@ const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
 
       // Handle state persistence command from extension
       if (payload && (payload as any).type === '__setState') {
-        const vscodeApi = (window as any).acquireVsCodeApi?.();
         if (vscodeApi?.setState) {
-          vscodeApi.setState((payload as any).state);
+          const stateToSave = (payload as any).state;
+          vscodeApi.setState(stateToSave);
+
+          // Immediately check if state was saved
+          const retrievedState = vscodeApi.getState?.();
+        } else {
+          console.error('[AppWrapper] ERROR: vscodeApi or setState not available');
         }
         return;
       }
@@ -33,17 +39,12 @@ export function AppWrapper(): JSX.Element {
   const viewKind = React.useMemo(() => {
     const globalAny = window as typeof window & {
       __tic80ControlSurfaceViewKind?: ControlSurfaceViewKind;
-      acquireVsCodeApi?: () => unknown;
     };
     return globalAny.__tic80ControlSurfaceViewKind;
   }, []);
 
   // Check if we're in a real VS Code webview or mock environment
-  const globalAny = window as typeof window & {
-    acquireVsCodeApi?: () => unknown;
-  };
-
-  if (!globalAny.acquireVsCodeApi) {
+  if (!vscodeApi) {
     return <MockAppContainer />;
   }
 

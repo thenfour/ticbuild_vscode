@@ -12,6 +12,7 @@ export class WatchStore {
   private controlSurfaceRoot: DevtoolsControlNode[] = [];
   private output?: vscode.OutputChannel;
   private readonly devtoolsPath?: string;
+  private readonly loadPromise: Promise<void>;
 
   constructor(
     workspaceRoot: string | undefined,
@@ -21,7 +22,9 @@ export class WatchStore {
     this.devtoolsPath = workspaceRoot
       ? path.join(workspaceRoot, DEVTOOLS_DIR_NAME, DEVTOOLS_FILE_NAME)
       : undefined;
-    void this.load();
+    this.loadPromise = this.load().catch((error) => {
+      this.log(`[watchStore] load failed: ${String(error)}`);
+    });
   }
 
   dispose(): void {
@@ -30,6 +33,10 @@ export class WatchStore {
 
   onDidChange(listener: () => void): vscode.Disposable {
     return this.emitter.event(listener);
+  }
+
+  whenReady(): Promise<void> {
+    return this.loadPromise;
   }
 
   getAll(): WatchItem[] {

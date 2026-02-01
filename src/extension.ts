@@ -27,6 +27,10 @@ import { ControlSurfaceRegistry } from './views/ControlSurfaceRegistry';
 import { ControlSurfaceSidebarProvider } from './views/ControlSurfaceSidebarProvider';
 import { ensureDevtoolsSchemaForWorkspace } from './devtoolsModel';
 
+function generatePanelId(): string {
+  return `panel-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   const output = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
   const statusBar =
@@ -52,7 +56,11 @@ export function activate(context: vscode.ExtensionContext): void {
       case 'setSelectedPage': {
         const payload = message as { pageId?: string; viewId?: string };
         if (payload.pageId && payload.viewId) {
-          void context.workspaceState.update(`${STATE_KEY_SELECTED_PAGE}.${payload.viewId}`, payload.pageId);
+          const key = `${STATE_KEY_SELECTED_PAGE}.${payload.viewId}`;
+          void context.workspaceState.update(key, payload.pageId);
+          output.appendLine(`[controlSurface] Saved selected page: viewId=${payload.viewId}, pageId=${payload.pageId}, key=${key}`);
+        } else {
+          output.appendLine(`[controlSurface] setSelectedPage missing data: pageId=${payload.pageId}, viewId=${payload.viewId}`);
         }
         break;
       }
@@ -167,17 +175,22 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   };
 
-  const getControlSurfacePayload = async (viewId?: string) =>
-    buildControlSurfaceWebviewPayloadWithSymbols(
+  const getControlSurfacePayload = async (viewId?: string) => {
+    await watchStore.whenReady();
+    const key = viewId ? `${STATE_KEY_SELECTED_PAGE}.${viewId}` : undefined;
+    const selectedPageId = key ? context.workspaceState.get<string>(key) : undefined;
+
+    return buildControlSurfaceWebviewPayloadWithSymbols(
       session.snapshot,
       watchStore.getAll(),
       watchStore.getControlSurfaceRoot(),
       (expr) => session.evalExpr(expr),
       getPollHz(),
       controlSurfaceRegistry.getActiveSidebarId(),
-      viewId ? context.workspaceState.get<string>(`${STATE_KEY_SELECTED_PAGE}.${viewId}`) : undefined,
+      selectedPageId,
       viewId,
     );
+  };
 
   const explorerProvider = new ControlSurfaceSidebarProvider(
     context.extensionPath,
@@ -201,8 +214,7 @@ export function activate(context: vscode.ExtensionContext): void {
     'tic80ControlSurfaceActivity',
   );
 
-  let controlSurfaceCounter = 1;
-  let panelCounter = 1;
+  let panelCounter = context.workspaceState.get<number>('tic80.panelCounter', 1);
   const explorerSidebarId = 'explorer-sidebar';
   const activitySidebarId = 'activity-sidebar';
 
@@ -213,44 +225,62 @@ export function activate(context: vscode.ExtensionContext): void {
   // Register webview panel serializer for proper persistence across sessions
   context.subscriptions.push(
     vscode.window.registerWebviewPanelSerializer('tic80ControlSurfacePanel', {
-      async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
-        const id = state.id ?? `panel-${Date.now()}-${controlSurfaceCounter++}`;
-        const title = state.title ?? webviewPanel.title ?? 'Control Surface';
+      async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any): Promise<void> {
+        try {
+          // If state is missing, this is first-time deserialization
+          // Generate a new stable ID that will be saved
+          const id = state?.id ?? generatePanelId();
+          const title = state?.title ?? webviewPanel.title ?? 'Control Surface';
+          const createdAt = state?.createdAt ?? Date.now();
 
-        webviewPanel.webview.options = {
-          enableScripts: true,
-          localResourceRoots: [
-            vscode.Uri.file(path.join(context.extensionPath, 'ControlSurfaceUI', 'dist')),
-          ],
-        };
+          webviewPanel.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [
+              vscode.Uri.file(path.join(context.extensionPath, 'ControlSurfaceUI', 'dist')),
+            ],
+          };
 
-        webviewPanel.onDidDispose(() => {
-          controlSurfaceRegistry.removeById(id);
-        }, undefined, context.subscriptions);
+          webviewPanel.onDidDispose(() => {
+            controlSurfaceRegistry.removeById(id);
+          }, undefined, context.subscriptions);
 
-        webviewPanel.webview.onDidReceiveMessage(
-          (message: { type?: string }) => handleControlSurfaceMessage(message, webviewPanel.webview),
-          undefined,
-          context.subscriptions,
-        );
+          webviewPanel.webview.onDidReceiveMessage(
+            (message: { type?: string }) => handleControlSurfaceMessage(message, webviewPanel.webview),
+            undefined,
+            context.subscriptions,
+          );
 
-        webviewPanel.webview.html = buildControlSurfaceWebviewHtml(
-          webviewPanel.webview,
-          context.extensionPath,
-          'panel',
-        );
+          webviewPanel.webview.html = buildControlSurfaceWebviewHtml(
+            webviewPanel.webview,
+            context.extensionPath,
+            'panel',
+          );
 
-        controlSurfaceRegistry.add({
-          id,
-          kind: 'panel',
-          title,
-          createdAt: state.createdAt ?? Date.now(),
-          panel: webviewPanel,
-        });
+          controlSurfaceRegistry.add({
+            id,
+            kind: 'panel',
+            title,
+            createdAt,
+            panel: webviewPanel,
+          });
 
-        // Send initial payload
-        const payload = await getControlSurfacePayload(id);
-        void webviewPanel.webview.postMessage(payload);
+          // Save state immediately so it's available on next reload
+          // Must happen after HTML is set but before sending payload
+          const stateToSave = { id, title, createdAt };
+          setTimeout(() => {
+            void webviewPanel.webview.postMessage({
+              type: '__setState',
+              state: stateToSave,
+            });
+          }, 100);
+
+          // Send initial payload after HTML is set
+          const payload = await getControlSurfacePayload(id);
+          void webviewPanel.webview.postMessage(payload);
+        } catch (error) {
+          output.appendLine(`[controlSurface] Error deserializing panel: ${String(error)}`);
+          throw error;
+        }
       },
     }),
   );
@@ -514,8 +544,9 @@ export function activate(context: vscode.ExtensionContext): void {
           return;
         }
 
-        const id = `panel-${Date.now()}-${controlSurfaceCounter++}`;
+        const id = generatePanelId();
         const createdAt = Date.now();
+
         const panel = vscode.window.createWebviewPanel(
           'tic80ControlSurfacePanel',
           title,
@@ -529,12 +560,6 @@ export function activate(context: vscode.ExtensionContext): void {
           },
         );
         panelCounter += 1;
-
-        // Save state for serialization
-        void panel.webview.postMessage({
-          type: '__setState',
-          state: { id, title, createdAt },
-        });
 
         panel.onDidDispose(() => {
           controlSurfaceRegistry.removeById(id);
@@ -560,6 +585,16 @@ export function activate(context: vscode.ExtensionContext): void {
         // Send initial payload to populate the control surface
         const payload = await getControlSurfacePayload(id);
         void panel.webview.postMessage(payload);
+
+        // Save state for serialization after webview is ready
+        // Use setTimeout to ensure the webview message handler is set up
+        setTimeout(() => {
+          void panel.webview.postMessage({
+            type: '__setState',
+            state: { id, title, createdAt },
+          });
+          //output.appendLine(`[controlSurface] Sent __setState for panel: ${id}`);
+        }, 500);
 
         void updateControlSurfaceViews();
       },

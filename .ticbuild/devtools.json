@@ -14,11 +14,11 @@
     },
     {
       "type": "global",
-      "symbol": "y"
+      "symbol": "t"
     },
     {
-      "type": "global",
-      "symbol": "t"
+      "type": "expression",
+      "expression": "math.cos(x)"
     }
   ],
   "controls": [

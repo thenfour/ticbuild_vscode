@@ -255,6 +255,25 @@ export function activate(context: vscode.ExtensionContext): void {
         watchesWebview.onDidDispose(() => {
           watchesWebview = undefined;
         }, undefined, context.subscriptions);
+        watchesWebview.webview.onDidReceiveMessage(
+          (message: { type?: string }) => {
+            switch (message?.type) {
+              case 'addWatch':
+                void vscode.commands.executeCommand('tic80.addWatch');
+                break;
+              case 'removeWatch':
+                void vscode.commands.executeCommand('tic80.removeWatch');
+                break;
+              case 'clearWatches':
+                void vscode.commands.executeCommand('tic80.clearWatches');
+                break;
+              default:
+                break;
+            }
+          },
+          undefined,
+          context.subscriptions,
+        );
         watchesWebview.webview.html = buildControlSurfaceWebviewHtml(
           watchesWebview.webview,
           context.extensionPath,

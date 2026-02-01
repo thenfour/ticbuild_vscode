@@ -72,3 +72,14 @@ Output window -> select `TIC-80 Remote` in the output channel.
 # Watch treeview
 
 In explorer view, there's a treeview pane called `TIC-80 Watches`
+
+# building
+
+build the webview first
+
+```bash
+cd ControlSurfaceUI
+npm run build
+```
+
+then build the extension.

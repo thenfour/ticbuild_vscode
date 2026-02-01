@@ -20,6 +20,14 @@ const initialState: ControlSurfaceState = {
 
 export function ControlSurfaceApp(): JSX.Element {
   const [state, setState] = React.useState<ControlSurfaceState>(initialState);
+  const vscodeApi = React.useMemo(() => {
+    const globalAny = window as typeof window & {
+      acquireVsCodeApi?: () => { postMessage: (message: unknown) => void };
+    };
+    return globalAny.acquireVsCodeApi
+      ? globalAny.acquireVsCodeApi()
+      : undefined;
+  }, []);
 
   React.useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -45,6 +53,19 @@ export function ControlSurfaceApp(): JSX.Element {
       <h1 style={{ fontSize: 14, margin: "0 0 8px 0" }}>
         TIC-80 Control Surfaces
       </h1>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <button onClick={() => vscodeApi?.postMessage({ type: "addWatch" })}>
+          Add Watch
+        </button>
+        <button onClick={() => vscodeApi?.postMessage({ type: "removeWatch" })}>
+          Remove Watch
+        </button>
+        <button
+          onClick={() => vscodeApi?.postMessage({ type: "clearWatches" })}
+        >
+          Clear Watches
+        </button>
+      </div>
       <div
         style={{
           marginBottom: 12,

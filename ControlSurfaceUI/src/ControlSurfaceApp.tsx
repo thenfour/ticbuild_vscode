@@ -3,7 +3,6 @@ import React from "react";
 import { Divider } from "./basic/Divider";
 import { ButtonGroup } from "./Buttons/ButtonGroup";
 import { Button } from "./Buttons/PushButton";
-import { ComponentTester } from "./ComponentTester";
 import { ControlSurfacePage } from "./ControlSurfacePage";
 import {
   ControlSurfaceApi,
@@ -12,6 +11,8 @@ import {
   ControlSurfaceState,
   ControlSurfaceViewKind,
 } from "./defs";
+import { ComponentTester } from "./ComponentTester";
+import { Dropdown } from "./basic/Dropdown";
 
 const initialState: ControlSurfaceState = {
   status: "Disconnected",
@@ -146,7 +147,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         TIC-80 Control Surfaces
       </h1>
 
-      {/* control gallery. */}
+      {/* control gallery for testing / dev */}
       <ComponentTester />
 
       {/* view kind */}
@@ -173,16 +174,11 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
       <ButtonGroup>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           Page
-          <select
+          <Dropdown
             value={selectedPageId}
-            onChange={(event) => setSelectedPageId(event.target.value)}
-          >
-            {pages.map((page) => (
-              <option key={page.id} value={page.id}>
-                {page.label}
-              </option>
-            ))}
-          </select>
+            onChange={(newValue) => setSelectedPageId(newValue)}
+            options={pages.map((val => ({ label: val.label, value: val.id })))}
+          />
         </label>
         <Divider />
         <Button onClick={() => resolvedApi?.postMessage({ type: "addWatch" })}>

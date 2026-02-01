@@ -13,6 +13,8 @@
     font-size: var(--ff-size-1x);
     text-align: center;
     outline: none;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
 }
 
 .integer-up-down__input:disabled {
@@ -40,6 +42,8 @@
     font-size: var(--ff-size-1x);
     text-align: center;
     outline: none;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
 }
 
 .numeric-up-down__input:disabled {

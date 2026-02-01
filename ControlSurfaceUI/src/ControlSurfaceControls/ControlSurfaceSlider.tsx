@@ -10,3 +10,48 @@
     }
 
 */
+
+import React from "react";
+import { ControlSurfaceSliderSpec, ControlSurfaceApi } from "../defs";
+
+export interface ControlSurfaceSliderProps extends ControlSurfaceSliderSpec {
+  api?: ControlSurfaceApi;
+}
+
+export const ControlSurfaceSlider: React.FC<ControlSurfaceSliderProps> = ({
+  label,
+  symbol,
+  min = 0,
+  max = 100,
+  step = 1,
+  api
+}) => {
+  const [value, setValue] = React.useState<number>(min);
+
+  // Fetch initial value on mount
+  React.useEffect(() => {
+    api?.postMessage({ type: "getSymbol", symbol });
+  }, [symbol, api]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = Number(e.target.value);
+    setValue(newValue);
+    api?.postMessage({ type: "setSymbol", symbol, value: newValue });
+  };
+
+  return (
+    <div className="control-surface-slider">
+      <label className="control-surface-label">{label}</label>
+      <input
+        type="range"
+        className="control-surface-slider-input"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={handleChange}
+      />
+      <span className="control-surface-slider-value">{value}</span>
+    </div>
+  );
+};

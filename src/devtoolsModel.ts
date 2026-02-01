@@ -54,6 +54,46 @@ export type DevtoolsControlNode =
         orientation?: 'horizontal' | 'vertical';
         controls: DevtoolsControlNode[];
         [key: string]: unknown;
+    }
+    | {
+        type: 'divider';
+        [key: string]: unknown;
+    }
+    | {
+        type: 'enumButtons';
+        label: string;
+        symbol: string;
+        options: { label?: string; value: string | number }[];
+        [key: string]: unknown;
+    }
+    | {
+        type: 'label';
+        label: string;
+        expression: string;
+        [key: string]: unknown;
+    }
+    | {
+        type: 'number';
+        label: string;
+        symbol: string;
+        min?: number;
+        max?: number;
+        step?: number;
+        [key: string]: unknown;
+    }
+    | {
+        type: 'string';
+        label: string;
+        symbol: string;
+        [key: string]: unknown;
+    }
+    | {
+        type: 'tabs';
+        tabs: {
+            label: string;
+            controls: DevtoolsControlNode[];
+        }[];
+        [key: string]: unknown;
     };
 
 export type DevtoolsFile = {
@@ -192,6 +232,90 @@ const devtoolsSchema = {
                         },
                     },
                     required: ['type', 'label', 'controls'],
+                },
+                {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                        type: { const: 'divider' },
+                    },
+                    required: ['type'],
+                },
+                {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                        type: { const: 'enumButtons' },
+                        label: { type: 'string', minLength: 1 },
+                        symbol: { type: 'string', minLength: 1 },
+                        options: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    label: { type: 'string' },
+                                    value: { type: ['string', 'number'] },
+                                },
+                                required: ['value'],
+                            },
+                        },
+                    },
+                    required: ['type', 'label', 'symbol', 'options'],
+                },
+                {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                        type: { const: 'label' },
+                        label: { type: 'string', minLength: 1 },
+                        expression: { type: 'string', minLength: 1 },
+                    },
+                    required: ['type', 'label', 'expression'],
+                },
+                {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                        type: { const: 'number' },
+                        label: { type: 'string', minLength: 1 },
+                        symbol: { type: 'string', minLength: 1 },
+                        min: { type: 'number' },
+                        max: { type: 'number' },
+                        step: { type: 'number' },
+                    },
+                    required: ['type', 'label', 'symbol'],
+                },
+                {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                        type: { const: 'string' },
+                        label: { type: 'string', minLength: 1 },
+                        symbol: { type: 'string', minLength: 1 },
+                    },
+                    required: ['type', 'label', 'symbol'],
+                },
+                {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                        type: { const: 'tabs' },
+                        tabs: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    label: { type: 'string', minLength: 1 },
+                                    controls: {
+                                        type: 'array',
+                                        items: { $ref: '#/$defs/controlNode' },
+                                    },
+                                },
+                                required: ['label', 'controls'],
+                            },
+                        },
+                    },
+                    required: ['type', 'tabs'],
                 },
             ],
         },

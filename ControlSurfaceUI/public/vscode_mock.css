@@ -778,14 +778,14 @@
 }
 
 html {
-    background-color: #252526;
+    background-color: #1e1e1e;
   font-family: "Segoe WPC", "Segoe UI", sans-serif;
   font-size: 13px;
     line-height: 1.4em;
     position: relative;
     inset: 0;
     z-index: 1;
-    overflow: hidden;
+    /* overflow: hidden; */
     color: var(--vscode-foreground);
 
     --monaco-monospace-font: Consolas, "Courier New", monospace;

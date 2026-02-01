@@ -31,7 +31,29 @@
 
 }
 
+/* Fieldset and Legend styling with VS Code theming */
+fieldset {
+  border: 1px solid var(--vscode-panel-border, var(--border));
+  border-radius: 4px;
+  padding: 12px;
+  margin: 8px 0;
+  background-color: var(--vscode-editor-background, var(--bg));
+}
 
-button {
+legend {
+  color: var(--vscode-foreground, var(--text));
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 6px;
+  border: none;
+  background-color: transparent;
+}
 
+fieldset:disabled {
+  opacity: 0.5;
+  border-color: var(--vscode-disabledForeground, var(--muted));
+}
+
+fieldset:disabled legend {
+  color: var(--vscode-disabledForeground, var(--muted));
 }

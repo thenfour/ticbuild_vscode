@@ -16,31 +16,32 @@ export const renderControlSurfaceControl = (
     node: ControlSurfaceNode,
     index: number,
     api?: ControlSurfaceApi,
+    symbolValues?: Record<string, any>,
 ): JSX.Element => {
     switch (node.type) {
         case "divider":
             return <ControlSurfaceDivider key={`divider-${index}`} {...node} />;
 
         case "enumButtons":
-            return <ControlSurfaceEnumButtons key={`enumButtons-${index}`} {...node} api={api} />;
+            return <ControlSurfaceEnumButtons key={`enumButtons-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
 
         case "knob":
-            return <ControlSurfaceKnob key={`knob-${index}`} {...node} api={api} />;
+            return <ControlSurfaceKnob key={`knob-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
 
         case "label":
             return <ControlSurfaceLabel key={`label-${index}`} {...node} api={api} />;
 
         case "number":
-            return <ControlSurfaceNumber key={`number-${index}`} {...node} api={api} />;
+            return <ControlSurfaceNumber key={`number-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
 
         case "slider":
-            return <ControlSurfaceSlider key={`slider-${index}`} {...node} api={api} />;
+            return <ControlSurfaceSlider key={`slider-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
 
         case "string":
-            return <ControlSurfaceString key={`string-${index}`} {...node} api={api} />;
+            return <ControlSurfaceString key={`string-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
 
         case "toggle":
-            return <ControlSurfaceToggle key={`toggle-${index}`} {...node} api={api} />;
+            return <ControlSurfaceToggle key={`toggle-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
 
         case "triggerButton":
             return <ControlSurfaceTriggerButton key={`triggerButton-${index}`} {...node} api={api} />;
@@ -52,6 +53,7 @@ export const renderControlSurfaceControl = (
                     {...node}
                     api={api}
                     renderControl={renderControlSurfaceControl}
+                    symbolValues={symbolValues}
                 />
             );
 
@@ -62,6 +64,7 @@ export const renderControlSurfaceControl = (
                     {...node}
                     api={api}
                     renderControl={renderControlSurfaceControl}
+                    symbolValues={symbolValues}
                 />
             );
 
@@ -71,7 +74,7 @@ export const renderControlSurfaceControl = (
                     <h3 className="control-surface-page-title">{node.label}</h3>
                     <div className="control-surface-page-content">
                         {node.controls.map((child, childIndex) =>
-                            renderControlSurfaceControl(child, childIndex, api),
+                            renderControlSurfaceControl(child, childIndex, api, symbolValues),
                         )}
                     </div>
                 </div>

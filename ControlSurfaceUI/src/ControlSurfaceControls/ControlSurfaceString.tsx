@@ -15,15 +15,18 @@ import { ControlSurfaceStringSpec, ControlSurfaceApi } from "../defs";
 
 export interface ControlSurfaceStringProps extends ControlSurfaceStringSpec {
     api?: ControlSurfaceApi;
+    initialValue?: string;
 }
 
-export const ControlSurfaceString: React.FC<ControlSurfaceStringProps> = ({ label, symbol, api }) => {
-    const [value, setValue] = React.useState<string>("");
+export const ControlSurfaceString: React.FC<ControlSurfaceStringProps> = ({ label, symbol, api, initialValue }) => {
+    const [value, setValue] = React.useState<string>(initialValue ?? "");
 
-    // Fetch initial value on mount
+    // Update value when initialValue changes
     React.useEffect(() => {
-        api?.postMessage({ type: "getSymbol", symbol });
-    }, [symbol, api]);
+        if (initialValue !== undefined) {
+            setValue(initialValue);
+        }
+    }, [initialValue]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;

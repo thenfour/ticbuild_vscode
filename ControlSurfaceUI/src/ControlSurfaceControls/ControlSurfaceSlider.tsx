@@ -16,6 +16,7 @@ import { ControlSurfaceSliderSpec, ControlSurfaceApi } from "../defs";
 
 export interface ControlSurfaceSliderProps extends ControlSurfaceSliderSpec {
   api?: ControlSurfaceApi;
+  initialValue?: number;
 }
 
 export const ControlSurfaceSlider: React.FC<ControlSurfaceSliderProps> = ({
@@ -24,14 +25,17 @@ export const ControlSurfaceSlider: React.FC<ControlSurfaceSliderProps> = ({
   min = 0,
   max = 100,
   step = 1,
-  api
+  api,
+  initialValue
 }) => {
-  const [value, setValue] = React.useState<number>(min);
+  const [value, setValue] = React.useState<number>(initialValue ?? min);
 
-  // Fetch initial value on mount
+  // Update value when initialValue changes
   React.useEffect(() => {
-    api?.postMessage({ type: "getSymbol", symbol });
-  }, [symbol, api]);
+    if (initialValue !== undefined) {
+      setValue(initialValue);
+    }
+  }, [initialValue]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(e.target.value);

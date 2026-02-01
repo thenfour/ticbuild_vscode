@@ -19,26 +19,46 @@ export interface ControlSurfaceLabelProps extends ControlSurfaceLabelSpec {
 
 export const ControlSurfaceLabel: React.FC<ControlSurfaceLabelProps> = ({ label, expression, api }) => {
   const [displayValue, setDisplayValue] = React.useState<string>("");
+  const [error, setError] = React.useState<string | null>(null);
 
   // Poll expression value periodically
   React.useEffect(() => {
-    const evaluate = () => {
-      api?.postMessage({ type: "eval", expression });
+    if (!api?.evalExpression) {
+      setDisplayValue(expression);
+      return;
+    }
+
+    let mounted = true;
+
+    const evaluate = async () => {
+      try {
+        const result = await api.evalExpression!(expression);
+        if (mounted) {
+          setDisplayValue(result);
+          setError(null);
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err instanceof Error ? err.message : String(err));
+        }
+      }
     };
 
     evaluate(); // Initial evaluation
     const interval = setInterval(evaluate, 100); // Update 10 times per second
 
-    return () => clearInterval(interval);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, [expression, api]);
-
-  // Note: In a real implementation, we'd need a way to receive the evaluated value back
-  // For now, this is a placeholder structure
 
   return (
     <div className="control-surface-label">
       <span className="control-surface-label-title">{label}:</span>
-      <span className="control-surface-label-value">{displayValue || expression}</span>
+      <span className="control-surface-label-value" style={{ color: error ? 'var(--vscode-errorForeground)' : undefined }}>
+        {error ? `Error: ${error}` : displayValue || expression}
+      </span>
     </div>
   );
 };

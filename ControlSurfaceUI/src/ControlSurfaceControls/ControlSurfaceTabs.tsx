@@ -19,13 +19,15 @@ import { ControlSurfaceTabsSpec, ControlSurfaceApi } from "../defs";
 
 export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     api?: ControlSurfaceApi;
-    renderControl: (node: any, index: number, api?: ControlSurfaceApi) => JSX.Element;
+    renderControl: (node: any, index: number, api?: ControlSurfaceApi, symbolValues?: Record<string, any>) => JSX.Element;
+    symbolValues?: Record<string, any>;
 }
 
 export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     tabs,
     api,
-    renderControl
+    renderControl,
+    symbolValues
 }) => {
     const [selectedTabId, setSelectedTabId] = React.useState<number>(0);
 
@@ -47,7 +49,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                 >
                     <div className="control-surface-tab-content">
                         {tab.controls.map((child, childIndex) =>
-                            renderControl(child, childIndex, api)
+                            renderControl(child, childIndex, api, symbolValues)
                         )}
                     </div>
                 </Tab>

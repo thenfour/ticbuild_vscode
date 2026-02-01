@@ -17,39 +17,43 @@ import { NumericUpDown } from "../basic/NumericUpDown";
 import { ControlSurfaceNumberSpec, ControlSurfaceApi } from "../defs";
 
 export interface ControlSurfaceNumberProps extends ControlSurfaceNumberSpec {
-      api?: ControlSurfaceApi;
+    api?: ControlSurfaceApi;
+    initialValue?: number;
 }
 
 export const ControlSurfaceNumber: React.FC<ControlSurfaceNumberProps> = ({
-      label,
-      symbol,
-      min = 0,
-      max = 100,
-      step = 0.1,
-      api
+    label,
+    symbol,
+    min = 0,
+    max = 100,
+    step = 0.1,
+    api,
+    initialValue
 }) => {
-      const [value, setValue] = React.useState<number>(min);
+    const [value, setValue] = React.useState<number>(initialValue ?? min);
 
-      // Fetch initial value on mount
-      React.useEffect(() => {
-            api?.postMessage({ type: "getSymbol", symbol });
-      }, [symbol, api]);
+    // Update value when initialValue changes
+    React.useEffect(() => {
+        if (initialValue !== undefined) {
+            setValue(initialValue);
+        }
+    }, [initialValue]);
 
-      const handleChange = (newValue: number) => {
-            setValue(newValue);
-            api?.postMessage({ type: "setSymbol", symbol, value: newValue });
-      };
+    const handleChange = (newValue: number) => {
+        setValue(newValue);
+        api?.postMessage({ type: "setSymbol", symbol, value: newValue });
+    };
 
-      return (
-            <div className="control-surface-number">
-                  <label className="control-surface-label">{label}</label>
-                  <NumericUpDown
-                        value={value}
-                        onChange={handleChange}
-                        min={min}
-                        max={max}
-                        step={step}
-                  />
-            </div>
-      );
+    return (
+        <div>
+            <label>{label}</label>
+            <NumericUpDown
+                value={value}
+                onChange={handleChange}
+                min={min}
+                max={max}
+                step={step}
+            />
+        </div>
+    );
 };

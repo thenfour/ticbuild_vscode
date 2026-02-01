@@ -8,11 +8,13 @@ import {
 interface ControlSurfacePageProps {
   page: ControlSurfacePageSpec;
   api?: ControlSurfaceApi;
+  symbolValues?: Record<string, any>;
 }
 
 export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
   page,
   api,
+  symbolValues,
 }) => {
   if (!page.controls || page.controls.length === 0) {
     return (
@@ -25,7 +27,7 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
   return (
     <div className="controlSurfaceControl controlSurfaceControl-page">
       {page.controls.map((node, index) =>
-        renderControlSurfaceControl(node, index, api),
+        renderControlSurfaceControl(node, index, api, symbolValues),
       )}
     </div>
   );

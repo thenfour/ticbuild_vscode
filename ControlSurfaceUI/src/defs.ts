@@ -15,6 +15,7 @@ export type ControlSurfaceState = {
     status: string;
     watches: WatchItem[];
     controlSurfaceRoot: ControlSurfaceNode[];
+    symbolValues?: Record<string, any>; // map of symbol names to their current values
 };
 
 export type ControlSurfacePageSpec = {
@@ -112,6 +113,7 @@ export type ControlSurfaceNode =
 
 export type ControlSurfaceApi = {
     postMessage: (message: unknown) => void;
+    evalExpression?: (expression: string) => Promise<string>;
 };
 
 export type ControlSurfaceDataSource = {

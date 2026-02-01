@@ -11,8 +11,8 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
     constructor(
         private readonly extensionPath: string,
         private readonly registry: ControlSurfaceRegistry,
-        private readonly getPayload: () => unknown,
-        private readonly handleMessage: (message: { type?: string }) => void,
+        private readonly getPayload: () => unknown | Promise<unknown>,
+        private readonly handleMessage: (message: { type?: string }, webview?: vscode.Webview) => void,
         private readonly viewKind: ControlSurfaceKind,
         private readonly registryId: string,
         private readonly title: string,
@@ -47,7 +47,7 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
             ],
         };
         webview.onDidReceiveMessage(
-            (message: { type?: string }) => this.handleMessage(message),
+            (message: { type?: string }) => this.handleMessage(message, webview),
             undefined,
             this.disposables,
         );
@@ -69,11 +69,12 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
         await vscode.commands.executeCommand(`${this.viewId}.focus`);
     }
 
-    update(): void {
+    async update(): Promise<void> {
         if (!this.view) {
             return;
         }
-        this.view.webview.postMessage(this.getPayload());
+        const payload = await Promise.resolve(this.getPayload());
+        this.view.webview.postMessage(payload);
     }
 
     dispose(): void {

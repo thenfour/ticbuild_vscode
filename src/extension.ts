@@ -22,7 +22,7 @@ import {
 import { discoverRunningInstancesBase } from './remoting/discovery';
 import { setupAutoConnectWatcher } from './session/autoConnect';
 import { formatDateDiff, formatInstanceLabel, parseHostPort } from './utils';
-import { buildControlSurfaceWebviewHtml, buildControlSurfaceWebviewPayload } from './views/ControlSurfaceWebview';
+import { buildControlSurfaceWebviewHtml, buildControlSurfaceWebviewPayloadWithSymbols } from './views/ControlSurfaceWebview';
 import { ControlSurfaceRegistry } from './views/ControlSurfaceRegistry';
 import { ControlSurfaceSidebarProvider } from './views/ControlSurfaceSidebarProvider';
 import { ensureDevtoolsSchemaForWorkspace } from './devtoolsModel';
@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const watchProvider =
     new Tic80WatchesProvider(session, watchStore, controlSurfaceRegistry, output);
 
-  const handleControlSurfaceMessage = (message: { type?: string }) => {
+  const handleControlSurfaceMessage = (message: { type?: string }, webview?: vscode.Webview) => {
     switch (message?.type) {
       case 'addWatch':
         void vscode.commands.executeCommand('tic80.addWatch');
@@ -51,6 +51,44 @@ export function activate(context: vscode.ExtensionContext): void {
       case 'clearWatches':
         void vscode.commands.executeCommand('tic80.clearWatches');
         break;
+      case 'evalExpression': {
+        if (!session.isConnected()) {
+          const payload = message as { requestId?: string; expression?: string };
+          if (webview && payload.requestId) {
+            void webview.postMessage({
+              type: 'evalResult',
+              requestId: payload.requestId,
+              error: 'Not connected to TIC-80',
+            });
+          }
+          break;
+        }
+        const payload = message as { requestId?: string; expression?: string };
+        if (!payload.expression || !payload.requestId) {
+          break;
+        }
+        void (async () => {
+          try {
+            const result = await session.evalExpr(payload.expression!);
+            if (webview) {
+              void webview.postMessage({
+                type: 'evalResult',
+                requestId: payload.requestId,
+                result,
+              });
+            }
+          } catch (error) {
+            if (webview) {
+              void webview.postMessage({
+                type: 'evalResult',
+                requestId: payload.requestId,
+                error: error instanceof Error ? error.message : String(error),
+              });
+            }
+          }
+        })();
+        break;
+      }
       case 'eval': {
         if (!session.isConnected()) {
           output.appendLine('[controlSurface] eval ignored (not connected)');
@@ -87,11 +125,12 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   };
 
-  const getControlSurfacePayload = () =>
-    buildControlSurfaceWebviewPayload(
+  const getControlSurfacePayload = async () =>
+    buildControlSurfaceWebviewPayloadWithSymbols(
       session.snapshot,
       watchStore.getAll(),
       watchStore.getControlSurfaceRoot(),
+      (expr) => session.evalExpr(expr),
       controlSurfaceRegistry.getActiveSidebarId(),
     );
 

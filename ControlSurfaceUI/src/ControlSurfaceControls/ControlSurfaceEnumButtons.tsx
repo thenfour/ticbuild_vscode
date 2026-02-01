@@ -16,20 +16,24 @@ import { ControlSurfaceEnumButtonsSpec, ControlSurfaceApi } from "../defs";
 
 export interface ControlSurfaceEnumButtonsProps extends ControlSurfaceEnumButtonsSpec {
   api?: ControlSurfaceApi;
+  initialValue?: string | number;
 }
 
 export const ControlSurfaceEnumButtons: React.FC<ControlSurfaceEnumButtonsProps> = ({
   label,
   symbol,
   options,
-  api
+  api,
+  initialValue
 }) => {
-  const [value, setValue] = React.useState<string | number>(options[0]?.value ?? "");
+  const [value, setValue] = React.useState<string | number>(initialValue ?? options[0]?.value ?? "");
 
-  // Fetch initial value on mount
+  // Update value when initialValue changes
   React.useEffect(() => {
-    api?.postMessage({ type: "getSymbol", symbol });
-  }, [symbol, api]);
+    if (initialValue !== undefined) {
+      setValue(initialValue);
+    }
+  }, [initialValue]);
 
   const handleChange = (newValue: string | number) => {
     setValue(newValue);

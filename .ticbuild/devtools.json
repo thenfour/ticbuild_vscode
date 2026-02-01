@@ -74,6 +74,29 @@
           "type": "toggle",
           "label": "Enable Feature",
           "symbol": "featureEnabled"
+        },
+        {
+          "type": "enumButtons",
+          "label": "Mode",
+          "symbol": "mode",
+          "options": [
+            {
+              "label": "Easy",
+              "value": 0
+            },
+            {
+              "label": "Medium",
+              "value": 1
+            },
+            {
+              "label": "Hard",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "type": "label",
+          "expression": "Adjust advanced settings carefully."
         }
       ]
     }

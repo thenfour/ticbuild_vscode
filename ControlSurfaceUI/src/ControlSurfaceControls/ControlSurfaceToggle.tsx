@@ -16,15 +16,18 @@ import { ControlSurfaceToggleSpec, ControlSurfaceApi } from "../defs";
 
 export interface ControlSurfaceToggleProps extends ControlSurfaceToggleSpec {
   api?: ControlSurfaceApi;
+  initialValue?: boolean;
 }
 
-export const ControlSurfaceToggle: React.FC<ControlSurfaceToggleProps> = ({ label, symbol, api }) => {
-  const [checked, setChecked] = React.useState<boolean>(false);
+export const ControlSurfaceToggle: React.FC<ControlSurfaceToggleProps> = ({ label, symbol, api, initialValue }) => {
+  const [checked, setChecked] = React.useState<boolean>(initialValue ?? false);
 
-  // Fetch initial value on mount
+  // Update value when initialValue changes
   React.useEffect(() => {
-    api?.postMessage({ type: "getSymbol", symbol });
-  }, [symbol, api]);
+    if (initialValue !== undefined) {
+      setChecked(initialValue);
+    }
+  }, [initialValue]);
 
   const handleChange = (newValue: boolean) => {
     setChecked(newValue);

@@ -17,6 +17,7 @@ import { ControlSurfaceKnobSpec, ControlSurfaceApi } from "../defs";
 
 export interface ControlSurfaceKnobProps extends ControlSurfaceKnobSpec {
   api?: ControlSurfaceApi;
+  initialValue?: number;
 }
 
 export const ControlSurfaceKnob: React.FC<ControlSurfaceKnobProps> = ({
@@ -26,14 +27,17 @@ export const ControlSurfaceKnob: React.FC<ControlSurfaceKnobProps> = ({
   max = 1,
   step = 0.01,
   size = "medium", // Note: size is currently not used by Knob component
-  api
+  api,
+  initialValue
 }) => {
-  const [value, setValue] = React.useState<number>(min);
+  const [value, setValue] = React.useState<number>(initialValue ?? min);
 
-  // Fetch initial value on mount
+  // Update value when initialValue changes
   React.useEffect(() => {
-    api?.postMessage({ type: "getSymbol", symbol });
-  }, [symbol, api]);
+    if (initialValue !== undefined) {
+      setValue(initialValue);
+    }
+  }, [initialValue]);
 
   const handleChange = (newValue: number) => {
     setValue(newValue);

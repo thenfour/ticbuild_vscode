@@ -40,7 +40,8 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
 
 export interface ControlSurfaceGroupProps extends ControlSurfaceGroupSpec {
   api?: ControlSurfaceApi;
-  renderControl: (node: any, index: number, api?: ControlSurfaceApi) => JSX.Element;
+  renderControl: (node: any, index: number, api?: ControlSurfaceApi, symbolValues?: Record<string, any>) => JSX.Element;
+  symbolValues?: Record<string, any>;
 }
 
 export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
@@ -48,13 +49,14 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   orientation = "horizontal",
   controls,
   api,
-  renderControl
+  renderControl,
+  symbolValues
 }) => {
   return <ControlSurfaceGroupBase
     label={label}
     orientation={orientation}
   >
-    {controls.map((child, index) => renderControl(child, index, api))}
+    {controls.map((child, index) => renderControl(child, index, api, symbolValues))}
   </ControlSurfaceGroupBase>;
   // return (
   //   <div className="control-surface-group">

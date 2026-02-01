@@ -24,7 +24,54 @@ const getWindowApi = (): ControlSurfaceApi | undefined => {
   const globalAny = window as typeof window & {
     acquireVsCodeApi?: () => { postMessage: (message: unknown) => void };
   };
-  return globalAny.acquireVsCodeApi ? globalAny.acquireVsCodeApi() : undefined;
+
+  if (!globalAny.acquireVsCodeApi) {
+    return undefined;
+  }
+
+  const vscodeApi = globalAny.acquireVsCodeApi();
+  const pendingEvaluations = new Map<string, { resolve: (value: string) => void; reject: (error: Error) => void }>();
+
+  // Listen for evaluation responses
+  window.addEventListener("message", (event: MessageEvent) => {
+    const message = event.data;
+    if (message.type === "evalResult" && typeof message.requestId === "string") {
+      const pending = pendingEvaluations.get(message.requestId);
+      if (pending) {
+        pendingEvaluations.delete(message.requestId);
+        if (message.error) {
+          pending.reject(new Error(message.error));
+        } else {
+          pending.resolve(message.result ?? "");
+        }
+      }
+    }
+  });
+
+  return {
+    postMessage: (message: unknown) => vscodeApi.postMessage(message),
+    evalExpression: async (expression: string): Promise<string> => {
+      const requestId = `eval_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+      return new Promise((resolve, reject) => {
+        pendingEvaluations.set(requestId, { resolve, reject });
+
+        vscodeApi.postMessage({
+          type: "evalExpression",
+          requestId,
+          expression,
+        });
+
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          if (pendingEvaluations.has(requestId)) {
+            pendingEvaluations.delete(requestId);
+            reject(new Error("Evaluation timeout"));
+          }
+        }, 5000);
+      });
+    },
+  };
 };
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
@@ -210,7 +257,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
       {/* main control surface body */}
 
       {activePage ? (
-        <ControlSurfacePage page={activePage} api={resolvedApi} />
+        <ControlSurfacePage page={activePage} api={resolvedApi} symbolValues={state.symbolValues} />
       ) : (
         <div
           style={{

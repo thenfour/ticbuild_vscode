@@ -1,11 +1,10 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 
-import { RemoteSessionManager, SessionSnapshot } from './session/RemoteSessionManager';
-import { Tic80WatchesProvider, WatchNode } from './views/Tic80WatchesProvider';
+import { RemoteSessionManager } from './session/RemoteSessionManager';
+import { Tic80WatchesProvider, WatchNode, ControlSurfaceNode } from './views/Tic80WatchesProvider';
 import { WatchPoller } from './watches/watchPoller';
 import { WatchStore } from './watches/watchStore';
-import { WatchItem } from './watches/watchTypes';
 
 import {
   CONFIG_CONNECT_TIMEOUT_MS,
@@ -24,6 +23,8 @@ import { discoverRunningInstancesBase } from './remoting/discovery';
 import { setupAutoConnectWatcher } from './session/autoConnect';
 import { formatDateDiff, formatInstanceLabel, parseHostPort } from './utils';
 import { buildControlSurfaceWebviewHtml, buildControlSurfaceWebviewPayload } from './views/ControlSurfaceWebview';
+import { ControlSurfaceRegistry } from './views/ControlSurfaceRegistry';
+import { ControlSurfaceSidebarProvider } from './views/ControlSurfaceSidebarProvider';
 
 export function activate(context: vscode.ExtensionContext): void {
   const output = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
@@ -33,8 +34,43 @@ export function activate(context: vscode.ExtensionContext): void {
   const session = new RemoteSessionManager(output);
   const workspaceRoot = getWorkspaceRoot();
   const watchStore = new WatchStore(workspaceRoot, output);
-  const watchProvider = new Tic80WatchesProvider(session, watchStore, output);
-  let watchesWebview: vscode.WebviewPanel | undefined;
+  const controlSurfaceRegistry = new ControlSurfaceRegistry();
+  const watchProvider =
+    new Tic80WatchesProvider(session, watchStore, controlSurfaceRegistry, output);
+
+  const handleControlSurfaceMessage = (message: { type?: string }) => {
+    switch (message?.type) {
+      case 'addWatch':
+        void vscode.commands.executeCommand('tic80.addWatch');
+        break;
+      case 'removeWatch':
+        void vscode.commands.executeCommand('tic80.removeWatch');
+        break;
+      case 'clearWatches':
+        void vscode.commands.executeCommand('tic80.clearWatches');
+        break;
+      default:
+        break;
+    }
+  };
+
+  const getControlSurfacePayload = () =>
+    buildControlSurfaceWebviewPayload(
+      session.snapshot,
+      watchStore.getAll(),
+      controlSurfaceRegistry.getActiveSidebarId(),
+    );
+
+  const sidebarProvider = new ControlSurfaceSidebarProvider(
+    context.extensionPath,
+    controlSurfaceRegistry,
+    getControlSurfacePayload,
+    handleControlSurfaceMessage,
+  );
+
+  let controlSurfaceCounter = 1;
+  let panelCounter = 1;
+  let sidebarCounter = 1;
 
   let refreshTimer: NodeJS.Timeout | undefined;
   let refreshPending = false;
@@ -43,15 +79,12 @@ export function activate(context: vscode.ExtensionContext): void {
     refreshPending = true;
   };
 
-  const updateControlSurfaceWebview = () => {
-    if (!watchesWebview) {
-      return;
+  const updateControlSurfaceViews = () => {
+    const payload = getControlSurfacePayload();
+    for (const view of controlSurfaceRegistry.getPanels()) {
+      view.panel?.webview.postMessage(payload);
     }
-    const payload = buildControlSurfaceWebviewPayload(
-      session.snapshot,
-      watchStore.getAll(),
-    );
-    watchesWebview.webview.postMessage(payload);
+    sidebarProvider.update();
   };
 
 
@@ -59,10 +92,24 @@ export function activate(context: vscode.ExtensionContext): void {
     new WatchPoller(session, watchStore, output, () => scheduleUiRefresh());
 
   context.subscriptions.push(
-    output, statusBar, session, watchStore, watchProvider, poller);
+    output,
+    statusBar,
+    session,
+    watchStore,
+    watchProvider,
+    poller,
+    controlSurfaceRegistry,
+    sidebarProvider,
+  );
 
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider('tic80Watches', watchProvider),
+  );
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      'tic80ControlSurfaceSidebar',
+      sidebarProvider,
+    ),
   );
 
   statusBar.show();
@@ -120,7 +167,7 @@ export function activate(context: vscode.ExtensionContext): void {
       if (refreshPending) {
         refreshPending = false;
         watchProvider.refresh();
-        updateControlSurfaceWebview();
+        updateControlSurfaceViews();
       }
     }, intervalMs);
   };
@@ -142,11 +189,17 @@ export function activate(context: vscode.ExtensionContext): void {
     updateContextKeys();
     updatePoller();
     watchProvider.refresh();
-    updateControlSurfaceWebview();
+    updateControlSurfaceViews();
   });
 
   context.subscriptions.push(
     watchStore.onDidChange(() => scheduleUiRefresh()),
+  );
+  context.subscriptions.push(
+    controlSurfaceRegistry.onDidChange(() => {
+      watchProvider.refresh();
+      updateControlSurfaceViews();
+    }),
   );
 
   context.subscriptions.push(
@@ -234,16 +287,22 @@ export function activate(context: vscode.ExtensionContext): void {
       }),
 
     vscode.commands.registerCommand(
-      'tic80.openControlSurfaces',
-      () => {
-        if (watchesWebview) {
-          watchesWebview.reveal();
-          updateControlSurfaceWebview();
+      'tic80.addPanel',
+      async () => {
+        const title = await vscode.window.showInputBox({
+          title: 'New Control Surface Panel',
+          prompt: 'Enter a panel title',
+          value: `Control Surface Panel ${panelCounter}`,
+          ignoreFocusOut: true,
+        });
+        if (!title) {
           return;
         }
-        watchesWebview = vscode.window.createWebviewPanel(
-          'tic80ControlSurfaceWebview',
-          'TIC-80 Control Surfaces',
+
+        const id = `panel-${Date.now()}-${controlSurfaceCounter++}`;
+        const panel = vscode.window.createWebviewPanel(
+          'tic80ControlSurfacePanel',
+          title,
           vscode.ViewColumn.Beside,
           {
             enableScripts: true,
@@ -252,33 +311,112 @@ export function activate(context: vscode.ExtensionContext): void {
             ],
           },
         );
-        watchesWebview.onDidDispose(() => {
-          watchesWebview = undefined;
+        panelCounter += 1;
+        panel.onDidDispose(() => {
+          controlSurfaceRegistry.removeById(id);
         }, undefined, context.subscriptions);
-        watchesWebview.webview.onDidReceiveMessage(
-          (message: { type?: string }) => {
-            switch (message?.type) {
-              case 'addWatch':
-                void vscode.commands.executeCommand('tic80.addWatch');
-                break;
-              case 'removeWatch':
-                void vscode.commands.executeCommand('tic80.removeWatch');
-                break;
-              case 'clearWatches':
-                void vscode.commands.executeCommand('tic80.clearWatches');
-                break;
-              default:
-                break;
-            }
-          },
+        panel.webview.onDidReceiveMessage(
+          (message: { type?: string }) => handleControlSurfaceMessage(message),
           undefined,
           context.subscriptions,
         );
-        watchesWebview.webview.html = buildControlSurfaceWebviewHtml(
-          watchesWebview.webview,
+        panel.webview.html = buildControlSurfaceWebviewHtml(
+          panel.webview,
           context.extensionPath,
         );
-        updateControlSurfaceWebview();
+        controlSurfaceRegistry.add({
+          id,
+          kind: 'panel',
+          title,
+          createdAt: Date.now(),
+          panel,
+        });
+        updateControlSurfaceViews();
+      },
+    ),
+
+    vscode.commands.registerCommand(
+      'tic80.removePanel',
+      async (node?: ControlSurfaceNode) => {
+        const panels = controlSurfaceRegistry.getPanels();
+        if (panels.length === 0) {
+          void vscode.window.showInformationMessage('No control surface panels to remove.');
+          return;
+        }
+        let targetId = node?.kind === 'panel' ? node.viewId : undefined;
+        if (!targetId) {
+          const panelItems: vscode.QuickPickItem[] = panels.map((panel) => ({
+            label: panel.title,
+            description: panel.id,
+          }));
+          const pick = await vscode.window.showQuickPick(
+            panelItems,
+            { title: 'Remove Control Surface Panel' },
+          );
+          if (!pick?.description) {
+            return;
+          }
+          targetId = pick.description;
+        }
+        const target = controlSurfaceRegistry.getById(targetId);
+        if (!target || target.kind !== 'panel') {
+          return;
+        }
+        target.panel?.dispose();
+      },
+    ),
+
+    vscode.commands.registerCommand(
+      'tic80.addSidebar',
+      async () => {
+        const title = await vscode.window.showInputBox({
+          title: 'New Control Surface Sidebar',
+          prompt: 'Enter a sidebar title',
+          value: `Control Surface Sidebar ${sidebarCounter}`,
+          ignoreFocusOut: true,
+        });
+        if (!title) {
+          return;
+        }
+        const id = `sidebar-${Date.now()}-${controlSurfaceCounter++}`;
+        sidebarCounter += 1;
+        controlSurfaceRegistry.add({
+          id,
+          kind: 'sidebar',
+          title,
+          createdAt: Date.now(),
+        });
+        controlSurfaceRegistry.setActiveSidebarId(id);
+        sidebarProvider.reveal();
+        updateControlSurfaceViews();
+      },
+    ),
+
+    vscode.commands.registerCommand(
+      'tic80.removeSidebar',
+      async (node?: ControlSurfaceNode) => {
+        const sidebars = controlSurfaceRegistry.getSidebars();
+        if (sidebars.length === 0) {
+          void vscode.window.showInformationMessage('No control surface sidebars to remove.');
+          return;
+        }
+        let targetId = node?.kind === 'sidebar' ? node.viewId : undefined;
+        if (!targetId) {
+          const sidebarItems: vscode.QuickPickItem[] = sidebars.map((sidebar) => ({
+            label: sidebar.title,
+            description: sidebar.id,
+          }));
+          const pick = await vscode.window.showQuickPick(
+            sidebarItems,
+            { title: 'Remove Control Surface Sidebar' },
+          );
+          if (!pick?.description) {
+            return;
+          }
+          targetId = pick.description;
+        }
+        controlSurfaceRegistry.removeById(targetId);
+        updateControlSurfaceViews();
       },
     ),
 

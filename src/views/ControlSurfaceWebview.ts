@@ -31,7 +31,8 @@ export function buildControlSurfaceWebviewHtml(
 export function buildControlSurfaceWebviewPayload(
     snapshot: SessionSnapshot,
     watches: WatchItem[],
-): { status: string; watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }> } {
+    activeSidebarId?: string,
+): { status: string; watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>; activeSidebarId?: string } {
     const status = snapshot.state === 'Connected'
         ? `Connected ${snapshot.host}:${snapshot.port}`
         : snapshot.state === 'Connecting'
@@ -49,5 +50,6 @@ export function buildControlSurfaceWebviewPayload(
             stale: watch.stale,
             error: watch.lastError,
         })),
+        activeSidebarId,
     };
 }

@@ -6,7 +6,7 @@
     },
     {
       "type": "expression",
-      "expression": "x + 1"
+      "expression": "x + 2"
     },
     {
       "type": "memory",
@@ -21,16 +21,52 @@
       "expression": "math.cos(x)"
     }
   ],
-  "controls": [
-    {
-      "type": "button",
-      "label": "Increment x",
-      "eval": "x = x + 1"
-    },
+  "controlSurfaceRoot": [
     {
       "type": "knob",
-      "label": "Set x",
-      "eval": "x = {value}"
+      "label": "Position X",
+      "symbol": "x",
+      "min": 0,
+      "max": 240,
+      "step": 1,
+      "size": "large"
+    },
+    {
+      "type": "page",
+      "label": "Main",
+      "controls": [
+        {
+          "type": "button",
+          "label": "Reset",
+          "eval": "reset()"
+        },
+        {
+          "type": "group",
+          "label": "Settings",
+          "orientation": "vertical",
+          "controls": [
+            {
+              "type": "slider",
+              "label": "Volume",
+              "symbol": "volume",
+              "min": 0,
+              "max": 100,
+              "step": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "page",
+      "label": "Advanced",
+      "controls": [
+        {
+          "type": "toggle",
+          "label": "Enable Feature",
+          "symbol": "featureEnabled"
+        }
+      ]
     }
   ]
 }

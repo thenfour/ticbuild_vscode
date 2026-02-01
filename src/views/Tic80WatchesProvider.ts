@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { RemoteSessionManager } from '../session/RemoteSessionManager';
 import { WatchStore } from '../watches/watchStore';
 import { WatchItem } from '../watches/watchTypes';
+import { ControlSurfaceRegistry, ControlSurfaceViewInfo } from './ControlSurfaceRegistry';
 
 export class Tic80WatchesProvider implements
   vscode.TreeDataProvider<Tic80Node> {
@@ -12,6 +13,7 @@ export class Tic80WatchesProvider implements
   constructor(
     private readonly session: RemoteSessionManager,
     private readonly watchStore: WatchStore,
+    private readonly controlSurfaceRegistry: ControlSurfaceRegistry,
     private readonly output?: vscode.OutputChannel,
   ) {
     this.session.onDidChangeState(() => this.refresh());
@@ -43,12 +45,21 @@ export class Tic80WatchesProvider implements
   getChildren(element?: Tic80Node): Thenable<Tic80Node[]> {
     if (!element) {
       return Promise.resolve(
-        [this.createSessionNode(), this.createWatchesGroupNode()]);
+        [
+          this.createSessionNode(),
+          this.createWatchesGroupNode(),
+          this.createControlSurfacesGroupNode(),
+        ]);
     }
     if (element instanceof WatchesGroupNode) {
       // this.log('[tree] getChildren (watches)');
       return Promise.resolve(
         this.watchStore.getAll().map((watch) => this.createWatchNode(watch)));
+    }
+    if (element instanceof ControlSurfacesGroupNode) {
+      return Promise.resolve(
+        this.controlSurfaceRegistry.getAll().map(
+          (view) => this.createControlSurfaceNode(view)));
     }
     return Promise.resolve([]);
   }
@@ -73,6 +84,16 @@ export class Tic80WatchesProvider implements
     return node;
   }
 
+  private createControlSurfacesGroupNode(): ControlSurfacesGroupNode {
+    return new ControlSurfacesGroupNode(
+      this.controlSurfaceRegistry.getAll().length,
+    );
+  }
+
+  private createControlSurfaceNode(view: ControlSurfaceViewInfo): ControlSurfaceNode {
+    return new ControlSurfaceNode(view);
+  }
+
   private log(message: string): void {
     if (!this.output) {
       return;
@@ -89,7 +110,8 @@ export class Tic80WatchesProvider implements
   }
 }
 
-export type Tic80Node = SessionNode | WatchesGroupNode | WatchNode;
+export type Tic80Node =
+  SessionNode | WatchesGroupNode | WatchNode | ControlSurfacesGroupNode | ControlSurfaceNode;
 
 class SessionNode extends vscode.TreeItem {
   constructor(snapshot: {
@@ -112,6 +134,31 @@ class WatchesGroupNode extends vscode.TreeItem {
     super('Watches', vscode.TreeItemCollapsibleState.Expanded);
     this.contextValue = 'tic80WatchesGroup';
     this.description = count > 0 ? `${count}` : undefined;
+  }
+}
+
+class ControlSurfacesGroupNode extends vscode.TreeItem {
+  constructor(count: number) {
+    super('Control Surfaces', vscode.TreeItemCollapsibleState.Expanded);
+    this.contextValue = 'tic80ControlSurfacesGroup';
+    this.description = count > 0 ? `${count}` : undefined;
+  }
+}
+
+export class ControlSurfaceNode extends vscode.TreeItem {
+  readonly viewId: string;
+  readonly kind: 'panel' | 'sidebar';
+
+  constructor(view: ControlSurfaceViewInfo) {
+    super(view.title, vscode.TreeItemCollapsibleState.None);
+    this.viewId = view.id;
+    this.kind = view.kind;
+    this.id = view.id;
+    this.contextValue =
+      view.kind === 'panel'
+        ? 'tic80ControlSurfacePanelItem'
+        : 'tic80ControlSurfaceSidebarItem';
+    this.description = view.kind === 'panel' ? 'Panel' : 'Sidebar';
   }
 }
 

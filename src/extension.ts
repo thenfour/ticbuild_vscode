@@ -465,7 +465,7 @@ export function activate(context: vscode.ExtensionContext): void {
           controlSurfaceRegistry.removeById(id);
         }, undefined, context.subscriptions);
         panel.webview.onDidReceiveMessage(
-          (message: { type?: string }) => handleControlSurfaceMessage(message),
+          (message: { type?: string }) => handleControlSurfaceMessage(message, panel.webview),
           undefined,
           context.subscriptions,
         );
@@ -481,6 +481,11 @@ export function activate(context: vscode.ExtensionContext): void {
           createdAt: Date.now(),
           panel,
         });
+
+        // Send initial payload to populate the control surface
+        const payload = await getControlSurfacePayload();
+        void panel.webview.postMessage(payload);
+
         updateControlSurfaceViews();
       },
     ),

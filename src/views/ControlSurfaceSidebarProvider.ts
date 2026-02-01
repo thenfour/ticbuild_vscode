@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 
-import { ControlSurfaceRegistry } from './ControlSurfaceRegistry';
+import { ControlSurfaceRegistry, ControlSurfaceKind } from './ControlSurfaceRegistry';
 import { buildControlSurfaceWebviewHtml } from './ControlSurfaceWebview';
 
 export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider, vscode.Disposable {
@@ -13,6 +13,10 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
         private readonly registry: ControlSurfaceRegistry,
         private readonly getPayload: () => unknown,
         private readonly handleMessage: (message: { type?: string }) => void,
+        private readonly viewKind: ControlSurfaceKind,
+        private readonly registryId: string,
+        private readonly title: string,
+        private readonly viewId: string,
     ) {
         this.disposables.push(
             this.registry.onDidChange(() => this.update()),
@@ -26,16 +30,15 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
                 this.view = undefined;
             }
         }, undefined, this.disposables);
-        const id = 'sidebar-default';
-        if (!this.registry.getById(id)) {
+        if (!this.registry.getById(this.registryId)) {
             this.registry.add({
-                id,
-                kind: 'sidebar',
-                title: 'Control Surface Sidebar',
+                id: this.registryId,
+                kind: this.viewKind,
+                title: this.title,
                 createdAt: Date.now(),
             });
         }
-        this.registry.setActiveSidebarId(id);
+        this.registry.setActiveSidebarId(this.registryId);
         const { webview } = webviewView;
         webview.options = {
             enableScripts: true,
@@ -51,7 +54,7 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
         webview.html = buildControlSurfaceWebviewHtml(
             webview,
             this.extensionPath,
-            'sidebar',
+            this.viewKind,
         );
         this.update();
     }
@@ -63,7 +66,7 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
         } catch (error) {
             this.view = undefined;
         }
-        await vscode.commands.executeCommand('tic80ControlSurfaceSidebar.focus');
+        await vscode.commands.executeCommand(`${this.viewId}.focus`);
     }
 
     update(): void {

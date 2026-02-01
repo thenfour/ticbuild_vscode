@@ -5,6 +5,7 @@ import {
   ControlSurfaceApp,
   ControlSurfaceDataSource,
   ControlSurfaceState,
+  ControlSurfaceViewKind,
 } from "./ControlSurfaceApp";
 import { MockAppContainer } from "./MockAppContainer";
 
@@ -34,7 +35,7 @@ export function AppWrapper(): JSX.Element {
   const dataSource = React.useMemo(() => createWindowMessageDataSource(), []);
   const viewKind = React.useMemo(() => {
     const globalAny = window as typeof window & {
-      __tic80ControlSurfaceViewKind?: "panel" | "sidebar";
+      __tic80ControlSurfaceViewKind?: ControlSurfaceViewKind;
     };
     return globalAny.__tic80ControlSurfaceViewKind;
   }, []);

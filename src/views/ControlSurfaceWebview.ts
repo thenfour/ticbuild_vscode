@@ -4,12 +4,13 @@ import * as vscode from 'vscode';
 import { SessionSnapshot } from '../session/RemoteSessionManager';
 import { DevtoolsControlNode } from '../devtoolsModel';
 import { WatchItem } from '../watches/watchTypes';
+import { ControlSurfaceKind } from './ControlSurfaceRegistry';
 
 
 export function buildControlSurfaceWebviewHtml(
     webview: vscode.Webview,
     extensionPath: string,
-    viewKind: 'panel' | 'sidebar',
+    viewKind: ControlSurfaceKind,
 ): string {
     const scriptPath = vscode.Uri.file(
         path.join(extensionPath, 'ControlSurfaceUI', 'dist', 'bundle.js'),

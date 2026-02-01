@@ -95,16 +95,32 @@ export function activate(context: vscode.ExtensionContext): void {
       controlSurfaceRegistry.getActiveSidebarId(),
     );
 
-  const sidebarProvider = new ControlSurfaceSidebarProvider(
+  const explorerProvider = new ControlSurfaceSidebarProvider(
     context.extensionPath,
     controlSurfaceRegistry,
     getControlSurfacePayload,
     handleControlSurfaceMessage,
+    'explorer',
+    'explorer-sidebar',
+    'Control Surface Explorer',
+    'tic80ControlSurfaceExplorer',
+  );
+
+  const activityProvider = new ControlSurfaceSidebarProvider(
+    context.extensionPath,
+    controlSurfaceRegistry,
+    getControlSurfacePayload,
+    handleControlSurfaceMessage,
+    'activity',
+    'activity-sidebar',
+    'Control Surface Activity',
+    'tic80ControlSurfaceActivity',
   );
 
   let controlSurfaceCounter = 1;
   let panelCounter = 1;
-  const sidebarId = 'sidebar-default';
+  const explorerSidebarId = 'explorer-sidebar';
+  const activitySidebarId = 'activity-sidebar';
 
   let refreshTimer: NodeJS.Timeout | undefined;
   let refreshPending = false;
@@ -118,7 +134,8 @@ export function activate(context: vscode.ExtensionContext): void {
     for (const view of controlSurfaceRegistry.getPanels()) {
       view.panel?.webview.postMessage(payload);
     }
-    sidebarProvider.update();
+    explorerProvider.update();
+    activityProvider.update();
   };
 
 
@@ -133,7 +150,8 @@ export function activate(context: vscode.ExtensionContext): void {
     watchProvider,
     poller,
     controlSurfaceRegistry,
-    sidebarProvider,
+    explorerProvider,
+    activityProvider,
   );
 
   context.subscriptions.push(
@@ -141,8 +159,14 @@ export function activate(context: vscode.ExtensionContext): void {
   );
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
-      'tic80ControlSurfaceSidebar',
-      sidebarProvider,
+      'tic80ControlSurfaceExplorer',
+      explorerProvider,
+    ),
+  );
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      'tic80ControlSurfaceActivity',
+      activityProvider,
     ),
   );
 
@@ -212,7 +236,7 @@ export function activate(context: vscode.ExtensionContext): void {
   updateUiRefreshTimer();
   void vscode.commands.executeCommand(
     'setContext',
-    'tic80.controlSurfaceSidebar.visible',
+    'tic80.controlSurfaceExplorer.visible',
     true,
   );
 
@@ -418,37 +442,37 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
 
     vscode.commands.registerCommand(
-      'tic80.showSidebar',
+      'tic80.showExplorerSidebar',
       async () => {
-        if (!controlSurfaceRegistry.getById(sidebarId)) {
+        if (!controlSurfaceRegistry.getById(explorerSidebarId)) {
           controlSurfaceRegistry.add({
-            id: sidebarId,
-            kind: 'sidebar',
-            title: 'Control Surface Sidebar',
+            id: explorerSidebarId,
+            kind: 'explorer',
+            title: 'Control Surface Explorer',
             createdAt: Date.now(),
           });
         }
-        controlSurfaceRegistry.setActiveSidebarId(sidebarId);
+        controlSurfaceRegistry.setActiveSidebarId(explorerSidebarId);
         void vscode.commands.executeCommand(
           'setContext',
-          'tic80.controlSurfaceSidebar.visible',
+          'tic80.controlSurfaceExplorer.visible',
           true,
         );
-        await sidebarProvider.reveal();
+        await explorerProvider.reveal();
         updateControlSurfaceViews();
       },
     ),
 
     vscode.commands.registerCommand(
-      'tic80.hideSidebar',
+      'tic80.hideExplorerSidebar',
       async () => {
         void vscode.commands.executeCommand(
           'setContext',
-          'tic80.controlSurfaceSidebar.visible',
+          'tic80.controlSurfaceExplorer.visible',
           false,
         );
         void vscode.commands.executeCommand(
-          'tic80ControlSurfaceSidebar.focus',
+          'tic80ControlSurfaceExplorer.focus',
         );
         void vscode.commands.executeCommand('workbench.action.closeView');
       },

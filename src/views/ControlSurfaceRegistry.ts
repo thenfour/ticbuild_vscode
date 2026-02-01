@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-export type ControlSurfaceKind = 'panel' | 'sidebar';
+export type ControlSurfaceKind = 'panel' | 'explorer' | 'activity';
 
 export type ControlSurfaceViewInfo = {
     id: string;
@@ -29,8 +29,12 @@ export class ControlSurfaceRegistry implements vscode.Disposable {
         return this.items.filter((item) => item.kind === 'panel');
     }
 
-    getSidebars(): ControlSurfaceViewInfo[] {
-        return this.items.filter((item) => item.kind === 'sidebar');
+    getExplorers(): ControlSurfaceViewInfo[] {
+        return this.items.filter((item) => item.kind === 'explorer');
+    }
+
+    getActivities(): ControlSurfaceViewInfo[] {
+        return this.items.filter((item) => item.kind === 'activity');
     }
 
     getById(id: string): ControlSurfaceViewInfo | undefined {
@@ -42,7 +46,7 @@ export class ControlSurfaceRegistry implements vscode.Disposable {
     }
 
     setActiveSidebarId(id: string | undefined): void {
-        if (id && !this.items.some((item) => item.id === id && item.kind === 'sidebar')) {
+        if (id && !this.items.some((item) => item.id === id && (item.kind === 'explorer' || item.kind === 'activity'))) {
             return;
         }
         this.activeSidebarId = id;
@@ -51,7 +55,7 @@ export class ControlSurfaceRegistry implements vscode.Disposable {
 
     add(view: ControlSurfaceViewInfo): void {
         this.items.push(view);
-        if (view.kind === 'sidebar' && !this.activeSidebarId) {
+        if ((view.kind === 'explorer' || view.kind === 'activity') && !this.activeSidebarId) {
             this.activeSidebarId = view.id;
         }
         this.emitter.fire();
@@ -63,8 +67,8 @@ export class ControlSurfaceRegistry implements vscode.Disposable {
             return undefined;
         }
         const [removed] = this.items.splice(index, 1);
-        if (removed.kind === 'sidebar' && this.activeSidebarId === removed.id) {
-            this.activeSidebarId = this.items.find((item) => item.kind === 'sidebar')?.id;
+        if ((removed.kind === 'explorer' || removed.kind === 'activity') && this.activeSidebarId === removed.id) {
+            this.activeSidebarId = this.items.find((item) => item.kind === 'explorer' || item.kind === 'activity')?.id;
         }
         this.emitter.fire();
         return removed;

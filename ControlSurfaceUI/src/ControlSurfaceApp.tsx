@@ -2,6 +2,8 @@ import React from "react";
 
 import { ControlSurfacePage } from "./ControlSurfacePage";
 
+export type ControlSurfaceViewKind = "panel" | "explorer" | "activity";
+
 export type WatchItem = {
   id: string;
   label: string;
@@ -65,8 +67,6 @@ export type ControlSurfaceNode =
 export type ControlSurfaceApi = {
   postMessage: (message: unknown) => void;
 };
-
-export type ControlSurfaceViewKind = "panel" | "sidebar";
 
 export type ControlSurfaceDataSource = {
   subscribe: (listener: (payload: ControlSurfaceState) => void) => () => void;
@@ -211,7 +211,12 @@ export function ControlSurfaceApp({
             fontSize: 11,
           }}
         >
-          View: {viewKind}
+          View:{" "}
+          {viewKind === "panel"
+            ? "Panel"
+            : viewKind === "explorer"
+              ? "Explorer Sidebar"
+              : "Activity Bar"}
         </div>
       ) : null}
       <div

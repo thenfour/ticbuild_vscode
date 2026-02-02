@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "./Buttons/PushButton";
 import { ControlQuickAdd } from "./ControlQuickAdd";
 import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
+import { useControlSurfaceState } from "./hooks/ControlSurfaceState";
 
 export interface AddControlControlProps {
   parentPath: string[]; // Path to the parent container (for targeting where to add)
@@ -11,29 +12,32 @@ export interface AddControlControlProps {
 export const AddControlControl: React.FC<AddControlControlProps> = ({ parentPath }) => {
   const [isAdding, setIsAdding] = React.useState(false);
   const api = useControlSurfaceApi();
+  const stateApi = useControlSurfaceState();
 
-  if (!api) {
+  React.useEffect(() => {
+    if (!stateApi.state.designMode && isAdding) {
+      setIsAdding(false);
+    }
+  }, [isAdding, stateApi.state.designMode]);
+
+  if (!api || !stateApi.state.designMode) {
     return null;
   }
 
-  React.useEffect(() => {
-    if (isAdding) {
-      setIsAdding(false);
-    }
-  }, [isAdding]);
-
   if (isAdding) {
     return (
-      <ControlQuickAdd
-        parentPath={parentPath}
-        onComplete={() => setIsAdding(false)}
-        onCancel={() => setIsAdding(false)}
-      />
+      <div className="control-surface-interactive">
+        <ControlQuickAdd
+          parentPath={parentPath}
+          onComplete={() => setIsAdding(false)}
+          onCancel={() => setIsAdding(false)}
+        />
+      </div>
     );
   }
 
   return (
-    <div style={{ padding: "8px" }}>
+    <div className="control-surface-interactive" style={{ padding: "8px" }}>
       <Button onClick={() => setIsAdding(true)} style={{ width: "100%" }}>
         + Add Control {parentPath}
       </Button>

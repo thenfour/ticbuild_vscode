@@ -3,11 +3,12 @@ import React from "react";
 import {
   ControlSurfaceApp,
 } from "./ControlSurfaceApp";
-import { ControlSurfaceNode } from "./defs";
+import { ControlSurfaceGroupSpec, ControlSurfaceNode } from "./defs";
 import { VsCodeApiProvider } from "./hooks/VsCodeApiContext";
 import { ControlSurfaceStateProvider } from "./hooks/ControlSurfaceState";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { useMockControlSurfaceDataSource } from "./hooks/useMockControlSurfaceDataSource";
+import { resolveControlByPath, resolveControlsByPath } from "./controlPathUtils";
 
 type MockValueKind = "auto" | "string" | "number" | "boolean";
 
@@ -71,9 +72,161 @@ export function MockAppContainer(): JSX.Element {
     'tic80-mock-controlSurfaceRoot',
     []
   );
+  const [selectedPageId, setSelectedPageId] = React.useState("root");
   const [nextId, setNextId] = React.useState(1);
   const [addKind, setAddKind] = React.useState<MockValueKind>("auto");
   const [clipboardNotice, setClipboardNotice] = React.useState<string>("");
+
+  const mockApi = React.useMemo(() => ({
+    postMessage: (message: unknown) => {
+      console.log("[mock] postMessage", message);
+
+      if ((message as any).type === 'setSelectedPage') {
+        const payload = message as { type: string; pageId?: string };
+        if (payload.pageId) {
+          setSelectedPageId(payload.pageId);
+        }
+        return;
+      }
+
+      if ((message as any).type === 'addControl') {
+        const payload = message as { type: string; parentPath?: string[]; control?: ControlSurfaceNode };
+        if (!payload.parentPath || !payload.control) {
+          return;
+        }
+        const parentPath = payload.parentPath;
+        setControlSurfaceRoot((prev) => {
+          const next = JSON.parse(JSON.stringify(prev)) as ControlSurfaceNode[];
+          const container = resolveControlsByPath(next, parentPath);
+          if (container) {
+            container.push(payload.control as ControlSurfaceNode);
+          }
+          return next;
+        });
+        return;
+      }
+
+      if ((message as any).type === 'updateControl') {
+        const payload = message as { type: string; path?: string[]; control?: ControlSurfaceNode };
+        if (!payload.path || !payload.control) {
+          return;
+        }
+        setControlSurfaceRoot((prev) => {
+          const next = JSON.parse(JSON.stringify(prev)) as ControlSurfaceNode[];
+          const resolved = resolveControlByPath(next, payload.path);
+          if (resolved) {
+            resolved.parentControls[resolved.index] = payload.control as ControlSurfaceNode;
+          }
+          return next;
+        });
+        return;
+      }
+
+      if ((message as any).type === 'deleteControl') {
+        const payload = message as { type: string; path?: string[] };
+        if (!payload.path) {
+          return;
+        }
+        setControlSurfaceRoot((prev) => {
+          const next = JSON.parse(JSON.stringify(prev)) as ControlSurfaceNode[];
+          const resolved = resolveControlByPath(next, payload.path);
+          if (resolved) {
+            resolved.parentControls.splice(resolved.index, 1);
+          }
+          return next;
+        });
+        return;
+      }
+
+      if ((message as any).type === 'moveControl') {
+        const payload = message as { type: string; path?: string[]; direction?: 'up' | 'down' };
+        if (!payload.path || !payload.direction) {
+          return;
+        }
+        setControlSurfaceRoot((prev) => {
+          const next = JSON.parse(JSON.stringify(prev)) as ControlSurfaceNode[];
+          const resolved = resolveControlByPath(next, payload.path);
+          if (!resolved) {
+            return next;
+          }
+          const { parentControls, index } = resolved;
+          const targetIndex = payload.direction === 'up' ? index - 1 : index + 1;
+          if (targetIndex < 0 || targetIndex >= parentControls.length) {
+            return next;
+          }
+          const temp = parentControls[index];
+          parentControls[index] = parentControls[targetIndex];
+          parentControls[targetIndex] = temp;
+          return next;
+        });
+        return;
+      }
+
+      if ((message as any).type === 'subscribeExpression') {
+        const payload = message as { type: string; expression: string };
+        const nextCount = (expressionSubscriptionsRef.current.get(payload.expression) ?? 0) + 1;
+        expressionSubscriptionsRef.current.set(payload.expression, nextCount);
+        setExpressionResults((prev) => ({
+          ...prev,
+          [payload.expression]: { value: `mock result for: ${payload.expression}` },
+        }));
+        return;
+      }
+
+      if ((message as any).type === 'unsubscribeExpression') {
+        const payload = message as { type: string; expression: string };
+        const current = expressionSubscriptionsRef.current.get(payload.expression) ?? 0;
+        if (current <= 1) {
+          expressionSubscriptionsRef.current.delete(payload.expression);
+          setExpressionResults((prev) => {
+            const next = { ...prev };
+            delete next[payload.expression];
+            return next;
+          });
+        } else {
+          expressionSubscriptionsRef.current.set(payload.expression, current - 1);
+        }
+        return;
+      }
+
+      // Handle evalExpression requests
+      if ((message as any).type === 'evalExpression') {
+        const payload = message as { type: string; requestId: string; expression: string };
+        // Simulate async evaluation
+        setTimeout(() => {
+          const mockResult = `mock result for: ${payload.expression}`;
+          window.postMessage({
+            type: 'evalResult',
+            requestId: payload.requestId,
+            result: mockResult,
+          }, '*');
+        }, 100);
+      }
+
+      // Handle showWarningMessage requests
+      if ((message as any).type === 'showWarningMessage') {
+        const payload = message as { type: string; requestId: string; message: string; items?: string[] };
+        // Simulate user interaction with a confirm dialog
+        setTimeout(() => {
+          const result = window.confirm(payload.message)
+            ? payload.items?.[0]
+            : payload.items?.[1];
+          window.postMessage({
+            type: 'showWarningMessageResult',
+            requestId: payload.requestId,
+            result,
+          }, '*');
+        }, 100);
+      }
+    },
+    setState: (state: any) => {
+      console.log("[mock] setState", state);
+    },
+    getState: () => {
+      console.log("[mock] getState");
+      return undefined;
+    },
+  }), []);
 
 
   React.useEffect(() => {
@@ -85,77 +238,9 @@ export function MockAppContainer(): JSX.Element {
       };
     };
     if (!globalAny.acquireVsCodeApi) {
-      globalAny.acquireVsCodeApi = () => ({
-        postMessage: (message: unknown) => {
-          console.log("[mock] postMessage", message);
-
-          if ((message as any).type === 'subscribeExpression') {
-            const payload = message as { type: string; expression: string };
-            const nextCount = (expressionSubscriptionsRef.current.get(payload.expression) ?? 0) + 1;
-            expressionSubscriptionsRef.current.set(payload.expression, nextCount);
-            setExpressionResults((prev) => ({
-              ...prev,
-              [payload.expression]: { value: `mock result for: ${payload.expression}` },
-            }));
-            return;
-          }
-
-          if ((message as any).type === 'unsubscribeExpression') {
-            const payload = message as { type: string; expression: string };
-            const current = expressionSubscriptionsRef.current.get(payload.expression) ?? 0;
-            if (current <= 1) {
-              expressionSubscriptionsRef.current.delete(payload.expression);
-              setExpressionResults((prev) => {
-                const next = { ...prev };
-                delete next[payload.expression];
-                return next;
-              });
-            } else {
-              expressionSubscriptionsRef.current.set(payload.expression, current - 1);
-            }
-            return;
-          }
-
-          // Handle evalExpression requests
-          if ((message as any).type === 'evalExpression') {
-            const payload = message as { type: string; requestId: string; expression: string };
-            // Simulate async evaluation
-            setTimeout(() => {
-              const mockResult = `mock result for: ${payload.expression}`;
-              window.postMessage({
-                type: 'evalResult',
-                requestId: payload.requestId,
-                result: mockResult,
-              }, '*');
-            }, 100);
-          }
-
-          // Handle showWarningMessage requests
-          if ((message as any).type === 'showWarningMessage') {
-            const payload = message as { type: string; requestId: string; message: string; items?: string[] };
-            // Simulate user interaction with a confirm dialog
-            setTimeout(() => {
-              const result = window.confirm(payload.message)
-                ? payload.items?.[0]
-                : payload.items?.[1];
-              window.postMessage({
-                type: 'showWarningMessageResult',
-                requestId: payload.requestId,
-                result,
-              }, '*');
-            }, 100);
-          }
-        },
-        setState: (state: any) => {
-          console.log("[mock] setState", state);
-        },
-        getState: () => {
-          console.log("[mock] getState");
-          return undefined;
-        },
-      });
+      globalAny.acquireVsCodeApi = () => mockApi;
     }
-  }, []);
+  }, [mockApi]);
 
   React.useEffect(() => {
     const interval = window.setInterval(() => {
@@ -212,6 +297,7 @@ export function MockAppContainer(): JSX.Element {
     controlSurfaceRoot,
     expressionResults,
     discoveredInstances: [],
+    selectedPageId,
   });
 
   // const api = React.useMemo<{ postMessage: (message: unknown) => void }>(
@@ -270,7 +356,7 @@ export function MockAppContainer(): JSX.Element {
   };
 
   return (
-    <VsCodeApiProvider>
+    <VsCodeApiProvider api={mockApi}>
       <ControlSurfaceStateProvider>
         <div>
           <div

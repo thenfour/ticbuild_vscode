@@ -73,6 +73,11 @@ fieldset:disabled legend {
   user-select: none;
 }
 
+.control-surface-selectable--design .control-surface-selectable__content .control-surface-interactive {
+  pointer-events: auto;
+  user-select: auto;
+}
+
 .control-surface-selectable--design::after {
   content: "";
   position: absolute;

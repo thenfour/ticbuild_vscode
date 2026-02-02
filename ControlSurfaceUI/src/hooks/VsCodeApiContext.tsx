@@ -7,8 +7,14 @@ export type VsCodeApi = typeof vscodeApi;
 
 const VsCodeApiContext = React.createContext<VsCodeApi | undefined>(vscodeApi);
 
-export const VsCodeApiProvider = ({ children }: { children: React.ReactNode }) => (
-    <VsCodeApiContext.Provider value={vscodeApi}>
+export const VsCodeApiProvider = ({
+    children,
+    api,
+}: {
+    children: React.ReactNode;
+    api?: VsCodeApi;
+}) => (
+    <VsCodeApiContext.Provider value={api ?? vscodeApi}>
         {children}
     </VsCodeApiContext.Provider>
 );

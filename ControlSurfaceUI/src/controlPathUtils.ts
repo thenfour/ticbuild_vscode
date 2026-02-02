@@ -55,6 +55,42 @@ export const resolveControlByPath = (
   return null;
 };
 
+export const resolveControlsByPath = (
+  controlSurfaceRoot: ControlSurfaceNode[],
+  path: string[] | null | undefined,
+): ControlSurfaceNode[] | null => {
+  if (!path) {
+    return null;
+  }
+
+  let current: any = { controls: controlSurfaceRoot };
+
+  for (const segment of path) {
+    const parsed = parseControlPathSegment(segment);
+    if (!parsed) {
+      return null;
+    }
+    if (parsed.kind === "root") {
+      continue;
+    }
+    if (parsed.kind === "control") {
+      if (!Array.isArray(current.controls) || parsed.index < 0 || parsed.index >= current.controls.length) {
+        return null;
+      }
+      current = current.controls[parsed.index];
+      continue;
+    }
+    if (parsed.kind === "tab") {
+      if (!Array.isArray(current.tabs) || parsed.index < 0 || parsed.index >= current.tabs.length) {
+        return null;
+      }
+      current = current.tabs[parsed.index];
+    }
+  }
+
+  return Array.isArray(current.controls) ? current.controls : null;
+};
+
 export const findControlPathByNode = (
   controlSurfaceRoot: ControlSurfaceNode[],
   target: ControlSurfaceNode,

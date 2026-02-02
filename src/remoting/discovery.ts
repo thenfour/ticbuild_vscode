@@ -26,6 +26,12 @@ interface Tic80RunningInstanceInfo {
     metaVersion?: string;
 }
 
+type SessionEntry = {
+    filePath: string;
+    record: DiscoveryRecord;
+    startedAt?: Date;
+};
+
 // vs-code agnostic.
 export async function discoverRunningInstancesBase(
     timeoutMs: number,
@@ -46,6 +52,15 @@ export async function discoverRunningInstancesBase(
     const sessionFiles =
         entries.filter((name) => /^tic80-remote\..+\.json$/i.test(name));
     const items: Tic80RunningInstanceInfo[] = [];
+    const entriesByTarget = new Map<string, SessionEntry[]>();
+
+    const deleteSessionFile = async (filePath: string) => {
+        try {
+            await fs.unlink(filePath);
+        } catch (error) {
+            // ignore delete failures
+        }
+    };
 
     for (const fileName of sessionFiles) {
         const filePath = path.join(sessionDir, fileName);
@@ -66,56 +81,74 @@ export async function discoverRunningInstancesBase(
         if (!record.host || !record.port) {
             continue;
         }
+        const target = `${record.host}:${record.port}`;
+        const startedAt = record.startedAt ? isoDateStringToDate(record.startedAt) : undefined;
+        const entry: SessionEntry = {
+            filePath,
+            record,
+            startedAt,
+        };
+        const list = entriesByTarget.get(target) ?? [];
+        list.push(entry);
+        entriesByTarget.set(target, list);
+    }
 
-        //const target = `${record.host}:${record.port}`;
-        const client = new Tic80RemotingClient(record.host, record.port);
-        try {
-            await client.connect(timeoutMs);
-            const helloRaw = await client.hello();
-            const hello = decodeRemotingString(helloRaw);
-            if (!isExpectedHello(hello)) {
-                continue;
+    const entriesByNewest = (a: SessionEntry, b: SessionEntry) => {
+        const timeA = a.startedAt?.getTime() ?? 0;
+        const timeB = b.startedAt?.getTime() ?? 0;
+        return timeB - timeA;
+    };
+
+    for (const [target, grouped] of entriesByTarget) {
+        const ordered = [...grouped].sort(entriesByNewest);
+        let connected = false;
+
+        for (let index = 0; index < ordered.length; index += 1) {
+            const entry = ordered[index];
+            const client = new Tic80RemotingClient(entry.record.host, entry.record.port);
+            try {
+                await client.connect(timeoutMs);
+                const helloRaw = await client.hello();
+                const hello = decodeRemotingString(helloRaw);
+                if (!isExpectedHello(hello)) {
+                    await deleteSessionFile(entry.filePath);
+                    continue;
+                }
+
+                const cartRaw = await client.cartPath();
+                const cartPath = decodeRemotingString(cartRaw).trim();
+                const titleRaw = await safeMetadata(client, 'title');
+                const versionRaw = await safeMetadata(client, 'version');
+                const title = titleRaw ? decodeRemotingString(titleRaw).trim() : '';
+                const version = versionRaw ? decodeRemotingString(versionRaw).trim() : '';
+
+                items.push({
+                    host: entry.record.host,
+                    port: entry.record.port,
+                    remotingVersion: entry.record.remotingVersion,
+                    hello,
+                    startedAt: entry.startedAt,
+                    cartPath: cartPath.length > 0 ? cartPath : undefined,
+                    metaTitle: title.length > 0 ? title : undefined,
+                    metaVersion: version.length > 0 ? version : undefined,
+                });
+
+                connected = true;
+                // Delete any older duplicates without probing.
+                for (const older of ordered.slice(index + 1)) {
+                    await deleteSessionFile(older.filePath);
+                }
+                break;
+            } catch (error) {
+                await deleteSessionFile(entry.filePath);
+            } finally {
+                client.close();
             }
+        }
 
-            const cartRaw = await client.cartPath();
-            const cartPath = decodeRemotingString(cartRaw).trim();
-            const titleRaw = await safeMetadata(client, 'title');
-            const versionRaw = await safeMetadata(client, 'version');
-            const title = titleRaw ? decodeRemotingString(titleRaw).trim() : '';
-            const version = versionRaw ? decodeRemotingString(versionRaw).trim() : '';
-
-            // const label = formatInstanceLabel({
-            //     title,
-            //     version,
-            //     cartPath,
-            // });
-
-            //const uptime = formatUptime(record.startedAt);
-            // const description = uptime ? `${record.host}:${record.port} (${uptime})` :
-            //     `${record.host}:${record.port}`;
-
-            // items.push({
-            //     label,
-            //     description,
-            //     detail: cartPath.length > 0 ? cartPath : undefined,
-            //     value: target,
-            // });
-
-            items.push({
-                host: record.host,
-                port: record.port,
-                remotingVersion: record.remotingVersion,
-                hello,
-                startedAt: record.startedAt ? isoDateStringToDate(record.startedAt) : undefined,
-                cartPath: cartPath.length > 0 ? cartPath : undefined,
-                metaTitle: title.length > 0 ? title : undefined,
-                metaVersion: version.length > 0 ? version : undefined,
-            });
-
-        } catch (error) {
-            // ignore failed entries
-        } finally {
-            client.close();
+        if (!connected) {
+            // No live instances found for this target; stale entries already cleaned up.
+            continue;
         }
     }
 

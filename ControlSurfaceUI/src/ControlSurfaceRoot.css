@@ -29,6 +29,15 @@
   --button-background-highlighted: #38b764;
   --button-foreground-highlighted: #fff;
 
+  --control-surface-column-max-width: 400px;
+}
+
+
+.control-surface-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: var(--control-surface-column-max-width);
 }
 
 /* Fieldset and Legend styling with VS Code theming */

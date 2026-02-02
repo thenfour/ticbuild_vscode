@@ -71,7 +71,7 @@ export const renderControlSurfaceControl = (
 
         case "label":
             return wrapSelectable(
-                <ControlSurfaceLabel {...node} api={api} pollIntervalMs={pollIntervalMs} />,
+                <ControlSurfaceLabel {...node} api={api} uiRefreshMs={pollIntervalMs} />,
                 `label-${index}`,
             );
 

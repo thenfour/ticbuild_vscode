@@ -61,6 +61,7 @@ export function buildControlSurfaceWebviewPayload(
     watches: WatchItem[],
     controlSurfaceRoot: DevtoolsControlNode[],
     pollHz: number,
+    uiRefreshMs: number | undefined,
     activeSidebarId?: string,
     selectedPageId?: string,
     viewId?: string,
@@ -70,6 +71,7 @@ export function buildControlSurfaceWebviewPayload(
     controlSurfaceRoot: DevtoolsControlNode[];
     symbolValues?: Record<string, any>;
     pollIntervalMs: number;
+    uiRefreshMs?: number;
     activeSidebarId?: string;
     selectedPageId?: string;
     viewId?: string;
@@ -82,7 +84,8 @@ export function buildControlSurfaceWebviewPayload(
                 ? 'Error'
                 : 'Disconnected';
 
-    const pollIntervalMs = Math.max(Math.floor(1000 / pollHz), 10); // At least 10ms
+    const fallbackPollIntervalMs = Math.max(Math.floor(1000 / pollHz), 10); // At least 10ms
+    const pollIntervalMs = Math.max(uiRefreshMs ?? fallbackPollIntervalMs, 10);
 
     return {
         status,
@@ -95,6 +98,7 @@ export function buildControlSurfaceWebviewPayload(
         })),
         controlSurfaceRoot,
         pollIntervalMs,
+        uiRefreshMs,
         activeSidebarId,
         selectedPageId,
         viewId,
@@ -110,6 +114,7 @@ export async function buildControlSurfaceWebviewPayloadWithSymbols(
     controlSurfaceRoot: DevtoolsControlNode[],
     evalExpr: (expression: string) => Promise<string>,
     pollHz: number,
+    uiRefreshMs: number | undefined,
     activeSidebarId?: string,
     selectedPageId?: string,
     viewId?: string,
@@ -119,6 +124,7 @@ export async function buildControlSurfaceWebviewPayloadWithSymbols(
     controlSurfaceRoot: DevtoolsControlNode[];
     symbolValues?: Record<string, any>;
     pollIntervalMs: number;
+    uiRefreshMs?: number;
     activeSidebarId?: string;
     selectedPageId?: string;
     viewId?: string;
@@ -128,6 +134,7 @@ export async function buildControlSurfaceWebviewPayloadWithSymbols(
         watches,
         controlSurfaceRoot,
         pollHz,
+        uiRefreshMs,
         activeSidebarId,
         selectedPageId,
         viewId,

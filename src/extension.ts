@@ -216,6 +216,7 @@ export function activate(context: vscode.ExtensionContext): void {
       watchStore.getControlSurfaceRoot(),
       (expr) => session.evalExpr(expr),
       getPollHz(),
+      getUiRefreshMs(),
       controlSurfaceRegistry.getActiveSidebarId(),
       selectedPageId,
       viewId,
@@ -262,6 +263,11 @@ export function activate(context: vscode.ExtensionContext): void {
           const id = state?.id ?? generatePanelId();
           const title = state?.title ?? webviewPanel.title ?? 'Control Surface';
           const createdAt = state?.createdAt ?? Date.now();
+          const panelIconPath = vscode.Uri.file(
+            path.join(context.extensionPath, 'resources', 'desktop-classic-blue.svg'),
+          );
+
+          webviewPanel.iconPath = panelIconPath;
 
           webviewPanel.webview.options = {
             enableScripts: true,
@@ -412,7 +418,7 @@ export function activate(context: vscode.ExtensionContext): void {
     } else {
       poller.stop();
       watchStore.markAllStale();
-      watchProvider.refresh();
+      scheduleUiRefresh();
     }
   };
 
@@ -452,8 +458,7 @@ export function activate(context: vscode.ExtensionContext): void {
     updateStatus();
     updateContextKeys();
     updatePoller();
-    watchProvider.refresh();
-    updateControlSurfaceViews();
+    scheduleUiRefresh();
   });
 
   context.subscriptions.push(
@@ -461,8 +466,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
   context.subscriptions.push(
     controlSurfaceRegistry.onDidChange(() => {
-      watchProvider.refresh();
-      updateControlSurfaceViews();
+      scheduleUiRefresh();
     }),
   );
 
@@ -564,18 +568,22 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(
       'tic80.addPanel',
       async () => {
-        const title = await vscode.window.showInputBox({
-          title: 'New Control Surface Panel',
-          prompt: 'Enter a panel title',
-          value: `Control Surface Panel ${panelCounter}`,
-          ignoreFocusOut: true,
-        });
-        if (!title) {
-          return;
-        }
+        // const title = await vscode.window.showInputBox({
+        //   title: 'New TIC-80 Control Surface Panel',
+        //   prompt: 'Enter a panel title',
+        //   value: `TIC-80`,
+        //   ignoreFocusOut: true,
+        // });
+        // if (!title) {
+        //   return;
+        // }
+        const title = `TIC-80`;
 
         const id = generatePanelId();
         const createdAt = Date.now();
+        const panelIconPath = vscode.Uri.file(
+          path.join(context.extensionPath, 'resources', 'desktop-classic-blue.svg'),
+        );
 
         const panel = vscode.window.createWebviewPanel(
           'tic80ControlSurfacePanel',
@@ -589,6 +597,7 @@ export function activate(context: vscode.ExtensionContext): void {
             ],
           },
         );
+        panel.iconPath = panelIconPath;
         panelCounter += 1;
 
         panel.onDidDispose(() => {

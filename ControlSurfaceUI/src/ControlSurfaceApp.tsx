@@ -425,12 +425,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
       {/* main control surface body */}
 
-      {activePage && resolvedApi && state.symbolValues && state.pollIntervalMs ? (
+      {activePage && resolvedApi && state.symbolValues && (state.uiRefreshMs ?? state.pollIntervalMs) ? (
         <ControlSurfacePage
           page={activePage}
           api={resolvedApi}
           symbolValues={state.symbolValues}
-          pollIntervalMs={state.pollIntervalMs}
+          pollIntervalMs={state.uiRefreshMs ?? state.pollIntervalMs ?? 250}
           pagePath={activePagePath}
           designMode={designMode}
           selectedPath={selectedControlPath}

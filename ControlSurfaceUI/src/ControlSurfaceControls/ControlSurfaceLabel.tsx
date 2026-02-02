@@ -12,50 +12,15 @@
 
 import React from "react";
 import { ControlSurfaceLabelSpec, ControlSurfaceApi } from "../defs";
+import { useLuaExpressionResult } from "../useLuaExpressionResult";
 
 export interface ControlSurfaceLabelProps extends ControlSurfaceLabelSpec {
   api: ControlSurfaceApi;
-  pollIntervalMs: number;
+  uiRefreshMs: number;
 }
 
-export const ControlSurfaceLabel: React.FC<ControlSurfaceLabelProps> = ({ label, expression, api, pollIntervalMs }) => {
-  const [displayValue, setDisplayValue] = React.useState<string>("");
-  const [error, setError] = React.useState<string | null>(null);
-
-  // Poll expression value periodically
-  React.useEffect(() => {
-    // api.log?.(`ControlSurfaceLabel mounted. API keys: ${Object.keys(api).join(", ")}`);
-    // api.log?.(`evalExpression type: ${typeof api.evalExpression}`);
-
-
-    let mounted = true;
-
-    const evaluate = async () => {
-      try {
-        //api.log?.(`Evaluating expression: ${expression}`);
-        const result = await api.evalExpression!(expression);
-        //api.log?.(`Result: ${result}`);
-        if (mounted) {
-          setDisplayValue(result);
-          setError(null);
-        }
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        api.log?.(`Evaluation error: ${errorMsg}`);
-        if (mounted) {
-          setError(errorMsg);
-        }
-      }
-    };
-
-    evaluate(); // Initial evaluation
-    const interval = setInterval(evaluate, pollIntervalMs);
-
-    return () => {
-      mounted = false;
-      clearInterval(interval);
-    };
-  }, [expression, api, pollIntervalMs]);
+export const ControlSurfaceLabel: React.FC<ControlSurfaceLabelProps> = ({ label, expression, api, uiRefreshMs }) => {
+  const { value: displayValue, error } = useLuaExpressionResult(expression, api, uiRefreshMs);
 
   return (
     <div className="control-surface-label">

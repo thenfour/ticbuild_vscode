@@ -130,6 +130,7 @@ export function MockAppContainer(): JSX.Element {
       status: connected ? "Connected (mock)" : "Disconnected (mock)",
       watches: mappedWatches,
       controlSurfaceRoot,
+      uiRefreshMs: 250,
     };
   }, [connected, controlSurfaceRoot, watches]);
 

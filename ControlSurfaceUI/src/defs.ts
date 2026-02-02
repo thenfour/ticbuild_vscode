@@ -17,6 +17,7 @@ export type ControlSurfaceState = {
     controlSurfaceRoot: ControlSurfaceNode[];
     symbolValues?: Record<string, any>; // map of symbol names to their current values
     pollIntervalMs?: number; // interval for polling expressions in ms
+    uiRefreshMs?: number; // UI refresh interval in ms
     selectedPageId?: string; // persisted selected page ID
     viewId?: string; // unique ID for this view (panel or sidebar)
 };

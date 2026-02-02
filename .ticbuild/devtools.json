@@ -24,6 +24,11 @@
   ],
   "controlSurfaceRoot": [
     {
+      "type": "label",
+      "label": "",
+      "expression": "t"
+    },
+    {
       "type": "knob",
       "label": "Position X",
       "symbol": "x",
@@ -102,11 +107,6 @@
     },
     {
       "type": "divider"
-    },
-    {
-      "type": "label",
-      "label": "",
-      "expression": "t"
     }
   ]
 }

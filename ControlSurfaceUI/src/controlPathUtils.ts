@@ -7,10 +7,16 @@ type ResolvedControlPath = {
   index: number;
 };
 
-export const resolveControlByPath = (
+type ResolvedNodePath = {
+  node: ControlSurfaceNode;
+  parentControls: ControlSurfaceNode[] | null;
+  index: number | null;
+};
+
+const resolveNodeByPath = (
   controlSurfaceRoot: ControlSurfaceNode[],
   path: string[] | null | undefined,
-): ResolvedControlPath | null => {
+): ResolvedNodePath | null => {
   if (!path || path.length === 0) {
     return null;
   }
@@ -44,51 +50,40 @@ export const resolveControlByPath = (
     }
   }
 
-  if (parentControls && index !== null) {
-    return {
-      node: current as ControlSurfaceNode,
-      parentControls,
-      index,
-    };
+  return {
+    node: current as ControlSurfaceNode,
+    parentControls,
+    index,
+  };
+};
+
+export const resolveControlByPath = (
+  controlSurfaceRoot: ControlSurfaceNode[],
+  path: string[] | null | undefined,
+): ResolvedControlPath | null => {
+  const resolved = resolveNodeByPath(controlSurfaceRoot, path);
+  if (!resolved || !resolved.parentControls || resolved.index === null) {
+    return null;
   }
 
-  return null;
+  return {
+    node: resolved.node,
+    parentControls: resolved.parentControls,
+    index: resolved.index,
+  };
 };
 
 export const resolveControlsByPath = (
   controlSurfaceRoot: ControlSurfaceNode[],
   path: string[] | null | undefined,
 ): ControlSurfaceNode[] | null => {
-  if (!path) {
+  const resolved = resolveNodeByPath(controlSurfaceRoot, path);
+  if (!resolved) {
     return null;
   }
 
-  let current: any = { controls: controlSurfaceRoot };
-
-  for (const segment of path) {
-    const parsed = parseControlPathSegment(segment);
-    if (!parsed) {
-      return null;
-    }
-    if (parsed.kind === "root") {
-      continue;
-    }
-    if (parsed.kind === "control") {
-      if (!Array.isArray(current.controls) || parsed.index < 0 || parsed.index >= current.controls.length) {
-        return null;
-      }
-      current = current.controls[parsed.index];
-      continue;
-    }
-    if (parsed.kind === "tab") {
-      if (!Array.isArray(current.tabs) || parsed.index < 0 || parsed.index >= current.tabs.length) {
-        return null;
-      }
-      current = current.tabs[parsed.index];
-    }
-  }
-
-  return Array.isArray(current.controls) ? current.controls : null;
+  const controls = (resolved.node as any).controls as ControlSurfaceNode[] | undefined | null;
+  return Array.isArray(controls) ? controls : null;
 };
 
 export const findControlPathByNode = (

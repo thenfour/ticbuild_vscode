@@ -1,5 +1,5 @@
 import React from "react";
-import { ControlSurfaceDataSource, ControlSurfaceNode, ControlSurfaceState, WatchItem } from "../defs";
+import { ControlSurfaceDataSource, ControlSurfaceDiscoveredInstance, ControlSurfaceNode, ControlSurfaceState, WatchItem } from "../defs";
 
 type MockWatch = {
     id: string;
@@ -12,7 +12,7 @@ export type MockControlSurfaceDataSourceOptions = {
     watches: MockWatch[];
     controlSurfaceRoot: ControlSurfaceNode[];
     expressionResults: Record<string, { value?: string; error?: string }>;
-    discoveredInstances?: ControlSurfaceState["discoveredInstances"];
+    discoveredInstances?: ControlSurfaceDiscoveredInstance[];
     selectedPageId?: string;
 };
 
@@ -33,12 +33,12 @@ export const useMockControlSurfaceDataSource = ({
         controlSurfaceRoot: [],
         symbolValues: {},
         expressionResults: {},
-        discoveredInstances: [],
+        discoveredInstances,
         uiRefreshMs: 250,
         pollIntervalMs: 250,
         designMode: false,
         selectedControlPath: null,
-        selectedPageId: "root",
+        selectedPageId: selectedPageId ?? "root",
     });
 
     const payload = React.useMemo<ControlSurfaceState>(() => {

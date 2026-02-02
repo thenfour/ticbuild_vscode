@@ -3,12 +3,15 @@ import React from "react";
 import {
   ControlSurfaceApp,
 } from "./ControlSurfaceApp";
-import { ControlSurfaceGroupSpec, ControlSurfaceNode } from "./defs";
+import { ControlSurfaceDiscoveredInstance, ControlSurfaceGroupSpec, ControlSurfaceNode } from "./defs";
 import { VsCodeApiProvider } from "./hooks/VsCodeApiContext";
 import { ControlSurfaceStateProvider } from "./hooks/ControlSurfaceState";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { useMockControlSurfaceDataSource } from "./hooks/useMockControlSurfaceDataSource";
 import { resolveControlByPath, resolveControlsByPath } from "./controlPathUtils";
+import { ButtonGroup } from "./Buttons/ButtonGroup";
+import { Button } from "./Buttons/PushButton";
+import { Divider } from "./basic/Divider";
 
 type MockValueKind = "auto" | "string" | "number" | "boolean";
 
@@ -63,6 +66,35 @@ const createMockWatch = (index: number, kind: MockValueKind): MockWatch => {
   }
 };
 
+// create 5 mock instances for testing
+const mockInstances: ControlSurfaceDiscoveredInstance[] = [
+  {
+    host: "localhost",
+    port: 9000,
+    label: "Mock TIC-80 Instance",
+  },
+  {
+    host: "localhost",
+    port: 9001,
+    label: "Mock TIC-80 Instance 2",
+  },
+  {
+    host: "localhost",
+    port: 9002,
+    label: "Mock TIC-80 Instance 3",
+  },
+  {
+    host: "localhost",
+    port: 9003,
+    label: "Mock TIC-80 Instance 4",
+  },
+  {
+    host: "localhost",
+    port: 9004,
+    label: "Mock TIC-80 Instance 5",
+  },
+];
+
 export function MockAppContainer(): JSX.Element {
   const [connected, setConnected] = React.useState(false);
   const [watches, setWatches] = React.useState<MockWatch[]>([]);
@@ -76,6 +108,7 @@ export function MockAppContainer(): JSX.Element {
   const [nextId, setNextId] = React.useState(1);
   const [addKind, setAddKind] = React.useState<MockValueKind>("auto");
   const [clipboardNotice, setClipboardNotice] = React.useState<string>("");
+  const [discoveredInstances, setDiscoveredInstances] = React.useState<ControlSurfaceDiscoveredInstance[]>([]);
 
   const mockApi = React.useMemo(() => ({
     postMessage: (message: unknown) => {
@@ -296,7 +329,7 @@ export function MockAppContainer(): JSX.Element {
     watches,
     controlSurfaceRoot,
     expressionResults,
-    discoveredInstances: [],
+    discoveredInstances,
     selectedPageId,
   });
 
@@ -309,15 +342,15 @@ export function MockAppContainer(): JSX.Element {
   //   [],
   // );
 
-  const handleAddWatch = () => {
-    const id = nextId;
-    setWatches((current) => [...current, createMockWatch(id, addKind)]);
-    setNextId((current) => current + 1);
-  };
+  // const handleAddWatch = () => {
+  //   const id = nextId;
+  //   setWatches((current) => [...current, createMockWatch(id, addKind)]);
+  //   setNextId((current) => current + 1);
+  // };
 
-  const handleRemoveWatch = () => {
-    setWatches((current) => current.slice(0, -1));
-  };
+  // const handleRemoveWatch = () => {
+  //   setWatches((current) => current.slice(0, -1));
+  // };
 
   const handleCopyControlSurfaceRoot = async () => {
     setClipboardNotice("");
@@ -359,22 +392,12 @@ export function MockAppContainer(): JSX.Element {
     <VsCodeApiProvider api={mockApi}>
       <ControlSurfaceStateProvider>
         <div>
-          <div
-            style={{
-              padding: 12,
-              borderBottom: "1px solid var(--vscode-panel-border)",
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: 8,
-              fontFamily: "var(--vscode-font-family)",
-            }}
-          >
-            <strong style={{ marginRight: 4 }}>Mock Controls</strong>
-            <button onClick={() => setConnected((value) => !value)}>
+          <ButtonGroup          >
+            <Button onClick={() => setConnected((value) => !value)}>
               {connected ? "Set Disconnected" : "Set Connected"}
-            </button>
-            <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            </Button>
+            <Divider />
+            {/* <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
               Add type
               <select
                 value={addKind}
@@ -391,19 +414,40 @@ export function MockAppContainer(): JSX.Element {
             <button onClick={handleAddWatch}>Add Watch</button>
             <button onClick={handleRemoveWatch} disabled={watches.length === 0}>
               Remove Watch
-            </button>
-            <button onClick={handleCopyControlSurfaceRoot}>
+            </button> */}
+            <Button onClick={() => {
+              setDiscoveredInstances([]);
+            }}>
+              no inst
+            </Button>
+            <Button onClick={() => {
+              setDiscoveredInstances(mockInstances.slice(0, 1));
+            }}>
+              1 inst
+            </Button>
+            <Button onClick={() => {
+              setDiscoveredInstances(mockInstances.slice(0, 2));
+            }}>
+              2 inst
+            </Button>
+            <Button onClick={() => {
+              setDiscoveredInstances(mockInstances.slice(0, 5));
+            }}>
+              5 inst
+            </Button>
+            <Divider />
+            <Button onClick={handleCopyControlSurfaceRoot}>
               Copy controlSurfaceRoot
-            </button>
-            <button onClick={handlePasteControlSurfaceRoot}>
+            </Button>
+            <Button onClick={handlePasteControlSurfaceRoot}>
               Paste controlSurfaceRoot
-            </button>
+            </Button>
             {clipboardNotice ? (
               <span style={{ color: "var(--vscode-descriptionForeground)" }}>
                 {clipboardNotice}
               </span>
             ) : null}
-          </div>
+          </ButtonGroup>
           <ControlSurfaceApp
             dataSource={dataSource}
             //initialState={payload}

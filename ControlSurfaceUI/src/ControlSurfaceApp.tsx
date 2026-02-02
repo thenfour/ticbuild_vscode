@@ -382,10 +382,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
           <Dropdown
             value={selectedPageId}
             onChange={(newValue) => {
+              const selectedLabel = pages.find((page) => page.id === newValue)?.label;
               setSelectedPageId(newValue);
               resolvedApi?.postMessage({
                 type: "setSelectedPage",
                 pageId: newValue,
+                pageLabel: selectedLabel,
                 viewId: state.viewId
               });
             }}

@@ -102,6 +102,19 @@
               "step": 1
             }
           ]
+        },
+        {
+          "type": "tabs",
+          "tabs": [
+            {
+              "label": "Tab 1",
+              "controls": []
+            },
+            {
+              "label": "Tab 2",
+              "controls": []
+            }
+          ]
         }
       ]
     },

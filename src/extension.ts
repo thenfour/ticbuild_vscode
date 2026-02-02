@@ -21,7 +21,7 @@ import {
 } from './baseDefs';
 import { discoverRunningInstancesBase } from './remoting/discovery';
 import { setupAutoConnectWatcher } from './session/autoConnect';
-import { formatDateDiff, formatInstanceLabel, parseHostPort } from './utils';
+import { formatDateDiff, formatInstanceLabel, IsNullOrWhitespace, parseHostPort } from './utils';
 import { buildControlSurfaceWebviewHtml, buildControlSurfaceWebviewPayloadWithSymbols } from './views/ControlSurfaceWebview';
 import { ControlSurfaceRegistry } from './views/ControlSurfaceRegistry';
 import { ControlSurfaceSidebarProvider } from './views/ControlSurfaceSidebarProvider';
@@ -54,11 +54,21 @@ export function activate(context: vscode.ExtensionContext): void {
         break;
       }
       case 'setSelectedPage': {
-        const payload = message as { pageId?: string; viewId?: string };
+        const payload = message as { pageId?: string; viewId?: string; pageLabel?: string };
         if (payload.pageId && payload.viewId) {
           const key = `${STATE_KEY_SELECTED_PAGE}.${payload.viewId}`;
           void context.workspaceState.update(key, payload.pageId);
           output.appendLine(`[controlSurface] Saved selected page: viewId=${payload.viewId}, pageId=${payload.pageId}, key=${key}`);
+          if (payload.pageLabel && webview) {
+            const panelEntry = controlSurfaceRegistry
+              .getPanels()
+              .find((entry) => entry.panel?.webview === webview);
+            if (panelEntry?.panel) {
+              const title = IsNullOrWhitespace(payload.pageLabel) ? "TIC-80" : `TIC-80: ${payload.pageLabel}`;
+              panelEntry.panel.title = title;
+              panelEntry.title = title;
+            }
+          }
         } else {
           output.appendLine(`[controlSurface] setSelectedPage missing data: pageId=${payload.pageId}, viewId=${payload.viewId}`);
         }

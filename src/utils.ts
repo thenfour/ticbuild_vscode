@@ -78,3 +78,7 @@ export const dirExists = async (dirPath: string): Promise<boolean> => {
     }
 };
 
+
+export const IsNullOrWhitespace = (value: string | null | undefined): boolean => {
+    return value === null || value === undefined || value.trim().length === 0;
+}

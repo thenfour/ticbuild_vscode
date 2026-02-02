@@ -2,9 +2,8 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 
 import { RemoteSessionManager } from './session/RemoteSessionManager';
-import { Tic80WatchesProvider, WatchNode, ControlSurfaceNode } from './views/Tic80WatchesProvider';
-import { WatchPoller } from './watches/watchPoller';
-import { WatchStore } from './watches/watchStore';
+import { WatchNode, ControlSurfaceNode } from './views/Tic80WatchesProvider';
+import { WatchSystem } from './watches/WatchSystem';
 
 import {
   CONFIG_CONNECT_TIMEOUT_MS,
@@ -21,11 +20,13 @@ import {
 } from './baseDefs';
 import { discoverRunningInstancesBase } from './remoting/discovery';
 import { setupAutoConnectWatcher } from './session/autoConnect';
-import { formatDateDiff, formatInstanceLabel, IsNullOrWhitespace, parseHostPort } from './utils';
+import { formatDateDiff, formatInstanceLabel, parseHostPort } from './utils';
 import { buildControlSurfaceWebviewHtml, buildControlSurfaceWebviewPayloadWithSymbols } from './views/ControlSurfaceWebview';
+import { ExpressionSubscriptionMonitor } from './controlSurface/ExpressionSubscriptionMonitor';
 import { ControlSurfaceRegistry } from './views/ControlSurfaceRegistry';
 import { ControlSurfaceSidebarProvider } from './views/ControlSurfaceSidebarProvider';
 import { ensureDevtoolsSchemaForWorkspace } from './devtoolsModel';
+import { ControlSurfaceMessageHandler } from './controlSurface/ControlSurfaceMessageHandler';
 
 function generatePanelId(): string {
   return `panel-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -39,276 +40,15 @@ export function activate(context: vscode.ExtensionContext): void {
   const session = new RemoteSessionManager(output);
   const workspaceRoot = getWorkspaceRoot();
   void ensureDevtoolsSchemaForWorkspace(workspaceRoot, output);
-  const watchStore = new WatchStore(workspaceRoot, output);
   const controlSurfaceRegistry = new ControlSurfaceRegistry();
-  const watchProvider =
-    new Tic80WatchesProvider(session, watchStore, controlSurfaceRegistry, output);
-
-  const handleControlSurfaceMessage = (message: { type?: string }, webview?: vscode.Webview) => {
-    switch (message?.type) {
-      case 'log': {
-        const logMessage = (message as { message?: string }).message;
-        if (logMessage) {
-          output.appendLine(`[webview] ${logMessage}`);
-        }
-        break;
-      }
-      case 'setSelectedPage': {
-        const payload = message as { pageId?: string; viewId?: string; pageLabel?: string };
-        if (payload.pageId && payload.viewId) {
-          const key = `${STATE_KEY_SELECTED_PAGE}.${payload.viewId}`;
-          void context.workspaceState.update(key, payload.pageId);
-          output.appendLine(`[controlSurface] Saved selected page: viewId=${payload.viewId}, pageId=${payload.pageId}, key=${key}`);
-          if (payload.pageLabel && webview) {
-            const panelEntry = controlSurfaceRegistry
-              .getPanels()
-              .find((entry) => entry.panel?.webview === webview);
-            if (panelEntry?.panel) {
-              const title = IsNullOrWhitespace(payload.pageLabel) ? "TIC-80" : `TIC-80: ${payload.pageLabel}`;
-              panelEntry.panel.title = title;
-              panelEntry.title = title;
-            }
-          }
-        } else {
-          output.appendLine(`[controlSurface] setSelectedPage missing data: pageId=${payload.pageId}, viewId=${payload.viewId}`);
-        }
-        break;
-      }
-      case 'addControl': {
-        const payload = message as { parentPath?: string[]; control?: unknown };
-        output.appendLine(`[controlSurface] addControl request: parentPath=${JSON.stringify(payload.parentPath)}, control=${JSON.stringify(payload.control)}`);
-
-        if (payload.control && payload.parentPath) {
-          void watchStore.addControl(payload.parentPath, payload.control as any).then(() => {
-            output.appendLine('[controlSurface] addControl completed successfully');
-            // Send response back to webview
-            if (webview) {
-              void webview.postMessage({
-                type: 'log',
-                message: 'Control added successfully',
-              });
-            }
-          }).catch((error) => {
-            output.appendLine(`[controlSurface] addControl failed: ${String(error)}`);
-            if (webview) {
-              void webview.postMessage({
-                type: 'log',
-                message: `Failed to add control: ${String(error)}`,
-              });
-            }
-          });
-        }
-        break;
-      }
-      case 'updateControl': {
-        const payload = message as { path?: string[]; control?: unknown };
-        if (payload.path && payload.control) {
-          output.appendLine(`[controlSurface] updateControl request: path=${JSON.stringify(payload.path)}`);
-          void watchStore.updateControl(payload.path, payload.control as any).catch((error) => {
-            output.appendLine(`[controlSurface] updateControl failed: ${String(error)}`);
-          });
-        }
-        break;
-      }
-      case 'deleteControl': {
-        const payload = message as { path?: string[] };
-        if (payload.path) {
-          output.appendLine(`[controlSurface] deleteControl request: path=${JSON.stringify(payload.path)}`);
-          void watchStore.deleteControl(payload.path).catch((error) => {
-            output.appendLine(`[controlSurface] deleteControl failed: ${String(error)}`);
-          });
-        }
-        break;
-      }
-      case 'moveControl': {
-        const payload = message as { path?: string[]; direction?: 'up' | 'down' };
-        if (payload.path && payload.direction) {
-          output.appendLine(`[controlSurface] moveControl request: path=${JSON.stringify(payload.path)}, direction=${payload.direction}`);
-          void watchStore.moveControl(payload.path, payload.direction).catch((error) => {
-            output.appendLine(`[controlSurface] moveControl failed: ${String(error)}`);
-          });
-        }
-        break;
-      }
-      case 'addWatch':
-        void vscode.commands.executeCommand('tic80.addWatch');
-        break;
-      case 'removeWatch':
-        void vscode.commands.executeCommand('tic80.removeWatch');
-        break;
-      case 'clearWatches':
-        void vscode.commands.executeCommand('tic80.clearWatches');
-        break;
-      case 'evalExpression': {
-        if (!session.isConnected()) {
-          const payload = message as { requestId?: string; expression?: string };
-          if (webview && payload.requestId) {
-            void webview.postMessage({
-              type: 'evalResult',
-              requestId: payload.requestId,
-              error: 'Not connected',
-            });
-          }
-          break;
-        }
-        const payload = message as { requestId?: string; expression?: string };
-        if (!payload.expression || !payload.requestId) {
-          break;
-        }
-        void (async () => {
-          try {
-            const result = await session.evalExpr(payload.expression!);
-            //output.appendLine(`[controlSurface] evalExpression: "${payload.expression}" => "${result}"`);
-            if (webview) {
-              void webview.postMessage({
-                type: 'evalResult',
-                requestId: payload.requestId,
-                result,
-              });
-            }
-          } catch (error) {
-            output.appendLine(`[controlSurface] evalExpression error: ${String(error)}`);
-            if (webview) {
-              void webview.postMessage({
-                type: 'evalResult',
-                requestId: payload.requestId,
-                error: error instanceof Error ? error.message : String(error),
-              });
-            }
-          }
-        })();
-        break;
-      }
-      case 'showWarningMessage': {
-        const payload = message as { requestId?: string; message?: string; items?: string[] };
-        if (!payload.message || !payload.requestId) {
-          break;
-        }
-        void (async () => {
-          try {
-            const result = await vscode.window.showWarningMessage(
-              payload.message!,
-              ...(payload.items ?? [])
-            );
-            if (webview) {
-              void webview.postMessage({
-                type: 'showWarningMessageResult',
-                requestId: payload.requestId,
-                result,
-              });
-            }
-          } catch (error) {
-            output.appendLine(`[controlSurface] showWarningMessage error: ${String(error)}`);
-            if (webview) {
-              void webview.postMessage({
-                type: 'showWarningMessageResult',
-                requestId: payload.requestId,
-                error: error instanceof Error ? error.message : String(error),
-              });
-            }
-          }
-        })();
-        break;
-      }
-      case 'eval': {
-        if (!session.isConnected()) {
-          output.appendLine('[controlSurface] eval ignored (not connected)');
-          break;
-        }
-        const expr = (message as { expression?: string }).expression;
-        if (!expr) {
-          break;
-        }
-        void session.evalExpr(expr).catch((error) => {
-          output.appendLine(`[controlSurface] eval error: ${String(error)}`);
-        });
-        break;
-      }
-      case 'subscribeExpression': {
-        const payload = message as { expression?: string };
-        if (!payload.expression) {
-          break;
-        }
-        const current = expressionSubscriptions.get(payload.expression) ?? 0;
-        expressionSubscriptions.set(payload.expression, current + 1);
-        break;
-      }
-      case 'unsubscribeExpression': {
-        const payload = message as { expression?: string };
-        if (!payload.expression) {
-          break;
-        }
-        const current = expressionSubscriptions.get(payload.expression) ?? 0;
-        if (current <= 1) {
-          expressionSubscriptions.delete(payload.expression);
-          expressionResults.delete(payload.expression);
-        } else {
-          expressionSubscriptions.set(payload.expression, current - 1);
-        }
-        break;
-      }
-      case 'setSymbol': {
-        if (!session.isConnected()) {
-          output.appendLine('[controlSurface] setSymbol ignored (not connected)');
-          break;
-        }
-        const payload = message as { symbol?: string; value?: unknown };
-        if (!payload.symbol) {
-          break;
-        }
-        const serialized = JSON.stringify(payload.value ?? null);
-        const expr = `${payload.symbol} = ${serialized}`;
-        output.appendLine(`[controlSurface] setSymbol: ${expr}`);
-        void session.eval(expr).catch((error) => {
-          output.appendLine(`[controlSurface] setSymbol error: ${String(error)}`);
-        });
-        break;
-      }
-      default:
-        break;
-    }
-  };
-
-  const getControlSurfacePayload = async (viewId?: string) => {
-    await watchStore.whenReady();
-    const key = viewId ? `${STATE_KEY_SELECTED_PAGE}.${viewId}` : undefined;
-    const selectedPageId = key ? context.workspaceState.get<string>(key) : undefined;
-
-    const payload = await buildControlSurfaceWebviewPayloadWithSymbols(
-      session.snapshot,
-      watchStore.getAll(),
-      watchStore.getControlSurfaceRoot(),
-      (expr) => session.evalExpr(expr),
-      getPollHz(),
-      getUiRefreshMs(),
-      controlSurfaceRegistry.getActiveSidebarId(),
-      selectedPageId,
-      viewId,
-    );
-
-    return {
-      ...payload,
-      expressionResults: getExpressionResultsSnapshot(),
-    };
-  };
-
-  const activityProvider = new ControlSurfaceSidebarProvider(
-    context.extensionPath,
-    controlSurfaceRegistry,
-    getControlSurfacePayload,
-    handleControlSurfaceMessage,
-    'activity',
-    'activity-sidebar',
-    'Control Surface Activity',
-    'tic80ControlSurfaceActivity',
-  );
-
-  let panelCounter = context.workspaceState.get<number>('tic80.panelCounter', 1);
-  const activitySidebarId = 'activity-sidebar';
 
   // State persistence keys
   const STATE_KEY_PANELS = 'tic80.controlSurface.panels';
   const STATE_KEY_SELECTED_PAGE = 'tic80.controlSurface.selectedPage';
+
+
+  let panelCounter = context.workspaceState.get<number>('tic80.panelCounter', 1);
+  const activitySidebarId = 'activity-sidebar';
 
   // Register webview panel serializer for proper persistence across sessions
   context.subscriptions.push(
@@ -338,7 +78,7 @@ export function activate(context: vscode.ExtensionContext): void {
           }, undefined, context.subscriptions);
 
           webviewPanel.webview.onDidReceiveMessage(
-            (message: { type?: string }) => handleControlSurfaceMessage(message, webviewPanel.webview),
+            (message: { type?: string }) => controlSurfaceMessageHandler.handleMessage(message, webviewPanel.webview),
             undefined,
             context.subscriptions,
           );
@@ -389,59 +129,64 @@ export function activate(context: vscode.ExtensionContext): void {
     refreshPending = true;
   };
 
-  const expressionSubscriptions = new Map<string, number>();
-  const expressionResults = new Map<string, { value?: string; error?: string }>();
-  let expressionPollTimer: NodeJS.Timeout | undefined;
-  let expressionPollLast = 0;
-
-  const getExpressionResultsSnapshot = () => (
-    Object.fromEntries(expressionResults.entries())
+  const expressionMonitor = new ExpressionSubscriptionMonitor(
+    session,
+    getPollHz,
+    scheduleUiRefresh,
+    output,
   );
 
-  const pollExpressions = async () => {
-    if (!session.isConnected()) {
-      if (expressionSubscriptions.size > 0 || expressionResults.size > 0) {
-        expressionSubscriptions.clear();
-        expressionResults.clear();
-        scheduleUiRefresh();
-      }
-      return;
-    }
+  const watchSystem = new WatchSystem(
+    session,
+    workspaceRoot,
+    output,
+    controlSurfaceRegistry,
+    scheduleUiRefresh,
+  );
 
-    if (expressionSubscriptions.size === 0) {
-      return;
-    }
+  const controlSurfaceMessageHandler = new ControlSurfaceMessageHandler(
+    context,
+    output,
+    session,
+    watchSystem.store,
+    controlSurfaceRegistry,
+    expressionMonitor,
+    STATE_KEY_SELECTED_PAGE,
+  );
 
-    const pollMs = Math.max(Math.floor(1000 / getPollHz()), 16);
-    const now = Date.now();
-    if (now - expressionPollLast < pollMs) {
-      return;
-    }
-    expressionPollLast = now;
+  const getControlSurfacePayload = async (viewId?: string) => {
+    await watchSystem.store.whenReady();
+    const key = viewId ? `${STATE_KEY_SELECTED_PAGE}.${viewId}` : undefined;
+    const selectedPageId = key ? context.workspaceState.get<string>(key) : undefined;
 
-    const expressions = Array.from(expressionSubscriptions.keys());
-    const results = await Promise.all(
-      expressions.map(async (expression) => {
-        try {
-          const value = await session.evalExpr(expression);
-          return { expression, value } as const;
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          return { expression, error: errorMessage } as const;
-        }
-      }),
+    const payload = await buildControlSurfaceWebviewPayloadWithSymbols(
+      session.snapshot,
+      watchSystem.store.getAll(),
+      watchSystem.store.getControlSurfaceRoot(),
+      (expr) => session.evalExpr(expr),
+      getPollHz(),
+      getUiRefreshMs(),
+      controlSurfaceRegistry.getActiveSidebarId(),
+      selectedPageId,
+      viewId,
     );
 
-    results.forEach((result) => {
-      if ("error" in result) {
-        expressionResults.set(result.expression, { error: result.error });
-      } else {
-        expressionResults.set(result.expression, { value: result.value });
-      }
-    });
-
-    scheduleUiRefresh();
+    return {
+      ...payload,
+      expressionResults: expressionMonitor.getResultsSnapshot(),
+    };
   };
+
+  const activityProvider = new ControlSurfaceSidebarProvider(
+    context.extensionPath,
+    controlSurfaceRegistry,
+    getControlSurfacePayload,
+    (message, webview) => controlSurfaceMessageHandler.handleMessage(message, webview),
+    'activity',
+    'activity-sidebar',
+    'Control Surface Activity',
+    'tic80ControlSurfaceActivity',
+  );
 
   const updateControlSurfaceViews = async () => {
     // Update each panel with its own state
@@ -456,22 +201,17 @@ export function activate(context: vscode.ExtensionContext): void {
   };
 
 
-  const poller =
-    new WatchPoller(session, watchStore, output, () => scheduleUiRefresh());
-
   context.subscriptions.push(
     output,
     statusBar,
     session,
-    watchStore,
-    watchProvider,
-    poller,
+    watchSystem,
     controlSurfaceRegistry,
     activityProvider,
   );
 
   context.subscriptions.push(
-    vscode.window.registerTreeDataProvider('tic80Watches', watchProvider),
+    vscode.window.registerTreeDataProvider('tic80Watches', watchSystem.provider),
   );
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -515,14 +255,8 @@ export function activate(context: vscode.ExtensionContext): void {
   };
 
   const updatePoller = () => {
-    poller.setPollHz(getPollHz());
-    if (session.isConnected()) {
-      poller.start();
-    } else {
-      poller.stop();
-      watchStore.markAllStale();
-      scheduleUiRefresh();
-    }
+    watchSystem.setPollHz(getPollHz());
+    watchSystem.handleSessionStateChange();
   };
 
   const updateUiRefreshTimer = () => {
@@ -534,7 +268,7 @@ export function activate(context: vscode.ExtensionContext): void {
     refreshTimer = setInterval(() => {
       if (refreshPending) {
         refreshPending = false;
-        watchProvider.refresh();
+        watchSystem.provider.refresh();
         updateControlSurfaceViews();
       }
     }, intervalMs);
@@ -544,10 +278,7 @@ export function activate(context: vscode.ExtensionContext): void {
   updateContextKeys();
   updatePoller();
   updateUiRefreshTimer();
-
-  expressionPollTimer = setInterval(() => {
-    void pollExpressions();
-  }, 100);
+  expressionMonitor.start();
 
   setupAutoConnectWatcher({
     context,
@@ -561,14 +292,11 @@ export function activate(context: vscode.ExtensionContext): void {
     updateContextKeys();
     updatePoller();
     scheduleUiRefresh();
-    if (!session.isConnected()) {
-      expressionSubscriptions.clear();
-      expressionResults.clear();
-    }
+    expressionMonitor.handleSessionStateChange();
   });
 
   context.subscriptions.push(
-    watchStore.onDidChange(() => scheduleUiRefresh()),
+    watchSystem.store.onDidChange(() => scheduleUiRefresh()),
   );
   context.subscriptions.push(
     controlSurfaceRegistry.onDidChange(() => {
@@ -581,9 +309,7 @@ export function activate(context: vscode.ExtensionContext): void {
       if (refreshTimer) {
         clearInterval(refreshTimer);
       }
-      if (expressionPollTimer) {
-        clearInterval(expressionPollTimer);
-      }
+      expressionMonitor.dispose();
     }),
   );
 
@@ -666,8 +392,8 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(
       'tic80.reloadDevtools',
       async () => {
-        await watchStore.reloadFromDisk();
-        watchProvider.refresh();
+        await watchSystem.store.reloadFromDisk();
+        watchSystem.provider.refresh();
         updateControlSurfaceViews();
         void vscode.window.showInformationMessage(
           'Reloaded devtools.json.');
@@ -713,7 +439,7 @@ export function activate(context: vscode.ExtensionContext): void {
           controlSurfaceRegistry.removeById(id);
         }, undefined, context.subscriptions);
         panel.webview.onDidReceiveMessage(
-          (message: { type?: string }) => handleControlSurfaceMessage(message, panel.webview),
+          (message: { type?: string }) => controlSurfaceMessageHandler.handleMessage(message, panel.webview),
           undefined,
           context.subscriptions,
         );
@@ -824,7 +550,7 @@ export function activate(context: vscode.ExtensionContext): void {
             if (!selected) {
               return;
             }
-            watchStore.addGlobal(selected);
+            watchSystem.store.addGlobal(selected);
             output.appendLine(`[watch] Added global: ${selected}`);
           } catch (error) {
             const message =
@@ -844,7 +570,7 @@ export function activate(context: vscode.ExtensionContext): void {
           if (!expr) {
             return;
           }
-          watchStore.addExpr(expr);
+          watchSystem.store.addExpr(expr);
           output.appendLine(`[watch] Added expression: ${expr}`);
         }
       }),
@@ -854,7 +580,7 @@ export function activate(context: vscode.ExtensionContext): void {
       async (node?: WatchNode) => {
         let watchId = node?.watchId;
         if (!watchId) {
-          const watches = watchStore.getAll();
+          const watches = watchSystem.store.getAll();
           const pick = await vscode.window.showQuickPick(
             watches.map(
               (watch) => ({ label: watch.label, description: watch.id })),
@@ -869,11 +595,11 @@ export function activate(context: vscode.ExtensionContext): void {
           return;
         }
         const watch =
-          watchStore.getAll().find((item) => item.id === watchId);
+          watchSystem.store.getAll().find((item) => item.id === watchId);
         if (!watch) {
           return;
         }
-        watchStore.remove(watchId);
+        watchSystem.store.remove(watchId);
         output.appendLine(`[watch] Removed: ${watch.label}`);
       }),
 
@@ -888,7 +614,7 @@ export function activate(context: vscode.ExtensionContext): void {
         if (response !== 'Clear') {
           return;
         }
-        watchStore.clear();
+        watchSystem.store.clear();
         output.appendLine('[watch] Cleared all watches');
       }),
 
@@ -900,7 +626,7 @@ export function activate(context: vscode.ExtensionContext): void {
           return;
         }
         const watch =
-          watchStore.getAll().find((item) => item.id === watchId);
+          watchSystem.store.getAll().find((item) => item.id === watchId);
         if (!watch) {
           return;
         }

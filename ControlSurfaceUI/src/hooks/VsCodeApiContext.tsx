@@ -30,6 +30,7 @@ export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
     const rawApi = useVsCodeApi();
     const pendingEvaluationsRef = React.useRef(new Map<string, { resolve: (value: string) => void; reject: (error: Error) => void }>());
     const pendingWarningsRef = React.useRef(new Map<string, { resolve: (value: string | undefined) => void; reject: (error: Error) => void }>());
+    const pendingGlobalsRef = React.useRef(new Map<string, { resolve: (value: string[]) => void; reject: (error: Error) => void }>());
 
     React.useEffect(() => {
         if (!rawApi) {
@@ -56,6 +57,16 @@ export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
                         pending.reject(new Error(message.error));
                     } else {
                         pending.resolve(message.result);
+                    }
+                }
+            } else if (message.type === "listGlobalsResult" && typeof message.requestId === "string") {
+                const pending = pendingGlobalsRef.current.get(message.requestId);
+                if (pending) {
+                    pendingGlobalsRef.current.delete(message.requestId);
+                    if (message.error) {
+                        pending.reject(new Error(message.error));
+                    } else {
+                        pending.resolve(Array.isArray(message.result) ? message.result : []);
                     }
                 }
             }
@@ -133,6 +144,26 @@ export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
                             reject(new Error("Warning message timeout"));
                         }
                     }, 30000);
+                });
+            },
+            listGlobals: async (): Promise<string[]> => {
+                const requestId = `listGlobals_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+                return new Promise((resolve, reject) => {
+                    pendingGlobalsRef.current.set(requestId, { resolve, reject });
+
+                    rawApi.postMessage({
+                        type: "listGlobals",
+                        requestId,
+                    });
+
+                    // Timeout after 10 seconds
+                    setTimeout(() => {
+                        if (pendingGlobalsRef.current.has(requestId)) {
+                            pendingGlobalsRef.current.delete(requestId);
+                            reject(new Error("List globals timeout"));
+                        }
+                    }, 10000);
                 });
             },
         };

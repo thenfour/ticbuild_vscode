@@ -251,6 +251,27 @@ export function MockAppContainer(): JSX.Element {
           }, '*');
         }, 100);
       }
+
+      if ((message as any).type === 'listGlobals') {
+        const payload = message as { type: string; requestId: string };
+        setTimeout(() => {
+          window.postMessage({
+            type: 'listGlobalsResult',
+            requestId: payload.requestId,
+            result: [
+              "_G",
+              "btnp",
+              "cls",
+              "map",
+              "music",
+              "sfx",
+              "spr",
+              "t",
+              "trace",
+            ],
+          }, '*');
+        }, 100);
+      }
     },
     setState: (state: any) => {
       console.log("[mock] setState", state);

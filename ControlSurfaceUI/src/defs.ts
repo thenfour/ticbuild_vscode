@@ -148,11 +148,12 @@ export type ControlSurfaceNode =
 
 export type ControlSurfaceApi = {
     postMessage: (message: unknown) => void;
-    evalExpression?: (expression: string) => Promise<string>;
-    log?: (message: string) => void;
-    showWarningMessage?: <T extends string>(message: string, ...items: T[]) => Promise<T | undefined>;
-    subscribeExpression?: (expression: string) => void;
-    unsubscribeExpression?: (expression: string) => void;
+    evalExpression: (expression: string) => Promise<string>;
+    log: (message: string) => void;
+    showWarningMessage: <T extends string>(message: string, ...items: T[]) => Promise<T | undefined>;
+    subscribeExpression: (expression: string) => void;
+    unsubscribeExpression: (expression: string) => void;
+    listGlobals: () => Promise<string[]>;
 };
 
 export type ControlSurfaceDataSource = {

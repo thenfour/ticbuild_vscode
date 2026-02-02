@@ -181,6 +181,44 @@ export class ControlSurfaceMessageHandler {
                 })();
                 break;
             }
+            case 'listGlobals': {
+                const payload = message as { requestId?: string };
+                if (!payload.requestId) {
+                    break;
+                }
+                if (!this.session.isConnected()) {
+                    if (webview) {
+                        void webview.postMessage({
+                            type: 'listGlobalsResult',
+                            requestId: payload.requestId,
+                            error: 'Not connected',
+                        });
+                    }
+                    break;
+                }
+                void (async () => {
+                    try {
+                        const result = await this.session.listGlobals();
+                        if (webview) {
+                            void webview.postMessage({
+                                type: 'listGlobalsResult',
+                                requestId: payload.requestId,
+                                result,
+                            });
+                        }
+                    } catch (error) {
+                        this.output.appendLine(`[controlSurface] listGlobals error: ${String(error)}`);
+                        if (webview) {
+                            void webview.postMessage({
+                                type: 'listGlobalsResult',
+                                requestId: payload.requestId,
+                                error: error instanceof Error ? error.message : String(error),
+                            });
+                        }
+                    }
+                })();
+                break;
+            }
             case 'eval': {
                 if (!this.session.isConnected()) {
                     this.output.appendLine('[controlSurface] eval ignored (not connected)');

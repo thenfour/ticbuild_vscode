@@ -54,7 +54,12 @@ export const ControlSurfaceStateProvider = ({ children }: { children: React.Reac
     const [state, setState] = React.useState<ControlSurfaceState>(() => makeState());
 
     const applyHostState = React.useCallback((payload: Partial<ControlSurfaceState>) => {
-        setState((prev) => makeState(payload, prev));
+        setState((prev) => makeState({
+            ...payload,
+            // keep local-only UI state; host shouldn't override these
+            designMode: prev.designMode,
+            selectedControlPath: prev.selectedControlPath,
+        }, prev));
     }, []);
 
     const setSelectedPageId = React.useCallback<React.Dispatch<React.SetStateAction<string>>>((value) => {

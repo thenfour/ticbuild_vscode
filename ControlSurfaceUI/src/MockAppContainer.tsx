@@ -3,9 +3,11 @@ import React from "react";
 import {
   ControlSurfaceApp,
 } from "./ControlSurfaceApp";
-import { ControlSurfaceDataSource, ControlSurfaceNode, ControlSurfaceState, WatchItem } from "./defs";
+import { ControlSurfaceNode } from "./defs";
 import { VsCodeApiProvider } from "./hooks/VsCodeApiContext";
+import { ControlSurfaceStateProvider } from "./hooks/ControlSurfaceState";
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import { useMockControlSurfaceDataSource } from "./hooks/useMockControlSurfaceDataSource";
 
 type MockValueKind = "auto" | "string" | "number" | "boolean";
 
@@ -71,20 +73,6 @@ export function MockAppContainer(): JSX.Element {
   const [addKind, setAddKind] = React.useState<MockValueKind>("auto");
   const [clipboardNotice, setClipboardNotice] = React.useState<string>("");
 
-  const subscribersRef = React.useRef(
-    new Set<(payload: ControlSurfaceState) => void>(),
-  );
-  const latestPayloadRef = React.useRef<ControlSurfaceState>({
-    status: "Disconnected (mock)",
-    watches: [],
-    controlSurfaceRoot,
-    symbolValues: {},
-    uiRefreshMs: 250,
-    pollIntervalMs: 250,
-    designMode: false,
-    selectedControlPath: null,
-    selectedPageId: "root",
-  });
 
   React.useEffect(() => {
     const globalAny = window as typeof window & {
@@ -170,40 +158,11 @@ export function MockAppContainer(): JSX.Element {
     return () => window.clearInterval(interval);
   }, []);
 
-  const payload = React.useMemo<ControlSurfaceState>(() => {
-    const mappedWatches: WatchItem[] = watches.map((watch) => ({
-      id: watch.id,
-      label: watch.label,
-      value: watch.value,
-    }));
-    return {
-      status: connected ? "Connected (mock)" : "Disconnected (mock)",
-      watches: mappedWatches,
-      controlSurfaceRoot,
-      uiRefreshMs: 250,
-      pollIntervalMs: 250,
-      symbolValues: { mockSymbol: 123 },
-      designMode: false,
-      selectedControlPath: null,
-      selectedPageId: "root",
-    } satisfies ControlSurfaceState;
-  }, [connected, controlSurfaceRoot, watches]);
-
-  React.useEffect(() => {
-    latestPayloadRef.current = payload;
-    subscribersRef.current.forEach((listener) => listener(payload));
-  }, [payload]);
-
-  const dataSource = React.useMemo<ControlSurfaceDataSource>(
-    () => ({
-      subscribe: (listener) => {
-        subscribersRef.current.add(listener);
-        listener(latestPayloadRef.current);
-        return () => subscribersRef.current.delete(listener);
-      },
-    }),
-    [],
-  );
+  const dataSource = useMockControlSurfaceDataSource({
+    connected,
+    watches,
+    controlSurfaceRoot,
+  });
 
   // const api = React.useMemo<{ postMessage: (message: unknown) => void }>(
   //   () => ({
@@ -262,58 +221,60 @@ export function MockAppContainer(): JSX.Element {
 
   return (
     <VsCodeApiProvider>
-      <div>
-        <div
-          style={{
-            padding: 12,
-            borderBottom: "1px solid var(--vscode-panel-border)",
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: 8,
-            fontFamily: "var(--vscode-font-family)",
-          }}
-        >
-          <strong style={{ marginRight: 4 }}>Mock Controls</strong>
-          <button onClick={() => setConnected((value) => !value)}>
-            {connected ? "Set Disconnected" : "Set Connected"}
-          </button>
-          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            Add type
-            <select
-              value={addKind}
-              onChange={(event) =>
-                setAddKind(event.target.value as MockValueKind)
-              }
-            >
-              <option value="auto">Auto-incrementing number</option>
-              <option value="string">String</option>
-              <option value="number">Static number</option>
-              <option value="boolean">Boolean</option>
-            </select>
-          </label>
-          <button onClick={handleAddWatch}>Add Watch</button>
-          <button onClick={handleRemoveWatch} disabled={watches.length === 0}>
-            Remove Watch
-          </button>
-          <button onClick={handleCopyControlSurfaceRoot}>
-            Copy controlSurfaceRoot
-          </button>
-          <button onClick={handlePasteControlSurfaceRoot}>
-            Paste controlSurfaceRoot
-          </button>
-          {clipboardNotice ? (
-            <span style={{ color: "var(--vscode-descriptionForeground)" }}>
-              {clipboardNotice}
-            </span>
-          ) : null}
+      <ControlSurfaceStateProvider>
+        <div>
+          <div
+            style={{
+              padding: 12,
+              borderBottom: "1px solid var(--vscode-panel-border)",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: 8,
+              fontFamily: "var(--vscode-font-family)",
+            }}
+          >
+            <strong style={{ marginRight: 4 }}>Mock Controls</strong>
+            <button onClick={() => setConnected((value) => !value)}>
+              {connected ? "Set Disconnected" : "Set Connected"}
+            </button>
+            <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              Add type
+              <select
+                value={addKind}
+                onChange={(event) =>
+                  setAddKind(event.target.value as MockValueKind)
+                }
+              >
+                <option value="auto">Auto-incrementing number</option>
+                <option value="string">String</option>
+                <option value="number">Static number</option>
+                <option value="boolean">Boolean</option>
+              </select>
+            </label>
+            <button onClick={handleAddWatch}>Add Watch</button>
+            <button onClick={handleRemoveWatch} disabled={watches.length === 0}>
+              Remove Watch
+            </button>
+            <button onClick={handleCopyControlSurfaceRoot}>
+              Copy controlSurfaceRoot
+            </button>
+            <button onClick={handlePasteControlSurfaceRoot}>
+              Paste controlSurfaceRoot
+            </button>
+            {clipboardNotice ? (
+              <span style={{ color: "var(--vscode-descriptionForeground)" }}>
+                {clipboardNotice}
+              </span>
+            ) : null}
+          </div>
+          <ControlSurfaceApp
+            dataSource={dataSource}
+            //initialState={payload}
+            viewKind="panel"
+          />
         </div>
-        <ControlSurfaceApp
-          dataSource={dataSource}
-          //initialState={payload}
-          viewKind="panel"
-        />
-      </div>
+      </ControlSurfaceStateProvider>
     </VsCodeApiProvider>
   );
 }

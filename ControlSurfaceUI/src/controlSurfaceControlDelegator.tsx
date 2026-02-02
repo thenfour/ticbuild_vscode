@@ -59,49 +59,49 @@ export const renderControlSurfaceControl = (
 
         case "enumButtons":
             return wrapSelectable(
-                <ControlSurfaceEnumButtons {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceEnumButtons {...node} initialValue={symbolValues?.[node.symbol]} />,
                 `enumButtons-${index}`,
             );
 
         case "knob":
             return wrapSelectable(
-                <ControlSurfaceKnob {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceKnob {...node} initialValue={symbolValues?.[node.symbol]} />,
                 `knob-${index}`,
             );
 
         case "label":
             return wrapSelectable(
-                <ControlSurfaceLabel {...node} api={api} uiRefreshMs={pollIntervalMs} />,
+                <ControlSurfaceLabel {...node} uiRefreshMs={pollIntervalMs} />,
                 `label-${index}`,
             );
 
         case "number":
             return wrapSelectable(
-                <ControlSurfaceNumber {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceNumber {...node} initialValue={symbolValues?.[node.symbol]} />,
                 `number-${index}`,
             );
 
         case "slider":
             return wrapSelectable(
-                <ControlSurfaceSlider {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceSlider {...node} initialValue={symbolValues?.[node.symbol]} />,
                 `slider-${index}`,
             );
 
         case "string":
             return wrapSelectable(
-                <ControlSurfaceString {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceString {...node} initialValue={symbolValues?.[node.symbol]} />,
                 `string-${index}`,
             );
 
         case "toggle":
             return wrapSelectable(
-                <ControlSurfaceToggle {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceToggle {...node} initialValue={symbolValues?.[node.symbol]} />,
                 `toggle-${index}`,
             );
 
         case "triggerButton":
             return wrapSelectable(
-                <ControlSurfaceTriggerButton {...node} api={api} />,
+                <ControlSurfaceTriggerButton {...node} />,
                 `triggerButton-${index}`,
             );
 
@@ -112,7 +112,6 @@ export const renderControlSurfaceControl = (
                 <ControlSurfaceGroup
                     {...node}
                     layout={node.type}
-                    api={api}
                     renderControl={renderControlSurfaceControl}
                     symbolValues={symbolValues}
                     pollIntervalMs={pollIntervalMs}
@@ -127,7 +126,6 @@ export const renderControlSurfaceControl = (
             return wrapSelectable(
                 <ControlSurfaceTabs
                     {...node}
-                    api={api}
                     renderControl={renderControlSurfaceControl}
                     symbolValues={symbolValues}
                     pollIntervalMs={pollIntervalMs}

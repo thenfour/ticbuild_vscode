@@ -13,7 +13,7 @@ import {
 } from "./defs";
 import { ComponentTester } from "./ComponentTester";
 import { Dropdown } from "./basic/Dropdown";
-import { useVsCodeApi } from "./VsCodeApiContext";
+import { useControlSurfaceApi } from "./VsCodeApiContext";
 import { ControlRegistry } from "./controlRegistry";
 import { PagePropertiesPanel } from "./ControlSurfacePropertiesPanels";
 import { CONTROL_PATH_ROOT } from "./controlPathBase";
@@ -26,65 +26,6 @@ const initialState: ControlSurfaceState = {
   symbolValues: {},
   pollIntervalMs: 250,
   uiRefreshMs: 250,
-};
-
-const getWindowApi = (api: { postMessage: (message: unknown) => void } | undefined): ControlSurfaceApi | undefined => {
-  if (!api) {
-    return undefined;
-  }
-
-  const pendingEvaluations = new Map<string, { resolve: (value: string) => void; reject: (error: Error) => void }>();
-
-  // Listen for evaluation responses
-  window.addEventListener("message", (event: MessageEvent) => {
-    const message = event.data;
-    if (message.type === "evalResult" && typeof message.requestId === "string") {
-      const pending = pendingEvaluations.get(message.requestId);
-      if (pending) {
-        pendingEvaluations.delete(message.requestId);
-        if (message.error) {
-          pending.reject(new Error(message.error));
-        } else {
-          pending.resolve(message.result ?? "");
-        }
-      }
-    }
-  });
-
-  const wrappedApi: ControlSurfaceApi = {
-    postMessage: (message: unknown) => {
-      api.postMessage(message);
-    },
-    log: (message: string) => {
-      api.postMessage({
-        type: "log",
-        message,
-      });
-    },
-    evalExpression: async (expression: string): Promise<string> => {
-      const requestId = `eval_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-      return new Promise((resolve, reject) => {
-        pendingEvaluations.set(requestId, { resolve, reject });
-
-        api.postMessage({
-          type: "evalExpression",
-          requestId,
-          expression,
-        });
-
-        // Timeout after 5 seconds
-        setTimeout(() => {
-          if (pendingEvaluations.has(requestId)) {
-            pendingEvaluations.delete(requestId);
-            reject(new Error("Evaluation timeout"));
-          }
-        }, 5000);
-      });
-    },
-  };
-
-  return wrappedApi;
 };
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
@@ -103,7 +44,6 @@ const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
 });
 
 export type ControlSurfaceAppProps = {
-  api?: ControlSurfaceApi;
   dataSource?: ControlSurfaceDataSource;
   initialState?: ControlSurfaceState;
   viewKind?: ControlSurfaceViewKind;
@@ -156,7 +96,6 @@ const buildPageOptions = (
 };
 
 export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
-  api,
   dataSource,
   initialState: initialStateOverride,
   viewKind,
@@ -164,23 +103,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   const [state, setState] = React.useState<ControlSurfaceState>(
     initialStateOverride ?? initialState,
   );
-  const vsCodeApi = useVsCodeApi();
+  const api = useControlSurfaceApi();
   const [selectedPageId, setSelectedPageId] = React.useState(
     initialStateOverride?.selectedPageId ?? initialState.selectedPageId ?? "root"
   );
   const [designMode, setDesignMode] = React.useState(false);
   const [selectedControlPath, setSelectedControlPath] = React.useState<string[] | null>(null);
-  const resolvedApi = React.useMemo(() => {
-    const result = api ?? getWindowApi(vsCodeApi ?? undefined);
-    // Use postMessage to log since we might not have the log method yet
-    if (result) {
-      result.postMessage?.({
-        type: "log",
-        message: `ControlSurfaceApp: resolvedApi keys: ${Object.keys(result).join(", ")}, api prop was ${api ? "provided" : "undefined"}`,
-      });
-    }
-    return result;
-  }, [api, vsCodeApi]);
 
   const resolvedDataSource = React.useMemo(
     () => dataSource ?? createWindowMessageDataSource(),
@@ -217,7 +145,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
     if (!pages.find((page) => page.id === selectedPageId)) {
       setSelectedPageId("root");
       if (selectedPageId !== "root") {
-        resolvedApi?.postMessage({
+        api?.postMessage({
           type: "setSelectedPage",
           pageId: "root",
           pageLabel: "Root",
@@ -225,7 +153,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         });
       }
     }
-  }, [pages, resolvedApi, selectedPageId, state.viewId]);
+  }, [pages, api, selectedPageId, state.viewId]);
 
   React.useEffect(() => {
     if (selectedControlPath && !resolvedSelection) {
@@ -305,7 +233,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             onChange={(newValue) => {
               const selectedLabel = pages.find((page) => page.id === newValue)?.label;
               setSelectedPageId(newValue);
-              resolvedApi?.postMessage({
+              api?.postMessage({
                 type: "setSelectedPage",
                 pageId: newValue,
                 pageLabel: selectedLabel,
@@ -332,15 +260,15 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         {designMode ? (
           <Button
             onClick={() => {
-              if (!resolvedApi || selectedPageId === "root") {
+              if (!api || selectedPageId === "root") {
                 return;
               }
-              resolvedApi.postMessage({
+              api.postMessage({
                 type: "deleteControl",
                 path: activePagePath,
               });
               setSelectedPageId("root");
-              resolvedApi.postMessage({
+              api.postMessage({
                 type: "setSelectedPage",
                 pageId: "root",
                 pageLabel: "Root",
@@ -371,10 +299,9 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
       {/* main control surface body */}
 
-      {activePage && resolvedApi && (state.uiRefreshMs ?? state.pollIntervalMs) ? (
+      {activePage && api && (state.uiRefreshMs ?? state.pollIntervalMs) ? (
         <ControlSurfacePage
           page={activePage}
-          api={resolvedApi}
           symbolValues={state.symbolValues}
           pollIntervalMs={state.uiRefreshMs ?? state.pollIntervalMs ?? 250}
           pagePath={activePagePath}
@@ -382,7 +309,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
           selectedPath={selectedControlPath}
           onSelectPath={(path) => setSelectedControlPath(path)}
           onDeletePath={(path) => {
-            resolvedApi?.postMessage({
+            api?.postMessage({
               type: "deleteControl",
               path,
             });
@@ -416,7 +343,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
                 if (!selectedControlPath) {
                   return;
                 }
-                resolvedApi?.postMessage({
+                api?.postMessage({
                   type: "deleteControl",
                   path: selectedControlPath,
                 });
@@ -436,7 +363,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
                 }
                 const nextPath = [...selectedControlPath];
                 nextPath[nextPath.length - 1] = `c${nextIndex}`;
-                resolvedApi?.postMessage({
+                api?.postMessage({
                   type: "moveControl",
                   path: selectedControlPath,
                   direction: "up",
@@ -458,7 +385,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
                 }
                 const nextPath = [...selectedControlPath];
                 nextPath[nextPath.length - 1] = `c${nextIndex}`;
-                resolvedApi?.postMessage({
+                api?.postMessage({
                   type: "moveControl",
                   path: selectedControlPath,
                   direction: "down",
@@ -484,7 +411,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
                         if (!selectedControlPath) {
                           return;
                         }
-                        resolvedApi?.postMessage({
+                        api?.postMessage({
                           type: "updateControl",
                           path: selectedControlPath,
                           control: nextNode,
@@ -506,7 +433,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
                     if (!selectedControlPath) {
                       return;
                     }
-                    resolvedApi?.postMessage({
+                    api?.postMessage({
                       type: "updateControl",
                       path: selectedControlPath,
                       control: nextNode,

@@ -13,10 +13,10 @@
 
 import React from "react";
 import { Knob } from "../basic/Knob2";
-import { ControlSurfaceKnobSpec, ControlSurfaceApi } from "../defs";
+import { ControlSurfaceKnobSpec } from "../defs";
+import { useControlSurfaceApi } from "../VsCodeApiContext";
 
 export interface ControlSurfaceKnobProps extends ControlSurfaceKnobSpec {
-  api?: ControlSurfaceApi;
   initialValue?: number;
 }
 
@@ -27,9 +27,9 @@ export const ControlSurfaceKnob: React.FC<ControlSurfaceKnobProps> = ({
   max = 1,
   step = 0.01,
   size = "medium", // Note: size is currently not used by Knob component
-  api,
   initialValue
 }) => {
+  const api = useControlSurfaceApi();
   const [value, setValue] = React.useState<number>(initialValue ?? min);
 
   // Update value when initialValue changes

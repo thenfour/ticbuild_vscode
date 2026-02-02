@@ -19,9 +19,9 @@ import { ControlSurfaceTabsSpec, ControlSurfaceApi } from "../defs";
 import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
 import { buildTabPath } from "../controlPathBase";
 import { AddControlControl } from "../AddControlControl";
+import { useControlSurfaceApi } from "../VsCodeApiContext";
 
 export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
-    api: ControlSurfaceApi;
     renderControl: (
         node: any,
         index: number,
@@ -40,7 +40,6 @@ export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
 
 export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     tabs,
-    api,
     renderControl,
     symbolValues,
     pollIntervalMs,
@@ -49,11 +48,16 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     selectedPath,
     onSelectPath,
 }) => {
+    const api = useControlSurfaceApi();
     const [selectedTabId, setSelectedTabId] = React.useState<number>(0);
 
     const handleTabChange = (e: React.SyntheticEvent | undefined, newTabId: number) => {
         setSelectedTabId(newTabId);
     };
+
+    if (!api) {
+        return null;
+    }
 
     return (
         <TabPanel
@@ -77,7 +81,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                             })
                         )}
                     </div>
-                    <AddControlControl api={api} parentPath={buildTabPath(parentPath, index)} disabled={designMode} />
+                    <AddControlControl parentPath={buildTabPath(parentPath, index)} disabled={designMode} />
                 </Tab>
             ))}
         </TabPanel>

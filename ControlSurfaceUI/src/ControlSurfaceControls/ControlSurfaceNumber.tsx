@@ -14,10 +14,10 @@ renders as a <NumericUpDown>
 
 import React from "react";
 import { NumericUpDown } from "../basic/NumericUpDown";
-import { ControlSurfaceNumberSpec, ControlSurfaceApi } from "../defs";
+import { ControlSurfaceNumberSpec } from "../defs";
+import { useControlSurfaceApi } from "../VsCodeApiContext";
 
 export interface ControlSurfaceNumberProps extends ControlSurfaceNumberSpec {
-    api?: ControlSurfaceApi;
     initialValue?: number;
 }
 
@@ -27,9 +27,9 @@ export const ControlSurfaceNumber: React.FC<ControlSurfaceNumberProps> = ({
     min = 0,
     max = 100,
     step = 0.1,
-    api,
     initialValue
 }) => {
+    const api = useControlSurfaceApi();
     const [value, setValue] = React.useState<number>(initialValue ?? min);
 
     // Update value when initialValue changes

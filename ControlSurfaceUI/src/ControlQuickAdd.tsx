@@ -3,21 +3,20 @@ import { Button } from "./Buttons/PushButton";
 import { ButtonGroup } from "./Buttons/ButtonGroup";
 import { Dropdown } from "./basic/Dropdown";
 import { ControlRegistry, CATEGORY_NAMES } from "./controlRegistry";
-import { ControlSurfaceApi } from "./defs";
+import { useControlSurfaceApi } from "./VsCodeApiContext";
 
 export interface ControlQuickAddProps {
-  api: ControlSurfaceApi;
   parentPath: string[];
   onComplete: () => void;
   onCancel: () => void;
 }
 
 export const ControlQuickAdd: React.FC<ControlQuickAddProps> = ({
-  api,
   parentPath,
   onComplete,
   onCancel,
 }) => {
+  const api = useControlSurfaceApi();
   const [selectedType, setSelectedType] = React.useState<string>("");
   const [quickAddData, setQuickAddData] = React.useState<Record<string, any>>({});
 
@@ -59,6 +58,7 @@ export const ControlQuickAdd: React.FC<ControlQuickAddProps> = ({
 
   const handleSubmit = () => {
     if (!selectedEntry) return;
+    if (!api) return;
 
     const controlSpec = selectedEntry.createDefaultSpec(quickAddData);
 

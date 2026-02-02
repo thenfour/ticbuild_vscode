@@ -12,14 +12,15 @@
 
 import React from "react";
 import { CheckboxButton } from "../Buttons/CheckboxButton";
-import { ControlSurfaceToggleSpec, ControlSurfaceApi } from "../defs";
+import { ControlSurfaceToggleSpec } from "../defs";
+import { useControlSurfaceApi } from "../VsCodeApiContext";
 
 export interface ControlSurfaceToggleProps extends ControlSurfaceToggleSpec {
-  api?: ControlSurfaceApi;
   initialValue?: boolean;
 }
 
-export const ControlSurfaceToggle: React.FC<ControlSurfaceToggleProps> = ({ label, symbol, api, initialValue }) => {
+export const ControlSurfaceToggle: React.FC<ControlSurfaceToggleProps> = ({ label, symbol, initialValue }) => {
+  const api = useControlSurfaceApi();
   const [checked, setChecked] = React.useState<boolean>(initialValue ?? false);
 
   // Update value when initialValue changes

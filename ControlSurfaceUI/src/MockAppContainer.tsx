@@ -258,7 +258,6 @@ export function MockAppContainer(): JSX.Element {
         ) : null}
       </div>
       <ControlSurfaceApp
-        api={api}
         dataSource={dataSource}
         initialState={payload}
         viewKind="panel"

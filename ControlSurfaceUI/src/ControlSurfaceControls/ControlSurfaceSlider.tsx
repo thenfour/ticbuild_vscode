@@ -12,10 +12,10 @@
 */
 
 import React from "react";
-import { ControlSurfaceSliderSpec, ControlSurfaceApi } from "../defs";
+import { ControlSurfaceSliderSpec } from "../defs";
+import { useControlSurfaceApi } from "../VsCodeApiContext";
 
 export interface ControlSurfaceSliderProps extends ControlSurfaceSliderSpec {
-  api?: ControlSurfaceApi;
   initialValue?: number;
 }
 
@@ -25,9 +25,9 @@ export const ControlSurfaceSlider: React.FC<ControlSurfaceSliderProps> = ({
   min = 0,
   max = 100,
   step = 1,
-  api,
   initialValue
 }) => {
+  const api = useControlSurfaceApi();
   const [value, setValue] = React.useState<number>(initialValue ?? min);
 
   // Update value when initialValue changes

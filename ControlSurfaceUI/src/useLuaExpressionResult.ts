@@ -1,5 +1,6 @@
 import React from "react";
 import { ControlSurfaceApi } from "./defs";
+import { useControlSurfaceApi } from "./VsCodeApiContext";
 
 export type LuaExpressionResult = {
     value: string;
@@ -8,13 +9,17 @@ export type LuaExpressionResult = {
 
 export const useLuaExpressionResult = (
     expression: string,
-    api: ControlSurfaceApi,
     uiRefreshMs: number,
+    //api?: ControlSurfaceApi | undefined,
 ): LuaExpressionResult => {
+    const api = useControlSurfaceApi();
     const [value, setValue] = React.useState<string>("");
     const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
+        if (!api) {
+            return;
+        }
         let mounted = true;
         const intervalMs = Math.max(uiRefreshMs, 16);
         console.log("Setting up Lua expression evaluation for:", expression, "with interval:", intervalMs);

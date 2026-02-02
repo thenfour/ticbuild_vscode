@@ -13,6 +13,7 @@ import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { ControlSurfaceGroupSpec, ControlSurfaceApi, ControlSurfaceColumnSpec, ControlSurfaceRowSpec } from "../defs";
 import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
 import { AddControlControl } from "../AddControlControl";
+import { useControlSurfaceApi } from "../VsCodeApiContext";
 
 
 export interface ControlSurfaceGroupBaseProps {
@@ -44,7 +45,6 @@ type Spec = Omit<ControlSurfaceGroupSpec, "type">;
 
 export interface ControlSurfaceGroupProps extends Spec {
   layout: "group" | "column" | "row";
-  api: ControlSurfaceApi;
   renderControl: (
     node: any,
     index: number,
@@ -66,7 +66,6 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   orientation,
   layout,
   controls,
-  api,
   renderControl,
   symbolValues,
   pollIntervalMs,
@@ -75,6 +74,12 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   selectedPath,
   onSelectPath,
 }) => {
+  const api = useControlSurfaceApi();
+
+  if (!api) {
+    return null;
+  }
+
   return <ControlSurfaceGroupBase
     label={label}
     orientation={orientation}
@@ -87,6 +92,6 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
         onSelectPath,
       })
     )}
-    <AddControlControl api={api} parentPath={parentPath} disabled={designMode} />
+    <AddControlControl parentPath={parentPath} disabled={designMode} />
   </ControlSurfaceGroupBase>;
 };

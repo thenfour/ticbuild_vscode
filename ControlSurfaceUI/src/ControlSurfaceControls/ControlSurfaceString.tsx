@@ -11,14 +11,15 @@ not yet necessary to have maxlength et al; just allow single line string. multi-
 */
 
 import React from "react";
-import { ControlSurfaceStringSpec, ControlSurfaceApi } from "../defs";
+import { ControlSurfaceStringSpec } from "../defs";
+import { useControlSurfaceApi } from "../VsCodeApiContext";
 
 export interface ControlSurfaceStringProps extends ControlSurfaceStringSpec {
-    api?: ControlSurfaceApi;
     initialValue?: string;
 }
 
-export const ControlSurfaceString: React.FC<ControlSurfaceStringProps> = ({ label, symbol, api, initialValue }) => {
+export const ControlSurfaceString: React.FC<ControlSurfaceStringProps> = ({ label, symbol, initialValue }) => {
+    const api = useControlSurfaceApi();
     const [value, setValue] = React.useState<string>(initialValue ?? "");
 
     // Update value when initialValue changes

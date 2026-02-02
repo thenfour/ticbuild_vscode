@@ -1,14 +1,13 @@
 import React from "react";
 import { renderControlSurfaceControl } from "./controlSurfaceControlDelegator";
 import {
-  ControlSurfaceApi,
   ControlSurfacePageSpec
 } from "./defs";
 import { AddControlControl } from "./AddControlControl";
+import { useControlSurfaceApi } from "./VsCodeApiContext";
 
 interface ControlSurfacePageProps {
   page: ControlSurfacePageSpec;
-  api: ControlSurfaceApi;
   symbolValues: Record<string, any>;
   pollIntervalMs: number;
   pagePath: string[];
@@ -20,7 +19,6 @@ interface ControlSurfacePageProps {
 
 export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
   page,
-  api,
   symbolValues,
   pollIntervalMs,
   pagePath,
@@ -29,6 +27,12 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
   onSelectPath,
   onDeletePath,
 }) => {
+  const api = useControlSurfaceApi();
+
+  if (!api) {
+    return null;
+  }
+
   return (
     <div className="controlSurfaceControl controlSurfaceControl-page">
       {page.controls && page.controls.length > 0 ? (
@@ -46,7 +50,7 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
           No controls on this page.
         </div>
       )}
-      <AddControlControl api={api} parentPath={pagePath} disabled={designMode} />
+      <AddControlControl parentPath={pagePath} disabled={designMode} />
     </div>
   );
 };

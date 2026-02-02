@@ -16,12 +16,16 @@ import { Dropdown } from "./basic/Dropdown";
 import { useVsCodeApi } from "./VsCodeApiContext";
 import { ControlRegistry } from "./controlRegistry";
 import { PagePropertiesPanel } from "./ControlSurfacePropertiesPanels";
-import { CONTROL_PATH_ROOT, parseControlPathSegment } from "./controlPath";
+import { CONTROL_PATH_ROOT } from "./controlPathBase";
+import { findControlPathByNode, resolveControlByPath } from "./controlPathUtils";
 
 const initialState: ControlSurfaceState = {
   status: "Disconnected",
   watches: [],
   controlSurfaceRoot: [],
+  symbolValues: {},
+  pollIntervalMs: 250,
+  uiRefreshMs: 250,
 };
 
 const getWindowApi = (api: { postMessage: (message: unknown) => void } | undefined): ControlSurfaceApi | undefined => {
@@ -80,9 +84,6 @@ const getWindowApi = (api: { postMessage: (message: unknown) => void } | undefin
     },
   };
 
-  // wrappedApi.log?.(`getWindowApi: Raw vscodeApi keys: ${Object.keys(vscodeApi).join(", ")}`);
-  // wrappedApi.log?.(`getWindowApi: Wrapped API keys: ${Object.keys(wrappedApi).join(", ")}`);
-
   return wrappedApi;
 };
 
@@ -114,11 +115,6 @@ type PageOption = {
   page: Extract<ControlSurfaceNode, { type: "page" }>;
 };
 
-type ResolvedControlPath = {
-  node: ControlSurfaceNode;
-  parentControls: ControlSurfaceNode[];
-  index: number;
-};
 
 // builds a flat list of all pages in the control surface hierarchy.
 const buildPageOptions = (
@@ -157,91 +153,6 @@ const buildPageOptions = (
 
   visit(controlSurfaceRoot, [], ["root"]);
   return pages;
-};
-
-const resolveControlByPath = (
-  controlSurfaceRoot: ControlSurfaceNode[],
-  path: string[] | null | undefined,
-): ResolvedControlPath | null => {
-  if (!path || path.length === 0) {
-    return null;
-  }
-
-  let current: any = { controls: controlSurfaceRoot };
-  let parentControls: ControlSurfaceNode[] | null = null;
-  let index: number | null = null;
-
-  for (const segment of path) {
-    const parsed = parseControlPathSegment(segment);
-    if (!parsed) {
-      return null;
-    }
-    if (parsed.kind === "root") {
-      continue;
-    }
-    if (parsed.kind === "control") {
-      if (!Array.isArray(current.controls) || parsed.index < 0 || parsed.index >= current.controls.length) {
-        return null;
-      }
-      parentControls = current.controls;
-      index = parsed.index;
-      current = current.controls[parsed.index];
-      continue;
-    }
-    if (parsed.kind === "tab") {
-      if (!Array.isArray(current.tabs) || parsed.index < 0 || parsed.index >= current.tabs.length) {
-        return null;
-      }
-      current = current.tabs[parsed.index];
-    }
-  }
-
-  if (parentControls && index !== null) {
-    return {
-      node: current as ControlSurfaceNode,
-      parentControls,
-      index,
-    };
-  }
-
-  return null;
-};
-
-const findControlPathByNode = (
-  controlSurfaceRoot: ControlSurfaceNode[],
-  target: ControlSurfaceNode,
-): string[] | null => {
-  const visit = (nodes: ControlSurfaceNode[], path: string[]): string[] | null => {
-    for (let index = 0; index < nodes.length; index += 1) {
-      const node = nodes[index];
-      const nextPath = [...path, `c${index}`];
-      if (node === target) {
-        return nextPath;
-      }
-
-      if (node.type === "tabs") {
-        for (let tabIndex = 0; tabIndex < node.tabs.length; tabIndex += 1) {
-          const tab = node.tabs[tabIndex];
-          const tabPath = [...nextPath, `t${tabIndex}`];
-          const foundInTab = visit(tab.controls, tabPath);
-          if (foundInTab) {
-            return foundInTab;
-          }
-        }
-      }
-
-      if ("controls" in node && Array.isArray(node.controls)) {
-        const found = visit(node.controls, nextPath);
-        if (found) {
-          return found;
-        }
-      }
-    }
-
-    return null;
-  };
-
-  return visit(controlSurfaceRoot, [CONTROL_PATH_ROOT]);
 };
 
 export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
@@ -338,10 +249,10 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         color: "var(--vscode-foreground)",
       }}
     >
-      <h1 style={{ fontSize: 14, margin: "0 0 12px 0" }}>
+      {/* <h1 style={{ fontSize: 14, margin: "0 0 12px 0" }}>
         TIC-80 Control Surfaces
       </h1>
-
+ */}
       {/* control gallery for testing / dev */}
       <ComponentTester />
 
@@ -374,6 +285,8 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
       >
         {state.status}
       </div>
+
+
       {/* Controls */}
 
       <ButtonGroup>
@@ -427,7 +340,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
       {/* main control surface body */}
 
-      {activePage && resolvedApi && state.symbolValues && (state.uiRefreshMs ?? state.pollIntervalMs) ? (
+      {activePage && resolvedApi && (state.uiRefreshMs ?? state.pollIntervalMs) ? (
         <ControlSurfacePage
           page={activePage}
           api={resolvedApi}

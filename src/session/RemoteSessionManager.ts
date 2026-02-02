@@ -122,7 +122,7 @@ export class RemoteSessionManager implements vscode.Disposable {
 
   async listGlobals(): Promise<string[]> {
     if (!this.client || this.state !== 'Connected') {
-      throw new Error('Not connected to TIC-80');
+      throw new Error('Not connected');
     }
     const globals = await this.client.listGlobals();
     // sanitize the list.
@@ -134,14 +134,14 @@ export class RemoteSessionManager implements vscode.Disposable {
 
   async evalExpr(expression: string): Promise<string> {
     if (!this.client || this.state !== 'Connected') {
-      throw new Error('Not connected to TIC-80');
+      throw new Error('Not connected');
     }
     return this.client.evalExpr(expression);
   }
 
   async eval(statement: string): Promise<string> {
     if (!this.client || this.state !== 'Connected') {
-      throw new Error('Not connected to TIC-80');
+      throw new Error('Not connected');
     }
     return this.client.eval(statement);
   }

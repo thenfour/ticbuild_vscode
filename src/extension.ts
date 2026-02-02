@@ -146,7 +146,7 @@ export function activate(context: vscode.ExtensionContext): void {
             void webview.postMessage({
               type: 'evalResult',
               requestId: payload.requestId,
-              error: 'Not connected to TIC-80',
+              error: 'Not connected',
             });
           }
           break;

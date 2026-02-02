@@ -33,6 +33,13 @@
 }
 
 
+.control-surface-row {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+
+
 .control-surface-column {
   display: flex;
   flex-direction: column;

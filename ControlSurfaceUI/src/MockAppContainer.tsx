@@ -75,6 +75,9 @@ export function MockAppContainer(): JSX.Element {
     status: "Disconnected (mock)",
     watches: [],
     controlSurfaceRoot: [],
+    symbolValues: {},
+    uiRefreshMs: 250,
+    pollIntervalMs: 250,
   });
 
   React.useEffect(() => {
@@ -131,6 +134,8 @@ export function MockAppContainer(): JSX.Element {
       watches: mappedWatches,
       controlSurfaceRoot,
       uiRefreshMs: 250,
+      pollIntervalMs: 250,
+      symbolValues: { mockSymbol: 123 },
     };
   }, [connected, controlSurfaceRoot, watches]);
 

@@ -11,8 +11,8 @@ import { ControlSurfaceString } from "./ControlSurfaceControls/ControlSurfaceStr
 import { ControlSurfaceTabs } from "./ControlSurfaceControls/ControlSurfaceTabs";
 import { ControlSurfaceToggle } from "./ControlSurfaceControls/ControlSurfaceToggle";
 import { ControlSurfaceTriggerButton } from "./ControlSurfaceControls/ControlSurfaceTriggerButton";
-import { ControlSurfaceSelectable } from "./ControlSurfaceSelectable";
-import { buildControlPath, isPathEqual } from "./controlPath";
+import { ControlSurfaceSelectable } from "./ControlBase/ControlSurfaceSelectable";
+import { buildControlPath, isPathEqual } from "./controlPathBase";
 
 export type ControlSurfaceRenderOptions = {
     parentPath: string[];

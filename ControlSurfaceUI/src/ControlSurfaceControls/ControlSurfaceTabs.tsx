@@ -17,7 +17,7 @@ import React from "react";
 import { TabPanel, Tab } from "../basic/Tabs";
 import { ControlSurfaceTabsSpec, ControlSurfaceApi } from "../defs";
 import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
-import { buildTabPath } from "../controlPath";
+import { buildTabPath } from "../controlPathBase";
 
 export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     api: ControlSurfaceApi;

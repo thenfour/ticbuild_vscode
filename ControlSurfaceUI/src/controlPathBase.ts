@@ -45,3 +45,4 @@ export const isPathEqual = (a: string[] | null | undefined, b: string[] | null |
     }
     return a.every((segment, index) => segment === b[index]);
 };
+

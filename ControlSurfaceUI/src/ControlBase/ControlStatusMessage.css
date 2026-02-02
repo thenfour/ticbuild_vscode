@@ -1,0 +1,19 @@
+.control-surface-status-message  {
+    
+}
+
+.control-surface-status-message-error {
+  color: var(--vscode-errorForeground, var(--error));
+}
+
+.control-surface-status-message-warning {
+  color: var(--vscode-warnForeground, var(--warning));
+}
+
+.control-surface-status-message-info {
+  color: var(--vscode-infoForeground, var(--info));
+}
+
+.control-surface-status-message-success {
+  color: var(--vscode-successForeground, var(--success));
+}

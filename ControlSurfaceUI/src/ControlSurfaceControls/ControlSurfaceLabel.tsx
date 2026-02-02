@@ -26,7 +26,7 @@ export const ControlSurfaceLabel: React.FC<ControlSurfaceLabelProps> = ({ label,
     <div className="control-surface-label">
       {label && <span className="control-surface-label-title">{label}: </span>}
       <span className="control-surface-label-value" style={{ color: error ? 'var(--vscode-errorForeground)' : undefined }}>
-        {error ? `Error: ${error}` : displayValue || expression}
+        {error ? `${error}` : displayValue || expression}
       </span>
     </div>
   );

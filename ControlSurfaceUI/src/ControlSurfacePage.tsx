@@ -5,6 +5,7 @@ import {
   ControlSurfacePageSpec
 } from "./defs";
 import { AddControlControl } from "./AddControlControl";
+import { ControlColumn } from "./ControlBase/ControlColumn";
 
 interface ControlSurfacePageProps {
   page: ControlSurfacePageSpec;
@@ -31,22 +32,24 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
 }) => {
   return (
     <div className="controlSurfaceControl controlSurfaceControl-page">
-      {page.controls && page.controls.length > 0 ? (
-        page.controls.map((node, index) =>
-          renderControlSurfaceControl(node, index, api, symbolValues, pollIntervalMs, {
-            parentPath: pagePath,
-            designMode,
-            selectedPath,
-            onSelectPath,
-            onDeletePath,
-          }),
-        )
-      ) : (
-        <div className="controlSurfaceControl controlSurfaceControl-page--empty" style={{ marginBottom: "8px" }}>
-          No controls on this page.
-        </div>
-      )}
-      <AddControlControl api={api} parentPath={pagePath} disabled={designMode} />
+      <ControlColumn>
+        {page.controls && page.controls.length > 0 ? (
+          page.controls.map((node, index) =>
+            renderControlSurfaceControl(node, index, api, symbolValues, pollIntervalMs, {
+              parentPath: pagePath,
+              designMode,
+              selectedPath,
+              onSelectPath,
+              onDeletePath,
+            }),
+          )
+        ) : (
+          <div className="controlSurfaceControl controlSurfaceControl-page--empty" style={{ marginBottom: "8px" }}>
+            No controls on this page.
+          </div>
+        )}
+        <AddControlControl api={api} parentPath={pagePath} disabled={designMode} />
+      </ControlColumn>
     </div>
   );
 };

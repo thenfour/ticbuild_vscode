@@ -1,5 +1,4 @@
 import React from "react";
-import { ControlSurfaceApi } from "../defs";
 import { useControlSurfaceApi } from "./VsCodeApiContext";
 import { useControlSurfaceState } from "./ControlSurfaceState";
 
@@ -19,43 +18,18 @@ export const useLuaExpressionResult = (
 ): LuaExpressionResult => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
-    const [value, setValue] = React.useState<string>("");
-    const [error, setError] = React.useState<string | null>(null);
+    const result = stateApi.state.expressionResults?.[expression];
+    const isConnected = (stateApi.state.status ?? "").includes("Connected");
 
     React.useEffect(() => {
-        if (!api) {
+        if (!api || !isConnected) {
             return;
         }
-        let mounted = true;
-        //const intervalMs = Math.max(stateApi.state.uiRefreshMs, 16);
-        console.log("Setting up Lua expression evaluation for:", expression, "with interval:", stateApi.state.uiRefreshMs);
-
-        const evaluate = async () => {
-            try {
-                const result = await api.evalExpression?.(expression);
-                if (!mounted) {
-                    return;
-                }
-                setValue(result ?? "");
-                setError(null);
-            } catch (err) {
-                if (!mounted) {
-                    return;
-                }
-                const errorMsg = err instanceof Error ? err.message : String(err);
-                api.log?.(`Evaluation error: ${errorMsg}`);
-                setError(errorMsg);
-            }
-        };
-
-        evaluate();
-        const interval = window.setInterval(evaluate, stateApi.state.uiRefreshMs);
-
+        api.subscribeExpression?.(expression);
         return () => {
-            mounted = false;
-            clearInterval(interval);
+            api.unsubscribeExpression?.(expression);
         };
-    }, [expression, api, stateApi.state.uiRefreshMs]);
+    }, [api, expression, isConnected]);
 
-    return { value, error };
+    return { value: result?.value ?? "", error: result?.error ?? null };
 };

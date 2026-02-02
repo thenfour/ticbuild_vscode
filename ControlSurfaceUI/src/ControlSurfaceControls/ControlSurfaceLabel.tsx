@@ -13,14 +13,12 @@
 import React from "react";
 import { ControlSurfaceLabelSpec } from "../defs";
 import { useLuaExpressionResult } from "../hooks/useLuaExpressionResult";
-import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceLabelProps extends ControlSurfaceLabelSpec {
   //uiRefreshMs: number;
 }
 
 export const ControlSurfaceLabel: React.FC<ControlSurfaceLabelProps> = ({ label, expression }) => {
-  const api = useControlSurfaceApi();
   const { value: displayValue, error } = useLuaExpressionResult(expression);
 
   return (

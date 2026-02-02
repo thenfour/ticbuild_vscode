@@ -224,6 +224,29 @@ export function activate(context: vscode.ExtensionContext): void {
         });
         break;
       }
+      case 'subscribeExpression': {
+        const payload = message as { expression?: string };
+        if (!payload.expression) {
+          break;
+        }
+        const current = expressionSubscriptions.get(payload.expression) ?? 0;
+        expressionSubscriptions.set(payload.expression, current + 1);
+        break;
+      }
+      case 'unsubscribeExpression': {
+        const payload = message as { expression?: string };
+        if (!payload.expression) {
+          break;
+        }
+        const current = expressionSubscriptions.get(payload.expression) ?? 0;
+        if (current <= 1) {
+          expressionSubscriptions.delete(payload.expression);
+          expressionResults.delete(payload.expression);
+        } else {
+          expressionSubscriptions.set(payload.expression, current - 1);
+        }
+        break;
+      }
       case 'setSymbol': {
         if (!session.isConnected()) {
           output.appendLine('[controlSurface] setSymbol ignored (not connected)');
@@ -251,7 +274,7 @@ export function activate(context: vscode.ExtensionContext): void {
     const key = viewId ? `${STATE_KEY_SELECTED_PAGE}.${viewId}` : undefined;
     const selectedPageId = key ? context.workspaceState.get<string>(key) : undefined;
 
-    return buildControlSurfaceWebviewPayloadWithSymbols(
+    const payload = await buildControlSurfaceWebviewPayloadWithSymbols(
       session.snapshot,
       watchStore.getAll(),
       watchStore.getControlSurfaceRoot(),
@@ -262,6 +285,11 @@ export function activate(context: vscode.ExtensionContext): void {
       selectedPageId,
       viewId,
     );
+
+    return {
+      ...payload,
+      expressionResults: getExpressionResultsSnapshot(),
+    };
   };
 
   const activityProvider = new ControlSurfaceSidebarProvider(
@@ -359,6 +387,60 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const scheduleUiRefresh = () => {
     refreshPending = true;
+  };
+
+  const expressionSubscriptions = new Map<string, number>();
+  const expressionResults = new Map<string, { value?: string; error?: string }>();
+  let expressionPollTimer: NodeJS.Timeout | undefined;
+  let expressionPollLast = 0;
+
+  const getExpressionResultsSnapshot = () => (
+    Object.fromEntries(expressionResults.entries())
+  );
+
+  const pollExpressions = async () => {
+    if (!session.isConnected()) {
+      if (expressionSubscriptions.size > 0 || expressionResults.size > 0) {
+        expressionSubscriptions.clear();
+        expressionResults.clear();
+        scheduleUiRefresh();
+      }
+      return;
+    }
+
+    if (expressionSubscriptions.size === 0) {
+      return;
+    }
+
+    const pollMs = Math.max(Math.floor(1000 / getPollHz()), 16);
+    const now = Date.now();
+    if (now - expressionPollLast < pollMs) {
+      return;
+    }
+    expressionPollLast = now;
+
+    const expressions = Array.from(expressionSubscriptions.keys());
+    const results = await Promise.all(
+      expressions.map(async (expression) => {
+        try {
+          const value = await session.evalExpr(expression);
+          return { expression, value } as const;
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          return { expression, error: errorMessage } as const;
+        }
+      }),
+    );
+
+    results.forEach((result) => {
+      if ("error" in result) {
+        expressionResults.set(result.expression, { error: result.error });
+      } else {
+        expressionResults.set(result.expression, { value: result.value });
+      }
+    });
+
+    scheduleUiRefresh();
   };
 
   const updateControlSurfaceViews = async () => {
@@ -463,6 +545,10 @@ export function activate(context: vscode.ExtensionContext): void {
   updatePoller();
   updateUiRefreshTimer();
 
+  expressionPollTimer = setInterval(() => {
+    void pollExpressions();
+  }, 100);
+
   setupAutoConnectWatcher({
     context,
     session,
@@ -475,6 +561,10 @@ export function activate(context: vscode.ExtensionContext): void {
     updateContextKeys();
     updatePoller();
     scheduleUiRefresh();
+    if (!session.isConnected()) {
+      expressionSubscriptions.clear();
+      expressionResults.clear();
+    }
   });
 
   context.subscriptions.push(
@@ -490,6 +580,9 @@ export function activate(context: vscode.ExtensionContext): void {
     new vscode.Disposable(() => {
       if (refreshTimer) {
         clearInterval(refreshTimer);
+      }
+      if (expressionPollTimer) {
+        clearInterval(expressionPollTimer);
       }
     }),
   );

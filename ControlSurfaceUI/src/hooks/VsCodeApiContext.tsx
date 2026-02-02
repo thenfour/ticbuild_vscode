@@ -95,6 +95,18 @@ export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
                     }, 5000);
                 });
             },
+            subscribeExpression: (expression: string) => {
+                rawApi.postMessage({
+                    type: "subscribeExpression",
+                    expression,
+                });
+            },
+            unsubscribeExpression: (expression: string) => {
+                rawApi.postMessage({
+                    type: "unsubscribeExpression",
+                    expression,
+                });
+            },
             showWarningMessage: async <T extends string>(message: string, ...items: T[]): Promise<T | undefined> => {
                 const requestId = `warning_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 

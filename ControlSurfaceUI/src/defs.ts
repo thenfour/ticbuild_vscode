@@ -17,6 +17,7 @@ export type ControlSurfaceState = {
     watches: WatchItem[];
     controlSurfaceRoot: ControlSurfaceNode[];
     symbolValues: Record<string, any>; // map of symbol names to their current values
+    expressionResults?: Record<string, { value?: string; error?: string }>;
     pollIntervalMs: number; // interval for polling expressions in ms
     uiRefreshMs: number; // UI refresh interval in ms
 
@@ -137,6 +138,8 @@ export type ControlSurfaceApi = {
     evalExpression?: (expression: string) => Promise<string>;
     log?: (message: string) => void;
     showWarningMessage?: <T extends string>(message: string, ...items: T[]) => Promise<T | undefined>;
+    subscribeExpression?: (expression: string) => void;
+    unsubscribeExpression?: (expression: string) => void;
 };
 
 export type ControlSurfaceDataSource = {

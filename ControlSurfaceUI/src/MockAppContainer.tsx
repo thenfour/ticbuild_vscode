@@ -65,6 +65,8 @@ const createMockWatch = (index: number, kind: MockValueKind): MockWatch => {
 export function MockAppContainer(): JSX.Element {
   const [connected, setConnected] = React.useState(false);
   const [watches, setWatches] = React.useState<MockWatch[]>([]);
+  const [expressionResults, setExpressionResults] = React.useState<Record<string, { value?: string; error?: string }>>({});
+  const expressionSubscriptionsRef = React.useRef(new Map<string, number>());
   const [controlSurfaceRoot, setControlSurfaceRoot] = useLocalStorage<ControlSurfaceNode[]>(
     'tic80-mock-controlSurfaceRoot',
     []
@@ -86,6 +88,33 @@ export function MockAppContainer(): JSX.Element {
       globalAny.acquireVsCodeApi = () => ({
         postMessage: (message: unknown) => {
           console.log("[mock] postMessage", message);
+
+          if ((message as any).type === 'subscribeExpression') {
+            const payload = message as { type: string; expression: string };
+            const nextCount = (expressionSubscriptionsRef.current.get(payload.expression) ?? 0) + 1;
+            expressionSubscriptionsRef.current.set(payload.expression, nextCount);
+            setExpressionResults((prev) => ({
+              ...prev,
+              [payload.expression]: { value: `mock result for: ${payload.expression}` },
+            }));
+            return;
+          }
+
+          if ((message as any).type === 'unsubscribeExpression') {
+            const payload = message as { type: string; expression: string };
+            const current = expressionSubscriptionsRef.current.get(payload.expression) ?? 0;
+            if (current <= 1) {
+              expressionSubscriptionsRef.current.delete(payload.expression);
+              setExpressionResults((prev) => {
+                const next = { ...prev };
+                delete next[payload.expression];
+                return next;
+              });
+            } else {
+              expressionSubscriptionsRef.current.set(payload.expression, current - 1);
+            }
+            return;
+          }
 
           // Handle evalExpression requests
           if ((message as any).type === 'evalExpression') {
@@ -129,6 +158,25 @@ export function MockAppContainer(): JSX.Element {
   }, []);
 
   React.useEffect(() => {
+    const interval = window.setInterval(() => {
+      if (expressionSubscriptionsRef.current.size === 0) {
+        return;
+      }
+      setExpressionResults((prev) => {
+        const next: Record<string, { value?: string; error?: string }> = { ...prev };
+        for (const expression of expressionSubscriptionsRef.current.keys()) {
+          const current = next[expression]?.value ?? "";
+          next[expression] = {
+            value: current ? `${current}.` : `mock result for: ${expression}`,
+          };
+        }
+        return next;
+      });
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  React.useEffect(() => {
     const existing = document.querySelector("link[data-vscode-mock='true']");
     if (!existing) {
       const link = document.createElement("link");
@@ -162,6 +210,7 @@ export function MockAppContainer(): JSX.Element {
     connected,
     watches,
     controlSurfaceRoot,
+    expressionResults,
   });
 
   // const api = React.useMemo<{ postMessage: (message: unknown) => void }>(

@@ -41,8 +41,11 @@ export const ControlSurfaceKnob: React.FC<ControlSurfaceKnobProps> = ({
 
   const handleChange = (newValue: number) => {
     setValue(newValue);
+    //console.log("Knob value changed:", newValue);
     api?.postMessage({ type: "setSymbol", symbol, value: newValue });
   };
+
+  //console.log("Rendering ControlSurfaceKnob with value:", value);
 
   return (
     <Knob

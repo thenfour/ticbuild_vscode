@@ -67,7 +67,7 @@
         },
         {
           "type": "label",
-          "expression": "\"x=\"..x"
+          "expression": "t"
         }
       ]
     },

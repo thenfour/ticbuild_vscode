@@ -211,6 +211,7 @@ export function MockAppContainer(): JSX.Element {
     watches,
     controlSurfaceRoot,
     expressionResults,
+    discoveredInstances: [],
   });
 
   // const api = React.useMemo<{ postMessage: (message: unknown) => void }>(

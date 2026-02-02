@@ -123,6 +123,8 @@ export async function buildControlSurfaceWebviewPayloadWithSymbols(
     watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>;
     controlSurfaceRoot: DevtoolsControlNode[];
     symbolValues?: Record<string, any>;
+    expressionResults?: Record<string, { value?: string; error?: string }>;
+    discoveredInstances?: Array<{ host: string; port: number; label?: string; description?: string; detail?: string; cartPath?: string; metaTitle?: string; metaVersion?: string; startedAt?: string }>;
     pollIntervalMs: number;
     uiRefreshMs?: number;
     activeSidebarId?: string;

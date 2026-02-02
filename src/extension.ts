@@ -18,7 +18,7 @@ import {
   DEFAULT_UI_REFRESH_MS,
   OUTPUT_CHANNEL_NAME
 } from './baseDefs';
-import { discoverRunningInstancesBase } from './remoting/discovery';
+import { discoverRunningInstancesBase, watchDiscoverySessionFiles } from './remoting/discovery';
 import { setupAutoConnectWatcher } from './session/autoConnect';
 import { formatDateDiff, formatInstanceLabel, parseHostPort } from './utils';
 import { buildControlSurfaceWebviewHtml, buildControlSurfaceWebviewPayloadWithSymbols } from './views/ControlSurfaceWebview';
@@ -154,6 +154,41 @@ export function activate(context: vscode.ExtensionContext): void {
     STATE_KEY_SELECTED_PAGE,
   );
 
+  let discoveredInstances: Array<{ host: string; port: number; label?: string; description?: string; detail?: string; cartPath?: string; metaTitle?: string; metaVersion?: string; startedAt?: string }> = [];
+
+  const refreshDiscoveredInstances = async () => {
+    const config = vscode.workspace.getConfiguration('tic80');
+    const timeoutMs = config.get<number>(
+      CONFIG_CONNECT_TIMEOUT_MS,
+      DEFAULT_CONNECT_TIMEOUT_MS,
+    );
+
+    const instances = await discoverRunningInstancesBase(timeoutMs);
+    discoveredInstances = instances.map((instance) => {
+      const label = formatInstanceLabel({
+        title: instance.metaTitle ?? '',
+        version: instance.metaVersion ?? '',
+        cartPath: instance.cartPath ?? '',
+      });
+      const uptime = instance.startedAt ? formatDateDiff(instance.startedAt, new Date()) : undefined;
+      const description = uptime ?
+        `${instance.host}:${instance.port} (${uptime})` :
+        `${instance.host}:${instance.port}`;
+
+      return {
+        host: instance.host,
+        port: instance.port,
+        label,
+        description,
+        detail: instance.cartPath,
+        cartPath: instance.cartPath,
+        metaTitle: instance.metaTitle,
+        metaVersion: instance.metaVersion,
+        startedAt: instance.startedAt?.toISOString(),
+      };
+    });
+  };
+
   const getControlSurfacePayload = async (viewId?: string) => {
     await watchSystem.store.whenReady();
     const key = viewId ? `${STATE_KEY_SELECTED_PAGE}.${viewId}` : undefined;
@@ -174,6 +209,7 @@ export function activate(context: vscode.ExtensionContext): void {
     return {
       ...payload,
       expressionResults: expressionMonitor.getResultsSnapshot(),
+      discoveredInstances,
     };
   };
 
@@ -279,6 +315,7 @@ export function activate(context: vscode.ExtensionContext): void {
   updatePoller();
   updateUiRefreshTimer();
   expressionMonitor.start();
+  void refreshDiscoveredInstances().then(() => scheduleUiRefresh());
 
   setupAutoConnectWatcher({
     context,
@@ -301,6 +338,16 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     controlSurfaceRegistry.onDidChange(() => {
       scheduleUiRefresh();
+    }),
+  );
+
+  const discoveryWatcherDispose = watchDiscoverySessionFiles(() => {
+    void refreshDiscoveredInstances().then(() => scheduleUiRefresh());
+  });
+
+  context.subscriptions.push(
+    new vscode.Disposable(() => {
+      discoveryWatcherDispose();
     }),
   );
 

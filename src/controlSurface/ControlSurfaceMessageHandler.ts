@@ -4,6 +4,7 @@ import { RemoteSessionManager } from '../session/RemoteSessionManager';
 import { WatchStore } from '../watches/watchStore';
 import { ControlSurfaceRegistry } from '../views/ControlSurfaceRegistry';
 import { ExpressionSubscriptionMonitor } from './ExpressionSubscriptionMonitor';
+import { CONFIG_CONNECT_TIMEOUT_MS, DEFAULT_CONNECT_TIMEOUT_MS } from '../baseDefs';
 
 export class ControlSurfaceMessageHandler {
     constructor(
@@ -208,6 +209,42 @@ export class ControlSurfaceMessageHandler {
                     break;
                 }
                 this.expressionMonitor.unsubscribe(payload.expression);
+                break;
+            }
+            case 'attach':
+                void vscode.commands.executeCommand('tic80.attach');
+                break;
+            case 'detach':
+                void vscode.commands.executeCommand('tic80.detach');
+                break;
+            case 'connectInstance': {
+                const payload = message as { host?: string; port?: number };
+                if (!payload.host || !payload.port) {
+                    break;
+                }
+                const config = vscode.workspace.getConfiguration('tic80');
+                const timeoutMs = config.get<number>(
+                    CONFIG_CONNECT_TIMEOUT_MS,
+                    DEFAULT_CONNECT_TIMEOUT_MS,
+                );
+
+                if (this.session.isConnected()) {
+                    this.output.appendLine('[session] Disconnecting before new connect request');
+                    this.session.disconnect('User requested reconnect');
+                }
+
+                this.output.appendLine(`[session] Attaching to ${payload.host}:${payload.port}`);
+                void (async () => {
+                    try {
+                        await this.session.connect(payload.host!, payload.port!, timeoutMs);
+                        this.output.appendLine(`[session] Connected to ${payload.host}:${payload.port}`);
+                    } catch (error) {
+                        const message = error instanceof Error ? error.message : String(error);
+                        this.output.appendLine(`[session] Attach failed: ${message}`);
+                        void vscode.window.showErrorMessage(
+                            `TIC-80 attach failed: ${message}`);
+                    }
+                })();
                 break;
             }
             case 'setSymbol': {

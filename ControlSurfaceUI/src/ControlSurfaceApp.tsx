@@ -12,6 +12,7 @@ import {
   ControlSurfaceViewKind,
 } from "./defs";
 import { ComponentTester } from "./ComponentTester";
+import { ConnectionStateControl } from "./ConnectionStateControl";
 import { Dropdown } from "./basic/Dropdown";
 import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 import { ControlRegistry } from "./controlRegistry";
@@ -131,16 +132,10 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         </div>
       ) : null} */}
 
-      {/* system status */}
-
-      <div
-        style={{
-          marginBottom: 12,
-          color: "var(--vscode-descriptionForeground)",
-        }}
-      >
-        {stateApi.state.status}
-      </div>
+      <ConnectionStateControl
+        status={stateApi.state.status}
+        discoveredInstances={stateApi.state.discoveredInstances}
+      />
 
 
       {/* Controls */}

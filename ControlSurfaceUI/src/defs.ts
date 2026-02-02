@@ -18,6 +18,7 @@ export type ControlSurfaceState = {
     controlSurfaceRoot: ControlSurfaceNode[];
     symbolValues: Record<string, any>; // map of symbol names to their current values
     expressionResults?: Record<string, { value?: string; error?: string }>;
+    discoveredInstances?: ControlSurfaceDiscoveredInstance[];
     pollIntervalMs: number; // interval for polling expressions in ms
     uiRefreshMs: number; // UI refresh interval in ms
 
@@ -26,6 +27,18 @@ export type ControlSurfaceState = {
     selectedControlPath: string[] | null;
 
     viewId?: string; // unique ID for this view (panel or sidebar)
+};
+
+export type ControlSurfaceDiscoveredInstance = {
+    host: string;
+    port: number;
+    label?: string;
+    description?: string;
+    detail?: string;
+    cartPath?: string;
+    metaTitle?: string;
+    metaVersion?: string;
+    startedAt?: string;
 };
 
 export type ControlSurfacePageSpec = {

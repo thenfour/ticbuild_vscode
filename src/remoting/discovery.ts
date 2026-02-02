@@ -1,4 +1,5 @@
 import * as fs from 'node:fs/promises';
+import * as fsSync from 'node:fs';
 import * as path from 'node:path';
 import { isoDateStringToDate } from '../utils';
 import { decodeRemotingString, isExpectedHello, safeMetadata, Tic80RemotingClient } from './Tic80RemotingClient';
@@ -153,4 +154,25 @@ export async function discoverRunningInstancesBase(
     }
 
     return items;
+}
+
+export function watchDiscoverySessionFiles(
+    onChange: () => void,
+): () => void {
+    const localAppData = process.env.LOCALAPPDATA;
+    if (!localAppData) {
+        return () => { };
+    }
+
+    const sessionDir = path.join(localAppData, 'TIC-80', 'remoting', 'sessions');
+    let watcher: fsSync.FSWatcher | undefined;
+    try {
+        watcher = fsSync.watch(sessionDir, () => onChange());
+    } catch (error) {
+        return () => { };
+    }
+
+    return () => {
+        watcher?.close();
+    };
 }

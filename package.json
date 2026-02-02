@@ -99,14 +99,6 @@
         "title": "TIC-80: Reload Devtools Config"
       },
       {
-        "command": "tic80.showExplorerSidebar",
-        "title": "TIC-80: Show Explorer Sidebar"
-      },
-      {
-        "command": "tic80.hideExplorerSidebar",
-        "title": "TIC-80: Hide Explorer Sidebar"
-      },
-      {
         "command": "tic80.addPanel",
         "title": "TIC-80: Add Panel"
       },
@@ -157,15 +149,6 @@
       ]
     },
     "views": {
-      "explorer": [
-        {
-          "id": "tic80ControlSurfaceExplorer",
-          "name": "TIC-80 Control Surface",
-          "type": "webview",
-          "icon": "resources/desktop-classic.svg",
-          "when": "tic80.controlSurfaceExplorer.visible"
-        }
-      ],
       "tic80": [
         {
           "id": "tic80Watches",
@@ -187,12 +170,6 @@
         },
         {
           "command": "tic80.reloadDevtools"
-        },
-        {
-          "command": "tic80.showExplorerSidebar"
-        },
-        {
-          "command": "tic80.hideExplorerSidebar"
         },
         {
           "command": "tic80.addPanel"
@@ -237,18 +214,8 @@
           "group": "inline"
         },
         {
-          "command": "tic80.showExplorerSidebar",
-          "when": "view == tic80Watches && viewItem == tic80ControlSurfaceExplorerItem && !tic80.controlSurfaceExplorer.visible",
-          "group": "inline"
-        },
-        {
           "command": "tic80.removePanel",
           "when": "view == tic80Watches && viewItem == tic80ControlSurfacePanelItem",
-          "group": "inline"
-        },
-        {
-          "command": "tic80.hideExplorerSidebar",
-          "when": "view == tic80Watches && viewItem == tic80ControlSurfaceExplorerItem && tic80.controlSurfaceExplorer.visible",
           "group": "inline"
         },
         {

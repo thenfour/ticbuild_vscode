@@ -147,7 +147,7 @@ class ControlSurfacesGroupNode extends vscode.TreeItem {
 
 export class ControlSurfaceNode extends vscode.TreeItem {
   readonly viewId: string;
-  readonly kind: 'panel' | 'explorer' | 'activity';
+  readonly kind: 'panel' | 'activity';
 
   constructor(view: ControlSurfaceViewInfo) {
     super(view.title, vscode.TreeItemCollapsibleState.None);
@@ -157,15 +157,11 @@ export class ControlSurfaceNode extends vscode.TreeItem {
     this.contextValue =
       view.kind === 'panel'
         ? 'tic80ControlSurfacePanelItem'
-        : view.kind === 'explorer'
-          ? 'tic80ControlSurfaceExplorerItem'
-          : 'tic80ControlSurfaceActivityItem';
+        : 'tic80ControlSurfaceActivityItem';
     this.description =
       view.kind === 'panel'
         ? 'Panel'
-        : view.kind === 'explorer'
-          ? 'Explorer Sidebar'
-          : 'Activity Bar';
+        : 'Activity Bar';
   }
 }
 

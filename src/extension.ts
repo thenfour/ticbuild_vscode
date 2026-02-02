@@ -233,17 +233,6 @@ export function activate(context: vscode.ExtensionContext): void {
     );
   };
 
-  const explorerProvider = new ControlSurfaceSidebarProvider(
-    context.extensionPath,
-    controlSurfaceRegistry,
-    getControlSurfacePayload,
-    handleControlSurfaceMessage,
-    'explorer',
-    'explorer-sidebar',
-    'Control Surface Explorer',
-    'tic80ControlSurfaceExplorer',
-  );
-
   const activityProvider = new ControlSurfaceSidebarProvider(
     context.extensionPath,
     controlSurfaceRegistry,
@@ -256,7 +245,6 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   let panelCounter = context.workspaceState.get<number>('tic80.panelCounter', 1);
-  const explorerSidebarId = 'explorer-sidebar';
   const activitySidebarId = 'activity-sidebar';
 
   // State persistence keys
@@ -351,7 +339,6 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }
     // Update sidebars
-    void explorerProvider.update();
     void activityProvider.update();
   };
 
@@ -367,18 +354,11 @@ export function activate(context: vscode.ExtensionContext): void {
     watchProvider,
     poller,
     controlSurfaceRegistry,
-    explorerProvider,
     activityProvider,
   );
 
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider('tic80Watches', watchProvider),
-  );
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      'tic80ControlSurfaceExplorer',
-      explorerProvider,
-    ),
   );
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -451,11 +431,6 @@ export function activate(context: vscode.ExtensionContext): void {
   updateContextKeys();
   updatePoller();
   updateUiRefreshTimer();
-  void vscode.commands.executeCommand(
-    'setContext',
-    'tic80.controlSurfaceExplorer.visible',
-    true,
-  );
 
   setupAutoConnectWatcher({
     context,
@@ -677,43 +652,6 @@ export function activate(context: vscode.ExtensionContext): void {
           return;
         }
         target.panel?.dispose();
-      },
-    ),
-
-    vscode.commands.registerCommand(
-      'tic80.showExplorerSidebar',
-      async () => {
-        if (!controlSurfaceRegistry.getById(explorerSidebarId)) {
-          controlSurfaceRegistry.add({
-            id: explorerSidebarId,
-            kind: 'explorer',
-            title: 'Control Surface Explorer',
-            createdAt: Date.now(),
-          });
-        }
-        controlSurfaceRegistry.setActiveSidebarId(explorerSidebarId);
-        void vscode.commands.executeCommand(
-          'setContext',
-          'tic80.controlSurfaceExplorer.visible',
-          true,
-        );
-        await explorerProvider.reveal();
-        updateControlSurfaceViews();
-      },
-    ),
-
-    vscode.commands.registerCommand(
-      'tic80.hideExplorerSidebar',
-      async () => {
-        void vscode.commands.executeCommand(
-          'setContext',
-          'tic80.controlSurfaceExplorer.visible',
-          false,
-        );
-        void vscode.commands.executeCommand(
-          'tic80ControlSurfaceExplorer.focus',
-        );
-        void vscode.commands.executeCommand('workbench.action.closeView');
       },
     ),
 

@@ -16,12 +16,25 @@ each tab is basically a group, where the group label is rendered as a tab.
 import React from "react";
 import { TabPanel, Tab } from "../basic/Tabs";
 import { ControlSurfaceTabsSpec, ControlSurfaceApi } from "../defs";
+import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
+import { buildTabPath } from "../controlPath";
 
 export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     api: ControlSurfaceApi;
-    renderControl: (node: any, index: number, api: ControlSurfaceApi, symbolValues: Record<string, any>, pollIntervalMs: number) => JSX.Element;
+    renderControl: (
+        node: any,
+        index: number,
+        api: ControlSurfaceApi,
+        symbolValues: Record<string, any>,
+        pollIntervalMs: number,
+        options: ControlSurfaceRenderOptions,
+    ) => JSX.Element;
     symbolValues: Record<string, any>;
     pollIntervalMs: number;
+    parentPath: string[];
+    designMode: boolean;
+    selectedPath?: string[] | null;
+    onSelectPath?: (path: string[], node: any) => void;
 }
 
 export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
@@ -29,7 +42,11 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     api,
     renderControl,
     symbolValues,
-    pollIntervalMs
+    pollIntervalMs,
+    parentPath,
+    designMode,
+    selectedPath,
+    onSelectPath,
 }) => {
     const [selectedTabId, setSelectedTabId] = React.useState<number>(0);
 
@@ -51,7 +68,12 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                 >
                     <div className="control-surface-tab-content">
                         {tab.controls.map((child, childIndex) =>
-                            renderControl(child, childIndex, api, symbolValues, pollIntervalMs)
+                            renderControl(child, childIndex, api, symbolValues, pollIntervalMs, {
+                                parentPath: buildTabPath(parentPath, index),
+                                designMode,
+                                selectedPath,
+                                onSelectPath,
+                            })
                         )}
                     </div>
                 </Tab>

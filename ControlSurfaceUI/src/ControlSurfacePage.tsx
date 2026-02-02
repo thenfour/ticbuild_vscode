@@ -11,7 +11,10 @@ interface ControlSurfacePageProps {
   api: ControlSurfaceApi;
   symbolValues: Record<string, any>;
   pollIntervalMs: number;
-  pageId?: string;
+  pagePath: string[];
+  designMode: boolean;
+  selectedPath?: string[] | null;
+  onSelectPath?: (path: string[], node: any) => void;
 }
 
 export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
@@ -19,20 +22,28 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
   api,
   symbolValues,
   pollIntervalMs,
-  pageId = "root",
+  pagePath,
+  designMode,
+  selectedPath,
+  onSelectPath,
 }) => {
   return (
     <div className="controlSurfaceControl controlSurfaceControl-page">
       {page.controls && page.controls.length > 0 ? (
         page.controls.map((node, index) =>
-          renderControlSurfaceControl(node, index, api, symbolValues, pollIntervalMs),
+          renderControlSurfaceControl(node, index, api, symbolValues, pollIntervalMs, {
+            parentPath: pagePath,
+            designMode,
+            selectedPath,
+            onSelectPath,
+          }),
         )
       ) : (
         <div className="controlSurfaceControl controlSurfaceControl-page--empty" style={{ marginBottom: "8px" }}>
           No controls on this page.
         </div>
       )}
-      <AddControlControl api={api} parentPath={[pageId]} />
+      <AddControlControl api={api} parentPath={pagePath} disabled={designMode} />
     </div>
   );
 };

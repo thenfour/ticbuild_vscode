@@ -90,6 +90,36 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         break;
       }
+      case 'updateControl': {
+        const payload = message as { path?: string[]; control?: unknown };
+        if (payload.path && payload.control) {
+          output.appendLine(`[controlSurface] updateControl request: path=${JSON.stringify(payload.path)}`);
+          void watchStore.updateControl(payload.path, payload.control as any).catch((error) => {
+            output.appendLine(`[controlSurface] updateControl failed: ${String(error)}`);
+          });
+        }
+        break;
+      }
+      case 'deleteControl': {
+        const payload = message as { path?: string[] };
+        if (payload.path) {
+          output.appendLine(`[controlSurface] deleteControl request: path=${JSON.stringify(payload.path)}`);
+          void watchStore.deleteControl(payload.path).catch((error) => {
+            output.appendLine(`[controlSurface] deleteControl failed: ${String(error)}`);
+          });
+        }
+        break;
+      }
+      case 'moveControl': {
+        const payload = message as { path?: string[]; direction?: 'up' | 'down' };
+        if (payload.path && payload.direction) {
+          output.appendLine(`[controlSurface] moveControl request: path=${JSON.stringify(payload.path)}, direction=${payload.direction}`);
+          void watchStore.moveControl(payload.path, payload.direction).catch((error) => {
+            output.appendLine(`[controlSurface] moveControl failed: ${String(error)}`);
+          });
+        }
+        break;
+      }
       case 'addWatch':
         void vscode.commands.executeCommand('tic80.addWatch');
         break;

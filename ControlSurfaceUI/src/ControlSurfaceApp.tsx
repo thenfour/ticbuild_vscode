@@ -14,6 +14,9 @@ import {
 import { ComponentTester } from "./ComponentTester";
 import { Dropdown } from "./basic/Dropdown";
 import { useVsCodeApi } from "./VsCodeApiContext";
+import { ControlRegistry } from "./controlRegistry";
+import { PagePropertiesPanel } from "./ControlSurfacePropertiesPanels";
+import { CONTROL_PATH_ROOT, parseControlPathSegment } from "./controlPath";
 
 const initialState: ControlSurfaceState = {
   status: "Disconnected",
@@ -111,6 +114,12 @@ type PageOption = {
   page: Extract<ControlSurfaceNode, { type: "page" }>;
 };
 
+type ResolvedControlPath = {
+  node: ControlSurfaceNode;
+  parentControls: ControlSurfaceNode[];
+  index: number;
+};
+
 // builds a flat list of all pages in the control surface hierarchy.
 const buildPageOptions = (
   controlSurfaceRoot: ControlSurfaceNode[],
@@ -150,6 +159,91 @@ const buildPageOptions = (
   return pages;
 };
 
+const resolveControlByPath = (
+  controlSurfaceRoot: ControlSurfaceNode[],
+  path: string[] | null | undefined,
+): ResolvedControlPath | null => {
+  if (!path || path.length === 0) {
+    return null;
+  }
+
+  let current: any = { controls: controlSurfaceRoot };
+  let parentControls: ControlSurfaceNode[] | null = null;
+  let index: number | null = null;
+
+  for (const segment of path) {
+    const parsed = parseControlPathSegment(segment);
+    if (!parsed) {
+      return null;
+    }
+    if (parsed.kind === "root") {
+      continue;
+    }
+    if (parsed.kind === "control") {
+      if (!Array.isArray(current.controls) || parsed.index < 0 || parsed.index >= current.controls.length) {
+        return null;
+      }
+      parentControls = current.controls;
+      index = parsed.index;
+      current = current.controls[parsed.index];
+      continue;
+    }
+    if (parsed.kind === "tab") {
+      if (!Array.isArray(current.tabs) || parsed.index < 0 || parsed.index >= current.tabs.length) {
+        return null;
+      }
+      current = current.tabs[parsed.index];
+    }
+  }
+
+  if (parentControls && index !== null) {
+    return {
+      node: current as ControlSurfaceNode,
+      parentControls,
+      index,
+    };
+  }
+
+  return null;
+};
+
+const findControlPathByNode = (
+  controlSurfaceRoot: ControlSurfaceNode[],
+  target: ControlSurfaceNode,
+): string[] | null => {
+  const visit = (nodes: ControlSurfaceNode[], path: string[]): string[] | null => {
+    for (let index = 0; index < nodes.length; index += 1) {
+      const node = nodes[index];
+      const nextPath = [...path, `c${index}`];
+      if (node === target) {
+        return nextPath;
+      }
+
+      if (node.type === "tabs") {
+        for (let tabIndex = 0; tabIndex < node.tabs.length; tabIndex += 1) {
+          const tab = node.tabs[tabIndex];
+          const tabPath = [...nextPath, `t${tabIndex}`];
+          const foundInTab = visit(tab.controls, tabPath);
+          if (foundInTab) {
+            return foundInTab;
+          }
+        }
+      }
+
+      if ("controls" in node && Array.isArray(node.controls)) {
+        const found = visit(node.controls, nextPath);
+        if (found) {
+          return found;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  return visit(controlSurfaceRoot, [CONTROL_PATH_ROOT]);
+};
+
 export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   api,
   dataSource,
@@ -163,6 +257,8 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   const [selectedPageId, setSelectedPageId] = React.useState(
     initialStateOverride?.selectedPageId ?? initialState.selectedPageId ?? "root"
   );
+  const [designMode, setDesignMode] = React.useState(false);
+  const [selectedControlPath, setSelectedControlPath] = React.useState<string[] | null>(null);
   const resolvedApi = React.useMemo(() => {
     const result = api ?? getWindowApi(vsCodeApi ?? undefined);
     // Use postMessage to log since we might not have the log method yet
@@ -186,12 +282,37 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   );
   const activePage =
     pages.find((page) => page.id === selectedPageId)?.page ?? pages[0]?.page;
+  const activePagePath = React.useMemo(() => {
+    if (!activePage) {
+      return [CONTROL_PATH_ROOT];
+    }
+
+    if (activePage.controls === state.controlSurfaceRoot) {
+      return [CONTROL_PATH_ROOT];
+    }
+
+    return (
+      findControlPathByNode(state.controlSurfaceRoot ?? [], activePage as ControlSurfaceNode) ??
+      [CONTROL_PATH_ROOT]
+    );
+  }, [activePage, state.controlSurfaceRoot]);
+
+  const resolvedSelection = React.useMemo(
+    () => resolveControlByPath(state.controlSurfaceRoot ?? [], selectedControlPath),
+    [state.controlSurfaceRoot, selectedControlPath],
+  );
 
   React.useEffect(() => {
     if (!pages.find((page) => page.id === selectedPageId)) {
       setSelectedPageId("root");
     }
   }, [pages, selectedPageId]);
+
+  React.useEffect(() => {
+    if (selectedControlPath && !resolvedSelection) {
+      setSelectedControlPath(null);
+    }
+  }, [resolvedSelection, selectedControlPath]);
 
   React.useEffect(() => {
     const unsubscribe = resolvedDataSource.subscribe((payload) => {
@@ -271,6 +392,20 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             options={pages.map((val => ({ label: val.label, value: val.id })))}
           />
         </label>
+        <Button
+          onClick={() => {
+            setDesignMode((value) => {
+              const next = !value;
+              if (!next) {
+                setSelectedControlPath(null);
+              }
+              return next;
+            });
+          }}
+          style={{ marginLeft: "auto" }}
+        >
+          {designMode ? "Exit Design Mode" : "Design Mode"}
+        </Button>
         {/* <Divider />
         <Button onClick={() => resolvedApi?.postMessage({ type: "addWatch" })}>
           Add Watch
@@ -291,7 +426,16 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
       {/* main control surface body */}
 
       {activePage && resolvedApi && state.symbolValues && state.pollIntervalMs ? (
-        <ControlSurfacePage page={activePage} api={resolvedApi} symbolValues={state.symbolValues} pollIntervalMs={state.pollIntervalMs} />
+        <ControlSurfacePage
+          page={activePage}
+          api={resolvedApi}
+          symbolValues={state.symbolValues}
+          pollIntervalMs={state.pollIntervalMs}
+          pagePath={activePagePath}
+          designMode={designMode}
+          selectedPath={selectedControlPath}
+          onSelectPath={(path) => setSelectedControlPath(path)}
+        />
       ) : (
         <div
           style={{
@@ -303,6 +447,122 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
           No controls.
         </div>
       )}
+
+      {designMode && resolvedSelection ? (
+        <div className="control-surface-properties-panel">
+          <div className="control-surface-properties-header">
+            <div className="control-surface-properties-title">
+              Selected: {resolvedSelection.node.type}
+            </div>
+          </div>
+          <ButtonGroup>
+            <Button
+              onClick={() => {
+                if (!selectedControlPath) {
+                  return;
+                }
+                resolvedApi?.postMessage({
+                  type: "deleteControl",
+                  path: selectedControlPath,
+                });
+                setSelectedControlPath(null);
+              }}
+            >
+              Delete
+            </Button>
+            <Button
+              onClick={() => {
+                if (!selectedControlPath || !resolvedSelection) {
+                  return;
+                }
+                const nextIndex = resolvedSelection.index - 1;
+                if (nextIndex < 0) {
+                  return;
+                }
+                const nextPath = [...selectedControlPath];
+                nextPath[nextPath.length - 1] = `c${nextIndex}`;
+                resolvedApi?.postMessage({
+                  type: "moveControl",
+                  path: selectedControlPath,
+                  direction: "up",
+                });
+                setSelectedControlPath(nextPath);
+              }}
+              disabled={resolvedSelection.index === 0}
+            >
+              Move Up
+            </Button>
+            <Button
+              onClick={() => {
+                if (!selectedControlPath || !resolvedSelection) {
+                  return;
+                }
+                const nextIndex = resolvedSelection.index + 1;
+                if (nextIndex >= resolvedSelection.parentControls.length) {
+                  return;
+                }
+                const nextPath = [...selectedControlPath];
+                nextPath[nextPath.length - 1] = `c${nextIndex}`;
+                resolvedApi?.postMessage({
+                  type: "moveControl",
+                  path: selectedControlPath,
+                  direction: "down",
+                });
+                setSelectedControlPath(nextPath);
+              }}
+              disabled={resolvedSelection.index >= resolvedSelection.parentControls.length - 1}
+            >
+              Move Down
+            </Button>
+          </ButtonGroup>
+
+          <div style={{ marginTop: 12 }}>
+            {(() => {
+              const entry = ControlRegistry.getByType(resolvedSelection.node.type);
+              const PropertiesPanel = entry?.propertiesPanelComponent;
+              if (!PropertiesPanel) {
+                if (resolvedSelection.node.type === "page") {
+                  return (
+                    <PagePropertiesPanel
+                      node={resolvedSelection.node}
+                      onChange={(nextNode) => {
+                        if (!selectedControlPath) {
+                          return;
+                        }
+                        resolvedApi?.postMessage({
+                          type: "updateControl",
+                          path: selectedControlPath,
+                          control: nextNode,
+                        });
+                      }}
+                    />
+                  );
+                }
+                return (
+                  <div className="control-surface-properties-hint">
+                    No editable properties for this control.
+                  </div>
+                );
+              }
+              return (
+                <PropertiesPanel
+                  node={resolvedSelection.node}
+                  onChange={(nextNode: ControlSurfaceNode) => {
+                    if (!selectedControlPath) {
+                      return;
+                    }
+                    resolvedApi?.postMessage({
+                      type: "updateControl",
+                      path: selectedControlPath,
+                      control: nextNode,
+                    });
+                  }}
+                />
+              );
+            })()}
+          </div>
+        </div>
+      ) : null}
 
       {/* watches (maybe remove later?) */}
       {/* 

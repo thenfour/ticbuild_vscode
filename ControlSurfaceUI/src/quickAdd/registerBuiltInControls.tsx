@@ -9,7 +9,21 @@ import { ControlSurfaceEnumButtons } from "../ControlSurfaceControls/ControlSurf
 import { ControlSurfaceLabel } from "../ControlSurfaceControls/ControlSurfaceLabel";
 import { ControlSurfaceTriggerButton } from "../ControlSurfaceControls/ControlSurfaceTriggerButton";
 import { ControlSurfaceGroup } from "../ControlSurfaceControls/ControlSurfaceGroup";
+import { ControlSurfaceTabs } from "../ControlSurfaceControls/ControlSurfaceTabs";
 import { SymbolQuickAdd } from "./SymbolQuickAdd";
+import {
+  DividerPropertiesPanel,
+  EnumButtonsPropertiesPanel,
+  GroupPropertiesPanel,
+  KnobPropertiesPanel,
+  LabelPropertiesPanel,
+  NumberPropertiesPanel,
+  SliderPropertiesPanel,
+  StringPropertiesPanel,
+  TabsPropertiesPanel,
+  TogglePropertiesPanel,
+  TriggerButtonPropertiesPanel,
+} from "../ControlSurfacePropertiesPanels";
 
 export function registerBuiltInControls() {
 
@@ -20,6 +34,7 @@ export function registerBuiltInControls() {
     description: "Rotary knob for numeric input",
     quickAddComponent: SymbolQuickAdd,
     renderComponent: ControlSurfaceKnob,
+    propertiesPanelComponent: KnobPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "knob",
       label: data.label || "Knob",
@@ -37,6 +52,7 @@ export function registerBuiltInControls() {
     description: "Linear slider for numeric input",
     quickAddComponent: SymbolQuickAdd,
     renderComponent: ControlSurfaceSlider,
+    propertiesPanelComponent: SliderPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "slider",
       label: data.label || "Slider",
@@ -54,6 +70,7 @@ export function registerBuiltInControls() {
     description: "On/off toggle switch",
     quickAddComponent: SymbolQuickAdd,
     renderComponent: ControlSurfaceToggle,
+    propertiesPanelComponent: TogglePropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "toggle",
       label: data.label || "Toggle",
@@ -68,6 +85,7 @@ export function registerBuiltInControls() {
     description: "Numeric input with up/down buttons",
     quickAddComponent: SymbolQuickAdd,
     renderComponent: ControlSurfaceNumber,
+    propertiesPanelComponent: NumberPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "number",
       label: data.label || "Number",
@@ -85,6 +103,7 @@ export function registerBuiltInControls() {
     description: "Text input field",
     quickAddComponent: SymbolQuickAdd,
     renderComponent: ControlSurfaceString,
+    propertiesPanelComponent: StringPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "string",
       label: data.label || "Text",
@@ -99,6 +118,7 @@ export function registerBuiltInControls() {
     description: "Multiple choice buttons",
     quickAddComponent: SymbolQuickAdd,
     renderComponent: ControlSurfaceEnumButtons,
+    propertiesPanelComponent: EnumButtonsPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "enumButtons",
       label: data.label || "Options",
@@ -117,6 +137,7 @@ export function registerBuiltInControls() {
     description: "Display dynamic text from expression",
     quickAddComponent: (props) => <SymbolQuickAdd {...props} label="Expression" />,
     renderComponent: ControlSurfaceLabel,
+    propertiesPanelComponent: LabelPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "label",
       label: data.label,
@@ -131,6 +152,7 @@ export function registerBuiltInControls() {
     description: "Execute code on click",
     quickAddComponent: (props) => <SymbolQuickAdd {...props} label="Expression" />,
     renderComponent: ControlSurfaceTriggerButton,
+    propertiesPanelComponent: TriggerButtonPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "triggerButton",
       label: data.label || "Button",
@@ -168,12 +190,56 @@ export function registerBuiltInControls() {
       );
     },
     renderComponent: ControlSurfaceGroup,
+    propertiesPanelComponent: GroupPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "group",
       label: data.label || "Group",
       orientation: "horizontal",
       controls: [],
     }),
+  });
+
+  ControlRegistry.register({
+    type: "tabs",
+    displayName: "Tabs",
+    category: "layout",
+    description: "Tabbed container of controls",
+    quickAddComponent: (props) => {
+      const [labels, setLabels] = React.useState("Tab 1, Tab 2");
+      React.useEffect(() => {
+        props.onSubmit({ labels });
+      }, [labels, props]);
+      return (
+        <div>
+          <label style={{ display: "block", marginBottom: "4px" }}>Tab Labels</label>
+          <input
+            type="text"
+            value={labels}
+            onChange={(e) => setLabels(e.target.value)}
+            placeholder="Tab 1, Tab 2"
+            style={{
+              width: "100%",
+              padding: "4px 8px",
+              backgroundColor: "var(--vscode-input-background)",
+              color: "var(--vscode-input-foreground)",
+              border: "1px solid var(--vscode-input-border)",
+            }}
+          />
+        </div>
+      );
+    },
+    renderComponent: ControlSurfaceTabs,
+    propertiesPanelComponent: TabsPropertiesPanel,
+    createDefaultSpec: (data) => {
+      const labels = String(data.labels ?? "Tab 1")
+        .split(",")
+        .map((label) => label.trim())
+        .filter(Boolean);
+      return {
+        type: "tabs",
+        tabs: labels.map((label) => ({ label, controls: [] })),
+      };
+    },
   });
 
   ControlRegistry.register({
@@ -188,6 +254,7 @@ export function registerBuiltInControls() {
       return null;
     },
     renderComponent: () => <hr />,
+    propertiesPanelComponent: DividerPropertiesPanel,
     createDefaultSpec: () => ({
       type: "divider",
     }),

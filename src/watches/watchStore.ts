@@ -173,49 +173,13 @@ export class WatchStore {
       ? existing.controlSurfaceRoot
       : [];
 
-    // Navigate to the parent and add the control
-    if (parentPath.length === 0 || (parentPath.length === 1 && parentPath[0] === 'root')) {
-      // Add to root
-      controlSurfaceRoot.push(control);
-      this.log(`[watchStore] added control to root, new count: ${controlSurfaceRoot.length}`);
-    } else {
-      // Navigate through the hierarchy to find the parent container
-      const pathToNavigate = parentPath[0] === 'root' ? parentPath.slice(1) : parentPath;
-
-      let currentContainer: any = { controls: controlSurfaceRoot };
-      let success = false;
-
-      for (let i = 0; i < pathToNavigate.length; i++) {
-        const index = parseInt(pathToNavigate[i], 10);
-
-        if (isNaN(index) || !Array.isArray(currentContainer.controls) || index < 0 || index >= currentContainer.controls.length) {
-          this.log(`[watchStore] addControl failed: invalid path at index ${i}, value=${pathToNavigate[i]}`);
-          break;
-        }
-
-        const node = currentContainer.controls[index];
-
-        // Check if this is the last segment of the path
-        if (i === pathToNavigate.length - 1) {
-          // This is the parent container - add the control here
-          if (Array.isArray(node.controls)) {
-            node.controls.push(control);
-            this.log(`[watchStore] added control to path ${parentPath.join('/')}, type=${node.type}`);
-            success = true;
-          } else {
-            this.log(`[watchStore] addControl failed: parent at ${parentPath.join('/')} has no controls array`);
-          }
-        } else {
-          // Continue navigating
-          currentContainer = node;
-        }
-      }
-
-      if (!success) {
-        this.log(`[watchStore] addControl failed: could not navigate to ${parentPath.join('/')}`);
-        return;
-      }
+    const container = this.resolveControlsContainer(controlSurfaceRoot, parentPath);
+    if (!container) {
+      this.log(`[watchStore] addControl failed: could not navigate to ${parentPath.join('/')}`);
+      return;
     }
+    container.push(control);
+    this.log(`[watchStore] added control to path ${parentPath.join('/')}, type=${(control as any).type}`);
 
     // Update in-memory state
     this.controlSurfaceRoot = controlSurfaceRoot;
@@ -249,6 +213,203 @@ export class WatchStore {
 
     // Trigger a change event to refresh the UI
     this.emitter.fire();
+  }
+
+  async updateControl(path: string[], control: DevtoolsControlNode): Promise<void> {
+    if (!this.devtoolsPath) {
+      this.log('[watchStore] updateControl skipped (no workspace root)');
+      return;
+    }
+
+    const existing = await readDevtoolsFile(this.devtoolsPath, this.output);
+    const controlSurfaceRoot = Array.isArray(existing.controlSurfaceRoot)
+      ? existing.controlSurfaceRoot
+      : [];
+
+    const resolved = this.resolveControlByPath(controlSurfaceRoot, path);
+    if (!resolved) {
+      this.log(`[watchStore] updateControl failed: invalid path ${path.join('/')}`);
+      return;
+    }
+
+    resolved.parentControls[resolved.index] = control;
+    this.controlSurfaceRoot = controlSurfaceRoot;
+
+    await this.persistControlSurface(existing, controlSurfaceRoot);
+    this.emitter.fire();
+  }
+
+  async deleteControl(path: string[]): Promise<void> {
+    if (!this.devtoolsPath) {
+      this.log('[watchStore] deleteControl skipped (no workspace root)');
+      return;
+    }
+
+    const existing = await readDevtoolsFile(this.devtoolsPath, this.output);
+    const controlSurfaceRoot = Array.isArray(existing.controlSurfaceRoot)
+      ? existing.controlSurfaceRoot
+      : [];
+
+    const resolved = this.resolveControlByPath(controlSurfaceRoot, path);
+    if (!resolved) {
+      this.log(`[watchStore] deleteControl failed: invalid path ${path.join('/')}`);
+      return;
+    }
+
+    resolved.parentControls.splice(resolved.index, 1);
+    this.controlSurfaceRoot = controlSurfaceRoot;
+
+    await this.persistControlSurface(existing, controlSurfaceRoot);
+    this.emitter.fire();
+  }
+
+  async moveControl(path: string[], direction: 'up' | 'down'): Promise<void> {
+    if (!this.devtoolsPath) {
+      this.log('[watchStore] moveControl skipped (no workspace root)');
+      return;
+    }
+
+    const existing = await readDevtoolsFile(this.devtoolsPath, this.output);
+    const controlSurfaceRoot = Array.isArray(existing.controlSurfaceRoot)
+      ? existing.controlSurfaceRoot
+      : [];
+
+    const resolved = this.resolveControlByPath(controlSurfaceRoot, path);
+    if (!resolved) {
+      this.log(`[watchStore] moveControl failed: invalid path ${path.join('/')}`);
+      return;
+    }
+
+    const delta = direction === 'up' ? -1 : 1;
+    const nextIndex = resolved.index + delta;
+    if (nextIndex < 0 || nextIndex >= resolved.parentControls.length) {
+      this.log(`[watchStore] moveControl ignored: out of bounds for ${path.join('/')}`);
+      return;
+    }
+
+    const [removed] = resolved.parentControls.splice(resolved.index, 1);
+    resolved.parentControls.splice(nextIndex, 0, removed);
+
+    this.controlSurfaceRoot = controlSurfaceRoot;
+    await this.persistControlSurface(existing, controlSurfaceRoot);
+    this.emitter.fire();
+  }
+
+  private resolveControlByPath(
+    controlSurfaceRoot: DevtoolsControlNode[],
+    path: string[],
+  ): { node: DevtoolsControlNode; parentControls: DevtoolsControlNode[]; index: number } | null {
+    let current: any = { controls: controlSurfaceRoot };
+    let parentControls: DevtoolsControlNode[] | null = null;
+    let index: number | null = null;
+
+    for (const segment of path) {
+      if (segment === 'root') {
+        continue;
+      }
+
+      if (segment.startsWith('c')) {
+        const parsed = Number.parseInt(segment.slice(1), 10);
+        if (Number.isNaN(parsed) || !Array.isArray(current.controls) || parsed < 0 || parsed >= current.controls.length) {
+          return null;
+        }
+        parentControls = current.controls;
+        index = parsed;
+        current = current.controls[parsed];
+        continue;
+      }
+
+      if (segment.startsWith('t')) {
+        const parsed = Number.parseInt(segment.slice(1), 10);
+        if (Number.isNaN(parsed) || !Array.isArray(current.tabs) || parsed < 0 || parsed >= current.tabs.length) {
+          return null;
+        }
+        current = current.tabs[parsed];
+        continue;
+      }
+
+      return null;
+    }
+
+    if (parentControls && index !== null) {
+      return {
+        node: current as DevtoolsControlNode,
+        parentControls,
+        index,
+      };
+    }
+
+    return null;
+  }
+
+  private resolveControlsContainer(
+    controlSurfaceRoot: DevtoolsControlNode[],
+    parentPath: string[],
+  ): DevtoolsControlNode[] | null {
+    let current: any = { controls: controlSurfaceRoot };
+
+    for (const segment of parentPath) {
+      if (segment === 'root') {
+        continue;
+      }
+
+      if (segment.startsWith('c')) {
+        const parsed = Number.parseInt(segment.slice(1), 10);
+        if (Number.isNaN(parsed) || !Array.isArray(current.controls) || parsed < 0 || parsed >= current.controls.length) {
+          return null;
+        }
+        current = current.controls[parsed];
+        continue;
+      }
+
+      if (segment.startsWith('t')) {
+        const parsed = Number.parseInt(segment.slice(1), 10);
+        if (Number.isNaN(parsed) || !Array.isArray(current.tabs) || parsed < 0 || parsed >= current.tabs.length) {
+          return null;
+        }
+        current = current.tabs[parsed];
+        continue;
+      }
+
+      return null;
+    }
+
+    if (Array.isArray(current.controls)) {
+      return current.controls;
+    }
+
+    return null;
+  }
+
+  private async persistControlSurface(existing: { [key: string]: unknown }, controlSurfaceRoot: DevtoolsControlNode[]): Promise<void> {
+    if (!this.devtoolsPath) {
+      return;
+    }
+
+    const updated = {
+      ...existing,
+      watches: this.watches.map((watch) => this.serializeWatch(watch)),
+      controlSurfaceRoot,
+    };
+
+    const dir = path.dirname(this.devtoolsPath);
+    try {
+      await fs.mkdir(dir, { recursive: true });
+    } catch (error) {
+      this.log('[watchStore] failed to create devtools dir');
+      return;
+    }
+
+    try {
+      await fs.writeFile(
+        this.devtoolsPath,
+        JSON.stringify(updated, null, 2),
+        'utf8',
+      );
+    } catch (error) {
+      this.log('[watchStore] failed to write devtools.json');
+      return;
+    }
   }
 
   private async load(): Promise<void> {

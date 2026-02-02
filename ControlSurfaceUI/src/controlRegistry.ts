@@ -24,7 +24,7 @@ export interface ControlTypeRegistryEntry {
   category: "input" | "display" | "layout" | "action";
   quickAddComponent: React.ComponentType<QuickAddProps>;
   renderComponent: React.ComponentType<any>;
-  propertiesPanelComponent?: React.ComponentType<ControlPropertiesProps>;
+  propertiesPanelComponent?: React.ComponentType<any>;
   createDefaultSpec: (quickAddData: Record<string, any>) => Partial<ControlSurfaceNode>;
   description?: string;
 }

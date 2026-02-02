@@ -11,6 +11,7 @@
 import React from "react";
 import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { ControlSurfaceGroupSpec, ControlSurfaceApi } from "../defs";
+import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
 import { AddControlControl } from "../AddControlControl";
 
 
@@ -41,10 +42,20 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
 
 export interface ControlSurfaceGroupProps extends ControlSurfaceGroupSpec {
   api: ControlSurfaceApi;
-  renderControl: (node: any, index: number, api: ControlSurfaceApi, symbolValues: Record<string, any>, pollIntervalMs: number) => JSX.Element;
+  renderControl: (
+    node: any,
+    index: number,
+    api: ControlSurfaceApi,
+    symbolValues: Record<string, any>,
+    pollIntervalMs: number,
+    options: ControlSurfaceRenderOptions,
+  ) => JSX.Element;
   symbolValues: Record<string, any>;
   pollIntervalMs: number;
   parentPath?: string[];
+  designMode: boolean;
+  selectedPath?: string[] | null;
+  onSelectPath?: (path: string[], node: any) => void;
 }
 
 export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
@@ -55,13 +66,23 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   renderControl,
   symbolValues,
   pollIntervalMs,
-  parentPath = []
+  parentPath = [],
+  designMode,
+  selectedPath,
+  onSelectPath,
 }) => {
   return <ControlSurfaceGroupBase
     label={label}
     orientation={orientation}
   >
-    {controls.map((child, index) => renderControl(child, index, api, symbolValues, pollIntervalMs))}
-    <AddControlControl api={api} parentPath={parentPath} />
+    {controls.map((child, index) =>
+      renderControl(child, index, api, symbolValues, pollIntervalMs, {
+        parentPath,
+        designMode,
+        selectedPath,
+        onSelectPath,
+      })
+    )}
+    <AddControlControl api={api} parentPath={parentPath} disabled={designMode} />
   </ControlSurfaceGroupBase>;
 };

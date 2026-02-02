@@ -57,3 +57,84 @@ fieldset:disabled {
 fieldset:disabled legend {
   color: var(--vscode-disabledForeground, var(--muted));
 }
+
+.control-surface-selectable {
+  position: relative;
+}
+
+.control-surface-selectable--design {
+  cursor: pointer;
+}
+
+.control-surface-selectable--design .control-surface-selectable__content {
+  pointer-events: none;
+  user-select: none;
+}
+
+.control-surface-selectable--design::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 1px dashed var(--vscode-focusBorder, var(--accent));
+  opacity: 0.25;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.control-surface-selectable--selected::after {
+  border-style: solid;
+  opacity: 0.9;
+}
+
+.control-surface-properties-panel {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--vscode-panel-border, var(--border));
+  border-radius: 4px;
+  background-color: var(--vscode-editor-background, var(--bg));
+}
+
+.control-surface-properties-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.control-surface-properties-title {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.control-surface-properties-field {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.control-surface-properties-label {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.control-surface-properties-input {
+  width: 100%;
+  padding: 4px 8px;
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 3px;
+}
+
+.control-surface-properties-textarea {
+  min-height: 80px;
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 11px;
+}
+
+.control-surface-properties-hint {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}

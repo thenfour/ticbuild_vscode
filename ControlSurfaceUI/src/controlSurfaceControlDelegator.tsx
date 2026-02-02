@@ -11,6 +11,15 @@ import { ControlSurfaceString } from "./ControlSurfaceControls/ControlSurfaceStr
 import { ControlSurfaceTabs } from "./ControlSurfaceControls/ControlSurfaceTabs";
 import { ControlSurfaceToggle } from "./ControlSurfaceControls/ControlSurfaceToggle";
 import { ControlSurfaceTriggerButton } from "./ControlSurfaceControls/ControlSurfaceTriggerButton";
+import { ControlSurfaceSelectable } from "./ControlSurfaceSelectable";
+import { buildControlPath, isPathEqual } from "./controlPath";
+
+export type ControlSurfaceRenderOptions = {
+    parentPath: string[];
+    designMode: boolean;
+    selectedPath?: string[] | null;
+    onSelectPath?: (path: string[], node: ControlSurfaceNode) => void;
+};
 
 export const renderControlSurfaceControl = (
     node: ControlSurfaceNode,
@@ -18,72 +27,128 @@ export const renderControlSurfaceControl = (
     api: ControlSurfaceApi,
     symbolValues: Record<string, any>,
     pollIntervalMs: number,
+    options: ControlSurfaceRenderOptions,
 ): JSX.Element => {
+    const currentPath = buildControlPath(options.parentPath, index);
+    const isSelected = isPathEqual(options.selectedPath, currentPath);
+
+    const handleSelect = options.onSelectPath
+        ? (path: string[]) => options.onSelectPath?.(path, node)
+        : undefined;
+
+    const wrapSelectable = (content: JSX.Element, key: string) => (
+        <ControlSurfaceSelectable
+            key={key}
+            path={currentPath}
+            designMode={options.designMode}
+            isSelected={isSelected}
+            onSelect={handleSelect}
+        >
+            {content}
+        </ControlSurfaceSelectable>
+    );
+
     switch (node.type) {
         case "divider":
-            return <ControlSurfaceDivider key={`divider-${index}`} {...node} />;
+            return wrapSelectable(<ControlSurfaceDivider {...node} />, `divider-${index}`);
 
         case "enumButtons":
-            return <ControlSurfaceEnumButtons key={`enumButtons-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
+            return wrapSelectable(
+                <ControlSurfaceEnumButtons {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                `enumButtons-${index}`,
+            );
 
         case "knob":
-            return <ControlSurfaceKnob key={`knob-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
+            return wrapSelectable(
+                <ControlSurfaceKnob {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                `knob-${index}`,
+            );
 
         case "label":
-            return <ControlSurfaceLabel key={`label-${index}`} {...node} api={api} pollIntervalMs={pollIntervalMs} />;
+            return wrapSelectable(
+                <ControlSurfaceLabel {...node} api={api} pollIntervalMs={pollIntervalMs} />,
+                `label-${index}`,
+            );
 
         case "number":
-            return <ControlSurfaceNumber key={`number-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
+            return wrapSelectable(
+                <ControlSurfaceNumber {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                `number-${index}`,
+            );
 
         case "slider":
-            return <ControlSurfaceSlider key={`slider-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
+            return wrapSelectable(
+                <ControlSurfaceSlider {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                `slider-${index}`,
+            );
 
         case "string":
-            return <ControlSurfaceString key={`string-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
+            return wrapSelectable(
+                <ControlSurfaceString {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                `string-${index}`,
+            );
 
         case "toggle":
-            return <ControlSurfaceToggle key={`toggle-${index}`} {...node} api={api} initialValue={symbolValues?.[node.symbol]} />;
+            return wrapSelectable(
+                <ControlSurfaceToggle {...node} api={api} initialValue={symbolValues?.[node.symbol]} />,
+                `toggle-${index}`,
+            );
 
         case "triggerButton":
-            return <ControlSurfaceTriggerButton key={`triggerButton-${index}`} {...node} api={api} />;
+            return wrapSelectable(
+                <ControlSurfaceTriggerButton {...node} api={api} />,
+                `triggerButton-${index}`,
+            );
 
         case "group":
-            return (
+            return wrapSelectable(
                 <ControlSurfaceGroup
-                    key={`group-${index}`}
                     {...node}
                     api={api}
                     renderControl={renderControlSurfaceControl}
                     symbolValues={symbolValues}
                     pollIntervalMs={pollIntervalMs}
-                />
+                    parentPath={currentPath}
+                    designMode={options.designMode}
+                    selectedPath={options.selectedPath}
+                    onSelectPath={options.onSelectPath}
+                />,
+                `group-${index}`,
             );
 
         case "tabs":
-            return (
+            return wrapSelectable(
                 <ControlSurfaceTabs
-                    key={`tabs-${index}`}
                     {...node}
                     api={api}
                     renderControl={renderControlSurfaceControl}
                     symbolValues={symbolValues}
                     pollIntervalMs={pollIntervalMs}
-                />
+                    parentPath={currentPath}
+                    designMode={options.designMode}
+                    selectedPath={options.selectedPath}
+                    onSelectPath={options.onSelectPath}
+                />,
+                `tabs-${index}`,
             );
 
         case "page":
-            return (
-                <div key={`page-${index}`} className="control-surface-page">
+            return wrapSelectable(
+                <div className="control-surface-page">
                     <h3 className="control-surface-page-title">{node.label}</h3>
                     <div className="control-surface-page-content">
                         {node.controls.map((child, childIndex) =>
-                            renderControlSurfaceControl(child, childIndex, api, symbolValues, pollIntervalMs),
+                            renderControlSurfaceControl(child, childIndex, api, symbolValues, pollIntervalMs, {
+                                ...options,
+                                parentPath: currentPath,
+                            }),
                         )}
                     </div>
-                </div>
+                </div>,
+                `page-${index}`,
             );
 
         default:
-            return <div key={`unknown-${index}`}>Unknown control type.</div>;
+            return wrapSelectable(<div>Unknown control type.</div>, `unknown-${index}`);
     }
 };

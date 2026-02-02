@@ -13,20 +13,12 @@ import {
 } from "./defs";
 import { ComponentTester } from "./ComponentTester";
 import { Dropdown } from "./basic/Dropdown";
-import { useControlSurfaceApi } from "./VsCodeApiContext";
+import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 import { ControlRegistry } from "./controlRegistry";
 import { PagePropertiesPanel } from "./ControlSurfacePropertiesPanels";
 import { CONTROL_PATH_ROOT } from "./controlPathBase";
 import { findControlPathByNode, resolveControlByPath } from "./controlPathUtils";
-
-const initialState: ControlSurfaceState = {
-  status: "Disconnected",
-  watches: [],
-  controlSurfaceRoot: [],
-  symbolValues: {},
-  pollIntervalMs: 250,
-  uiRefreshMs: 250,
-};
+import { useControlSurfaceState } from "./hooks/ControlSurfaceState";
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
   subscribe: (listener) => {
@@ -49,97 +41,32 @@ export type ControlSurfaceAppProps = {
   viewKind?: ControlSurfaceViewKind;
 };
 
-type PageOption = {
-  id: string;
-  label: string;
-  page: Extract<ControlSurfaceNode, { type: "page" }>;
-};
-
-
-// builds a flat list of all pages in the control surface hierarchy.
-const buildPageOptions = (
-  controlSurfaceRoot: ControlSurfaceNode[],
-): PageOption[] => {
-  const rootPage: Extract<ControlSurfaceNode, { type: "page" }> = {
-    type: "page",
-    label: "Root",
-    controls: controlSurfaceRoot,
-  };
-  const pages: PageOption[] = [{ id: "root", label: "Root", page: rootPage }];
-
-  const visit = (
-    nodes: ControlSurfaceNode[],
-    labelPath: string[],
-    idPath: string[],
-  ) => {
-    nodes.forEach((node, index) => {
-      if (node.type === "page") {
-        const nextLabelPath = [...labelPath, node.label];
-        const nextIdPath = [...idPath, `p${index}`];
-        pages.push({
-          id: nextIdPath.join("/"),
-          label: nextLabelPath.join(" / "),
-          page: node,
-        });
-        visit(node.controls, nextLabelPath, nextIdPath);
-        return;
-      }
-
-      if (node.type === "group") {
-        visit(node.controls, labelPath, [...idPath, `g${index}`]);
-      }
-    });
-  };
-
-  visit(controlSurfaceRoot, [], ["root"]);
-  return pages;
-};
-
 export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   dataSource,
-  initialState: initialStateOverride,
+  //initialState: initialStateOverride,
   viewKind,
 }) => {
-  const [state, setState] = React.useState<ControlSurfaceState>(
-    initialStateOverride ?? initialState,
-  );
   const api = useControlSurfaceApi();
-  const [selectedPageId, setSelectedPageId] = React.useState(
-    initialStateOverride?.selectedPageId ?? initialState.selectedPageId ?? "root"
-  );
-  const [designMode, setDesignMode] = React.useState(false);
-  const [selectedControlPath, setSelectedControlPath] = React.useState<string[] | null>(null);
+  const stateApi = useControlSurfaceState();
 
   const resolvedDataSource = React.useMemo(
     () => dataSource ?? createWindowMessageDataSource(),
     [dataSource],
   );
 
-  const pages = React.useMemo(
-    () => buildPageOptions(state.controlSurfaceRoot ?? []),
-    [state.controlSurfaceRoot],
-  );
-  const activePage =
-    pages.find((page) => page.id === selectedPageId)?.page ?? pages[0]?.page;
-  const activePagePath = React.useMemo(() => {
-    if (!activePage) {
-      return [CONTROL_PATH_ROOT];
-    }
-
-    if (activePage.controls === state.controlSurfaceRoot) {
-      return [CONTROL_PATH_ROOT];
-    }
-
-    return (
-      findControlPathByNode(state.controlSurfaceRoot ?? [], activePage as ControlSurfaceNode) ??
-      [CONTROL_PATH_ROOT]
-    );
-  }, [activePage, state.controlSurfaceRoot]);
-
   const resolvedSelection = React.useMemo(
-    () => resolveControlByPath(state.controlSurfaceRoot ?? [], selectedControlPath),
-    [state.controlSurfaceRoot, selectedControlPath],
+    () => resolveControlByPath(stateApi.state.controlSurfaceRoot, stateApi.state.selectedControlPath),
+    [stateApi.state.controlSurfaceRoot, stateApi.state.selectedControlPath],
   );
+
+
+  const pages = stateApi.pageOptions;
+  const selectedPageId = stateApi.state.selectedPageId;
+  const setSelectedPageId = stateApi.setSelectedPageId;
+  const designMode = stateApi.state.designMode;
+  const setDesignMode = stateApi.setDesignMode;
+  const applyHostState = stateApi.applyHostState;
+  const setSelectedControlPath = stateApi.setSelectedControlPath;
 
   React.useEffect(() => {
     if (!pages.find((page) => page.id === selectedPageId)) {
@@ -149,33 +76,26 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
           type: "setSelectedPage",
           pageId: "root",
           pageLabel: "Root",
-          viewId: state.viewId,
+          viewId: stateApi.state.viewId,
         });
       }
     }
-  }, [pages, api, selectedPageId, state.viewId]);
+  }, [stateApi.pageOptions, api, selectedPageId, stateApi.state.viewId]);
 
   React.useEffect(() => {
-    if (selectedControlPath && !resolvedSelection) {
+    if (stateApi.state.selectedControlPath && !resolvedSelection) {
       setSelectedControlPath(null);
     }
-  }, [resolvedSelection, selectedControlPath]);
+  }, [resolvedSelection, stateApi.state.selectedControlPath]);
 
   React.useEffect(() => {
     const unsubscribe = resolvedDataSource.subscribe((payload) => {
-      setState({
-        ...payload,
-        controlSurfaceRoot: payload.controlSurfaceRoot ?? [],
-      });
-      // Update selected page if it's provided in the payload
-      if (payload.selectedPageId) {
-        setSelectedPageId(payload.selectedPageId);
-      }
+      applyHostState(payload);
     });
     return () => {
       unsubscribe?.();
     };
-  }, [resolvedDataSource]);
+  }, [resolvedDataSource, applyHostState]);
 
   return (
     <div
@@ -219,7 +139,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
           color: "var(--vscode-descriptionForeground)",
         }}
       >
-        {state.status}
+        {stateApi.state.status}
       </div>
 
 
@@ -237,7 +157,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
                 type: "setSelectedPage",
                 pageId: newValue,
                 pageLabel: selectedLabel,
-                viewId: state.viewId
+                viewId: stateApi.state.viewId,
               });
             }}
             options={pages.map((val => ({ label: val.label, value: val.id })))}
@@ -279,14 +199,14 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
               api.postMessage({
                 type: "deleteControl",
-                path: activePagePath,
+                path: stateApi.activePagePath,
               });
               setSelectedPageId("root");
               api.postMessage({
                 type: "setSelectedPage",
                 pageId: "root",
                 pageLabel: "Root",
-                viewId: state.viewId,
+                viewId: stateApi.state.viewId,
               });
             }}
             disabled={selectedPageId === "root"}
@@ -313,21 +233,21 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
       {/* main control surface body */}
 
-      {activePage && api && (state.uiRefreshMs ?? state.pollIntervalMs) ? (
+      {stateApi.activePage && api ? (
         <ControlSurfacePage
-          page={activePage}
-          symbolValues={state.symbolValues}
-          pollIntervalMs={state.uiRefreshMs ?? state.pollIntervalMs ?? 250}
-          pagePath={activePagePath}
-          designMode={designMode}
-          selectedPath={selectedControlPath}
+          page={stateApi.activePage}
+          //symbolValues={state.symbolValues}
+          //pollIntervalMs={state.pollIntervalMs}
+          pagePath={stateApi.activePagePath}
+          //designMode={designMode}
+          //selectedPath={stateApi.state.selectedControlPath}
           onSelectPath={(path) => setSelectedControlPath(path)}
           onDeletePath={(path) => {
             api?.postMessage({
               type: "deleteControl",
               path,
             });
-            if (selectedControlPath && path.join("/") === selectedControlPath.join("/")) {
+            if (stateApi.state.selectedControlPath && path.join("/") === stateApi.state.selectedControlPath.join("/")) {
               setSelectedControlPath(null);
             }
           }}
@@ -344,7 +264,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         </div>
       )}
 
-      {designMode && resolvedSelection ? (
+      {stateApi.state.designMode && resolvedSelection ? (
         <div className="control-surface-properties-panel">
           <div className="control-surface-properties-header">
             <div className="control-surface-properties-title">
@@ -354,12 +274,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
           <ButtonGroup>
             <Button
               onClick={() => {
-                if (!selectedControlPath) {
+                if (!stateApi.state.selectedControlPath) {
                   return;
                 }
                 api?.postMessage({
                   type: "deleteControl",
-                  path: selectedControlPath,
+                  path: stateApi.state.selectedControlPath,
                 });
                 setSelectedControlPath(null);
               }}
@@ -368,18 +288,18 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             </Button>
             <Button
               onClick={() => {
-                if (!selectedControlPath || !resolvedSelection) {
+                if (!stateApi.state.selectedControlPath || !resolvedSelection) {
                   return;
                 }
                 const nextIndex = resolvedSelection.index - 1;
                 if (nextIndex < 0) {
                   return;
                 }
-                const nextPath = [...selectedControlPath];
+                const nextPath = [...stateApi.state.selectedControlPath];
                 nextPath[nextPath.length - 1] = `c${nextIndex}`;
                 api?.postMessage({
                   type: "moveControl",
-                  path: selectedControlPath,
+                  path: stateApi.state.selectedControlPath,
                   direction: "up",
                 });
                 setSelectedControlPath(nextPath);
@@ -390,18 +310,18 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             </Button>
             <Button
               onClick={() => {
-                if (!selectedControlPath || !resolvedSelection) {
+                if (!stateApi.state.selectedControlPath || !resolvedSelection) {
                   return;
                 }
                 const nextIndex = resolvedSelection.index + 1;
                 if (nextIndex >= resolvedSelection.parentControls.length) {
                   return;
                 }
-                const nextPath = [...selectedControlPath];
+                const nextPath = [...stateApi.state.selectedControlPath];
                 nextPath[nextPath.length - 1] = `c${nextIndex}`;
                 api?.postMessage({
                   type: "moveControl",
-                  path: selectedControlPath,
+                  path: stateApi.state.selectedControlPath,
                   direction: "down",
                 });
                 setSelectedControlPath(nextPath);
@@ -422,12 +342,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
                     <PagePropertiesPanel
                       node={resolvedSelection.node}
                       onChange={(nextNode) => {
-                        if (!selectedControlPath) {
+                        if (!stateApi.state.selectedControlPath) {
                           return;
                         }
                         api?.postMessage({
                           type: "updateControl",
-                          path: selectedControlPath,
+                          path: stateApi.state.selectedControlPath,
                           control: nextNode,
                         });
                       }}
@@ -444,12 +364,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
                 <PropertiesPanel
                   node={resolvedSelection.node}
                   onChange={(nextNode: ControlSurfaceNode) => {
-                    if (!selectedControlPath) {
+                    if (!stateApi.state.selectedControlPath) {
                       return;
                     }
                     api?.postMessage({
                       type: "updateControl",
-                      path: selectedControlPath,
+                      path: stateApi.state.selectedControlPath,
                       control: nextNode,
                     });
                   }}

@@ -13,11 +13,12 @@ import { ControlSurfaceToggle } from "./ControlSurfaceControls/ControlSurfaceTog
 import { ControlSurfaceTriggerButton } from "./ControlSurfaceControls/ControlSurfaceTriggerButton";
 import { ControlSurfaceSelectable } from "./ControlBase/ControlSurfaceSelectable";
 import { buildControlPath, isPathEqual } from "./controlPathBase";
+import { ControlSurfaceStateApi } from "./hooks/ControlSurfaceState";
 
 export type ControlSurfaceRenderOptions = {
     parentPath: string[];
-    designMode: boolean;
-    selectedPath?: string[] | null;
+    //designMode: boolean;
+    //selectedPath?: string[] | null;
     onSelectPath?: (path: string[], node: ControlSurfaceNode) => void;
     onDeletePath?: (path: string[], node: ControlSurfaceNode) => void;
 };
@@ -26,12 +27,13 @@ export const renderControlSurfaceControl = (
     node: ControlSurfaceNode,
     index: number,
     api: ControlSurfaceApi,
-    symbolValues: Record<string, any>,
-    pollIntervalMs: number,
+    stateApi: ControlSurfaceStateApi,
+    //symbolValues: Record<string, any>,
+    //pollIntervalMs: number,
     options: ControlSurfaceRenderOptions,
 ): JSX.Element => {
     const currentPath = buildControlPath(options.parentPath, index);
-    const isSelected = isPathEqual(options.selectedPath, currentPath);
+    const isSelected = isPathEqual(stateApi.state.selectedControlPath, currentPath);
 
     const handleSelect = options.onSelectPath
         ? (path: string[]) => options.onSelectPath?.(path, node)
@@ -44,7 +46,7 @@ export const renderControlSurfaceControl = (
         <ControlSurfaceSelectable
             key={key}
             path={currentPath}
-            designMode={options.designMode}
+            designMode={stateApi.state.designMode}
             isSelected={isSelected}
             onSelect={handleSelect}
             onDelete={handleDelete}
@@ -59,43 +61,43 @@ export const renderControlSurfaceControl = (
 
         case "enumButtons":
             return wrapSelectable(
-                <ControlSurfaceEnumButtons {...node} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceEnumButtons {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
                 `enumButtons-${index}`,
             );
 
         case "knob":
             return wrapSelectable(
-                <ControlSurfaceKnob {...node} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceKnob {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
                 `knob-${index}`,
             );
 
         case "label":
             return wrapSelectable(
-                <ControlSurfaceLabel {...node} uiRefreshMs={pollIntervalMs} />,
+                <ControlSurfaceLabel {...node} />,
                 `label-${index}`,
             );
 
         case "number":
             return wrapSelectable(
-                <ControlSurfaceNumber {...node} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceNumber {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
                 `number-${index}`,
             );
 
         case "slider":
             return wrapSelectable(
-                <ControlSurfaceSlider {...node} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceSlider {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
                 `slider-${index}`,
             );
 
         case "string":
             return wrapSelectable(
-                <ControlSurfaceString {...node} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceString {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
                 `string-${index}`,
             );
 
         case "toggle":
             return wrapSelectable(
-                <ControlSurfaceToggle {...node} initialValue={symbolValues?.[node.symbol]} />,
+                <ControlSurfaceToggle {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
                 `toggle-${index}`,
             );
 
@@ -113,11 +115,11 @@ export const renderControlSurfaceControl = (
                     {...node}
                     layout={node.type}
                     renderControl={renderControlSurfaceControl}
-                    symbolValues={symbolValues}
-                    pollIntervalMs={pollIntervalMs}
+                    //symbolValues={stateApi.state.symbolValues}
+                    //pollIntervalMs={stateApi.state.pollIntervalMs}
                     parentPath={currentPath}
-                    designMode={options.designMode}
-                    selectedPath={options.selectedPath}
+                    //designMode={stateApi.state.designMode}
+                    //selectedPath={stateApi.state.selectedControlPath}
                     onSelectPath={options.onSelectPath}
                 />,
                 `group-${index}`,
@@ -127,11 +129,11 @@ export const renderControlSurfaceControl = (
                 <ControlSurfaceTabs
                     {...node}
                     renderControl={renderControlSurfaceControl}
-                    symbolValues={symbolValues}
-                    pollIntervalMs={pollIntervalMs}
+                    //symbolValues={stateApi.state.symbolValues}
+                    //pollIntervalMs={stateApi.state.pollIntervalMs}
                     parentPath={currentPath}
-                    designMode={options.designMode}
-                    selectedPath={options.selectedPath}
+                    //designMode={stateApi.state.designMode}
+                    //selectedPath={stateApi.state.selectedControlPath}
                     onSelectPath={options.onSelectPath}
                 />,
                 `tabs-${index}`,
@@ -143,7 +145,7 @@ export const renderControlSurfaceControl = (
                     <h3 className="control-surface-page-title">{node.label}</h3>
                     <div className="control-surface-page-content">
                         {node.controls.map((child, childIndex) =>
-                            renderControlSurfaceControl(child, childIndex, api, symbolValues, pollIntervalMs, {
+                            renderControlSurfaceControl(child, childIndex, api, stateApi, {
                                 ...options,
                                 parentPath: currentPath,
                             }),

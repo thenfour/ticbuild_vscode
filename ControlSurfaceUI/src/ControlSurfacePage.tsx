@@ -4,30 +4,30 @@ import {
   ControlSurfacePageSpec
 } from "./defs";
 import { AddControlControl } from "./AddControlControl";
-import { useControlSurfaceApi } from "./VsCodeApiContext";
+import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
+import { useControlSurfaceState } from "./hooks/ControlSurfaceState";
 
 interface ControlSurfacePageProps {
   page: ControlSurfacePageSpec;
-  symbolValues: Record<string, any>;
-  pollIntervalMs: number;
+  //symbolValues: Record<string, any>;
   pagePath: string[];
-  designMode: boolean;
-  selectedPath?: string[] | null;
+  // designMode: boolean;
+  // selectedPath?: string[] | null;
   onSelectPath?: (path: string[], node: any) => void;
   onDeletePath?: (path: string[], node: any) => void;
 }
 
 export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
   page,
-  symbolValues,
-  pollIntervalMs,
+  //symbolValues,
   pagePath,
-  designMode,
-  selectedPath,
+  // designMode,
+  // selectedPath,
   onSelectPath,
   onDeletePath,
 }) => {
   const api = useControlSurfaceApi();
+  const stateApi = useControlSurfaceState();
 
   if (!api) {
     return null;
@@ -37,10 +37,10 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
     <div className="controlSurfaceControl controlSurfaceControl-page">
       {page.controls && page.controls.length > 0 ? (
         page.controls.map((node, index) =>
-          renderControlSurfaceControl(node, index, api, symbolValues, pollIntervalMs, {
+          renderControlSurfaceControl(node, index, api, stateApi, {
             parentPath: pagePath,
-            designMode,
-            selectedPath,
+            //designMode,
+            //selectedPath,
             onSelectPath,
             onDeletePath,
           }),
@@ -50,7 +50,7 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
           No controls on this page.
         </div>
       )}
-      <AddControlControl parentPath={pagePath} disabled={designMode} />
+      <AddControlControl parentPath={pagePath} />
     </div>
   );
 };

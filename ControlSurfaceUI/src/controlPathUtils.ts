@@ -1,5 +1,5 @@
 import { CONTROL_PATH_ROOT, parseControlPathSegment } from "./controlPathBase";
-import { ControlSurfaceNode } from "./defs";
+import { ControlSurfaceNode, ControlSurfacePageSpec } from "./defs";
 
 type ResolvedControlPath = {
   node: ControlSurfaceNode;
@@ -90,4 +90,51 @@ export const findControlPathByNode = (
   };
 
   return visit(controlSurfaceRoot, [CONTROL_PATH_ROOT]);
+};
+
+
+export type PageOption = {
+  id: string;
+  label: string;
+  page: ControlSurfacePageSpec;
+};
+
+
+// builds a flat list of all pages in the control surface hierarchy.
+export const buildPageOptions = (
+  controlSurfaceRoot: ControlSurfaceNode[],
+): PageOption[] => {
+  const rootPage: ControlSurfacePageSpec = {
+    type: "page",
+    label: "Root",
+    controls: controlSurfaceRoot,
+  };
+  const pages: PageOption[] = [{ id: "root", label: "Root", page: rootPage }];
+
+  const visit = (
+    nodes: ControlSurfaceNode[],
+    labelPath: string[],
+    idPath: string[],
+  ) => {
+    nodes.forEach((node, index) => {
+      if (node.type === "page") {
+        const nextLabelPath = [...labelPath, node.label];
+        const nextIdPath = [...idPath, `p${index}`];
+        pages.push({
+          id: nextIdPath.join("/"),
+          label: nextLabelPath.join(" / "),
+          page: node,
+        });
+        visit(node.controls, nextLabelPath, nextIdPath);
+        return;
+      }
+
+      if (node.type === "group") {
+        visit(node.controls, labelPath, [...idPath, `g${index}`]);
+      }
+    });
+  };
+
+  visit(controlSurfaceRoot, [], ["root"]);
+  return pages;
 };

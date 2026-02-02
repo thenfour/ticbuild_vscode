@@ -15,7 +15,7 @@ renders as a <NumericUpDown>
 import React from "react";
 import { NumericUpDown } from "../basic/NumericUpDown";
 import { ControlSurfaceNumberSpec } from "../defs";
-import { useControlSurfaceApi } from "../VsCodeApiContext";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceNumberProps extends ControlSurfaceNumberSpec {
     initialValue?: number;

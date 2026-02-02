@@ -13,7 +13,7 @@
 
 import React from "react";
 import { ControlSurfaceSliderSpec } from "../defs";
-import { useControlSurfaceApi } from "../VsCodeApiContext";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceSliderProps extends ControlSurfaceSliderSpec {
   initialValue?: number;

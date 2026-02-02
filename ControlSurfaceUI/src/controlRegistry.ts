@@ -8,9 +8,9 @@ export interface QuickAddProps {
 
 export interface ControlRenderProps {
   node: ControlSurfaceNode;
-  api: ControlSurfaceApi;
-  symbolValues?: Record<string, any>;
-  pollIntervalMs: number;
+  //api: ControlSurfaceApi;
+  //symbolValues?: Record<string, any>;
+  //pollIntervalMs: number;
 }
 
 export interface ControlPropertiesProps {

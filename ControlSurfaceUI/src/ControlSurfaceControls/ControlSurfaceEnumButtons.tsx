@@ -13,7 +13,7 @@
 import React from "react";
 import { EnumButtons } from "../basic/EnumButtons";
 import { ControlSurfaceEnumButtonsSpec } from "../defs";
-import { useControlSurfaceApi } from "../VsCodeApiContext";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceEnumButtonsProps extends ControlSurfaceEnumButtonsSpec {
   initialValue?: string | number;

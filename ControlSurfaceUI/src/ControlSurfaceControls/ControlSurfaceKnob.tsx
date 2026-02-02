@@ -14,7 +14,7 @@
 import React from "react";
 import { Knob } from "../basic/Knob2";
 import { ControlSurfaceKnobSpec } from "../defs";
-import { useControlSurfaceApi } from "../VsCodeApiContext";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceKnobProps extends ControlSurfaceKnobSpec {
   initialValue?: number;

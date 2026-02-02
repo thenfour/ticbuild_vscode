@@ -13,7 +13,8 @@ import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { ControlSurfaceGroupSpec, ControlSurfaceApi, ControlSurfaceColumnSpec, ControlSurfaceRowSpec } from "../defs";
 import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
 import { AddControlControl } from "../AddControlControl";
-import { useControlSurfaceApi } from "../VsCodeApiContext";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
+import { ControlSurfaceStateApi, useControlSurfaceState } from "../hooks/ControlSurfaceState";
 
 
 export interface ControlSurfaceGroupBaseProps {
@@ -49,15 +50,10 @@ export interface ControlSurfaceGroupProps extends Spec {
     node: any,
     index: number,
     api: ControlSurfaceApi,
-    symbolValues: Record<string, any>,
-    pollIntervalMs: number,
+    stateApi: ControlSurfaceStateApi,
     options: ControlSurfaceRenderOptions,
   ) => JSX.Element;
-  symbolValues: Record<string, any>;
-  pollIntervalMs: number;
   parentPath?: string[];
-  designMode: boolean;
-  selectedPath?: string[] | null;
   onSelectPath?: (path: string[], node: any) => void;
 }
 
@@ -67,14 +63,16 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   layout,
   controls,
   renderControl,
-  symbolValues,
-  pollIntervalMs,
+
+  //symbolValues,
+  //pollIntervalMs,
   parentPath = [],
-  designMode,
-  selectedPath,
+  //designMode,
+  //selectedPath,
   onSelectPath,
 }) => {
   const api = useControlSurfaceApi();
+  const stateApi = useControlSurfaceState();
 
   if (!api) {
     return null;
@@ -85,13 +83,11 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
     orientation={orientation}
   >
     {controls.map((child, index) =>
-      renderControl(child, index, api, symbolValues, pollIntervalMs, {
+      renderControl(child, index, api, stateApi, {
         parentPath,
-        designMode,
-        selectedPath,
         onSelectPath,
       })
     )}
-    <AddControlControl parentPath={parentPath} disabled={designMode} />
+    <AddControlControl parentPath={parentPath} />
   </ControlSurfaceGroupBase>;
 };

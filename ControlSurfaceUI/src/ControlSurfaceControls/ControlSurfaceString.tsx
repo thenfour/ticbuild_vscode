@@ -12,7 +12,7 @@ not yet necessary to have maxlength et al; just allow single line string. multi-
 
 import React from "react";
 import { ControlSurfaceStringSpec } from "../defs";
-import { useControlSurfaceApi } from "../VsCodeApiContext";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceStringProps extends ControlSurfaceStringSpec {
     initialValue?: string;

@@ -10,7 +10,7 @@
 import React from "react";
 import { Button } from "../Buttons/PushButton";
 import { ControlSurfaceTriggerButtonSpec } from "../defs";
-import { useControlSurfaceApi } from "../VsCodeApiContext";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceTriggerButtonProps extends ControlSurfaceTriggerButtonSpec {
 }

@@ -1,7 +1,7 @@
 import React from "react";
 
 import { vscodeApi } from "./vscodeApi";
-import { ControlSurfaceApi } from "./defs";
+import { ControlSurfaceApi } from "../defs";
 
 export type VsCodeApi = typeof vscodeApi;
 

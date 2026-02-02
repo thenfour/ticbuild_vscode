@@ -19,36 +19,39 @@ import { ControlSurfaceTabsSpec, ControlSurfaceApi } from "../defs";
 import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
 import { buildTabPath } from "../controlPathBase";
 import { AddControlControl } from "../AddControlControl";
-import { useControlSurfaceApi } from "../VsCodeApiContext";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
+import { ControlSurfaceStateApi, useControlSurfaceState } from "../hooks/ControlSurfaceState";
 
 export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     renderControl: (
         node: any,
         index: number,
         api: ControlSurfaceApi,
-        symbolValues: Record<string, any>,
-        pollIntervalMs: number,
+        stateApi: ControlSurfaceStateApi,
+        // symbolValues: Record<string, any>,
+        // pollIntervalMs: number,
         options: ControlSurfaceRenderOptions,
     ) => JSX.Element;
-    symbolValues: Record<string, any>;
-    pollIntervalMs: number;
+    // symbolValues: Record<string, any>;
+    // pollIntervalMs: number;
     parentPath: string[];
-    designMode: boolean;
-    selectedPath?: string[] | null;
+    // designMode: boolean;
+    // selectedPath?: string[] | null;
     onSelectPath?: (path: string[], node: any) => void;
 }
 
 export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     tabs,
     renderControl,
-    symbolValues,
-    pollIntervalMs,
+    // symbolValues,
+    // pollIntervalMs,
     parentPath,
-    designMode,
-    selectedPath,
+    // designMode,
+    // selectedPath,
     onSelectPath,
 }) => {
     const api = useControlSurfaceApi();
+    const stateApi = useControlSurfaceState();
     const [selectedTabId, setSelectedTabId] = React.useState<number>(0);
 
     const handleTabChange = (e: React.SyntheticEvent | undefined, newTabId: number) => {
@@ -73,15 +76,15 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                 >
                     <div className="control-surface-tab-content">
                         {tab.controls.map((child, childIndex) =>
-                            renderControl(child, childIndex, api, symbolValues, pollIntervalMs, {
+                            renderControl(child, childIndex, api, stateApi, {
                                 parentPath: buildTabPath(parentPath, index),
-                                designMode,
-                                selectedPath,
+                                // designMode,
+                                // selectedPath,
                                 onSelectPath,
                             })
                         )}
                     </div>
-                    <AddControlControl parentPath={buildTabPath(parentPath, index)} disabled={designMode} />
+                    <AddControlControl parentPath={buildTabPath(parentPath, index)} />
                 </Tab>
             ))}
         </TabPanel>

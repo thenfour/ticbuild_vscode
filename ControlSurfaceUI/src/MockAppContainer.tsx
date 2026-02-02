@@ -3,7 +3,9 @@ import React from "react";
 import {
   ControlSurfaceApp,
 } from "./ControlSurfaceApp";
-import { ControlSurfaceApi, ControlSurfaceDataSource, ControlSurfaceNode, ControlSurfaceState, WatchItem } from "./defs";
+import { ControlSurfaceDataSource, ControlSurfaceNode, ControlSurfaceState, WatchItem } from "./defs";
+import { VsCodeApiProvider } from "./hooks/VsCodeApiContext";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
 type MockValueKind = "auto" | "string" | "number" | "boolean";
 
@@ -61,9 +63,10 @@ const createMockWatch = (index: number, kind: MockValueKind): MockWatch => {
 export function MockAppContainer(): JSX.Element {
   const [connected, setConnected] = React.useState(false);
   const [watches, setWatches] = React.useState<MockWatch[]>([]);
-  const [controlSurfaceRoot, setControlSurfaceRoot] = React.useState<
-    ControlSurfaceNode[]
-  >([]);
+  const [controlSurfaceRoot, setControlSurfaceRoot] = useLocalStorage<ControlSurfaceNode[]>(
+    'tic80-mock-controlSurfaceRoot',
+    []
+  );
   const [nextId, setNextId] = React.useState(1);
   const [addKind, setAddKind] = React.useState<MockValueKind>("auto");
   const [clipboardNotice, setClipboardNotice] = React.useState<string>("");
@@ -74,20 +77,64 @@ export function MockAppContainer(): JSX.Element {
   const latestPayloadRef = React.useRef<ControlSurfaceState>({
     status: "Disconnected (mock)",
     watches: [],
-    controlSurfaceRoot: [],
+    controlSurfaceRoot,
     symbolValues: {},
     uiRefreshMs: 250,
     pollIntervalMs: 250,
+    designMode: false,
+    selectedControlPath: null,
+    selectedPageId: "root",
   });
 
   React.useEffect(() => {
     const globalAny = window as typeof window & {
-      acquireVsCodeApi?: () => { postMessage: (message: unknown) => void };
+      acquireVsCodeApi?: () => {
+        postMessage: (message: unknown) => void;
+        setState?: (state: any) => void;
+        getState?: () => any;
+      };
     };
     if (!globalAny.acquireVsCodeApi) {
       globalAny.acquireVsCodeApi = () => ({
         postMessage: (message: unknown) => {
           console.log("[mock] postMessage", message);
+
+          // Handle evalExpression requests
+          if ((message as any).type === 'evalExpression') {
+            const payload = message as { type: string; requestId: string; expression: string };
+            // Simulate async evaluation
+            setTimeout(() => {
+              const mockResult = `mock result for: ${payload.expression}`;
+              window.postMessage({
+                type: 'evalResult',
+                requestId: payload.requestId,
+                result: mockResult,
+              }, '*');
+            }, 100);
+          }
+
+          // Handle showWarningMessage requests
+          if ((message as any).type === 'showWarningMessage') {
+            const payload = message as { type: string; requestId: string; message: string; items?: string[] };
+            // Simulate user interaction with a confirm dialog
+            setTimeout(() => {
+              const result = window.confirm(payload.message)
+                ? payload.items?.[0]
+                : payload.items?.[1];
+              window.postMessage({
+                type: 'showWarningMessageResult',
+                requestId: payload.requestId,
+                result,
+              }, '*');
+            }, 100);
+          }
+        },
+        setState: (state: any) => {
+          console.log("[mock] setState", state);
+        },
+        getState: () => {
+          console.log("[mock] getState");
+          return undefined;
         },
       });
     }
@@ -136,7 +183,10 @@ export function MockAppContainer(): JSX.Element {
       uiRefreshMs: 250,
       pollIntervalMs: 250,
       symbolValues: { mockSymbol: 123 },
-    };
+      designMode: false,
+      selectedControlPath: null,
+      selectedPageId: "root",
+    } satisfies ControlSurfaceState;
   }, [connected, controlSurfaceRoot, watches]);
 
   React.useEffect(() => {
@@ -155,14 +205,14 @@ export function MockAppContainer(): JSX.Element {
     [],
   );
 
-  const api = React.useMemo<ControlSurfaceApi>(
-    () => ({
-      postMessage: (message: unknown) => {
-        console.log("[mock] postMessage", message);
-      },
-    }),
-    [],
-  );
+  // const api = React.useMemo<{ postMessage: (message: unknown) => void }>(
+  //   () => ({
+  //     postMessage: (message: unknown) => {
+  //       console.log("[mock] postMessage (via api object)", message);
+  //     },
+  //   }),
+  //   [],
+  // );
 
   const handleAddWatch = () => {
     const id = nextId;
@@ -211,57 +261,59 @@ export function MockAppContainer(): JSX.Element {
   };
 
   return (
-    <div>
-      <div
-        style={{
-          padding: 12,
-          borderBottom: "1px solid var(--vscode-panel-border)",
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 8,
-          fontFamily: "var(--vscode-font-family)",
-        }}
-      >
-        <strong style={{ marginRight: 4 }}>Mock Controls</strong>
-        <button onClick={() => setConnected((value) => !value)}>
-          {connected ? "Set Disconnected" : "Set Connected"}
-        </button>
-        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          Add type
-          <select
-            value={addKind}
-            onChange={(event) =>
-              setAddKind(event.target.value as MockValueKind)
-            }
-          >
-            <option value="auto">Auto-incrementing number</option>
-            <option value="string">String</option>
-            <option value="number">Static number</option>
-            <option value="boolean">Boolean</option>
-          </select>
-        </label>
-        <button onClick={handleAddWatch}>Add Watch</button>
-        <button onClick={handleRemoveWatch} disabled={watches.length === 0}>
-          Remove Watch
-        </button>
-        <button onClick={handleCopyControlSurfaceRoot}>
-          Copy controlSurfaceRoot
-        </button>
-        <button onClick={handlePasteControlSurfaceRoot}>
-          Paste controlSurfaceRoot
-        </button>
-        {clipboardNotice ? (
-          <span style={{ color: "var(--vscode-descriptionForeground)" }}>
-            {clipboardNotice}
-          </span>
-        ) : null}
+    <VsCodeApiProvider>
+      <div>
+        <div
+          style={{
+            padding: 12,
+            borderBottom: "1px solid var(--vscode-panel-border)",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 8,
+            fontFamily: "var(--vscode-font-family)",
+          }}
+        >
+          <strong style={{ marginRight: 4 }}>Mock Controls</strong>
+          <button onClick={() => setConnected((value) => !value)}>
+            {connected ? "Set Disconnected" : "Set Connected"}
+          </button>
+          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            Add type
+            <select
+              value={addKind}
+              onChange={(event) =>
+                setAddKind(event.target.value as MockValueKind)
+              }
+            >
+              <option value="auto">Auto-incrementing number</option>
+              <option value="string">String</option>
+              <option value="number">Static number</option>
+              <option value="boolean">Boolean</option>
+            </select>
+          </label>
+          <button onClick={handleAddWatch}>Add Watch</button>
+          <button onClick={handleRemoveWatch} disabled={watches.length === 0}>
+            Remove Watch
+          </button>
+          <button onClick={handleCopyControlSurfaceRoot}>
+            Copy controlSurfaceRoot
+          </button>
+          <button onClick={handlePasteControlSurfaceRoot}>
+            Paste controlSurfaceRoot
+          </button>
+          {clipboardNotice ? (
+            <span style={{ color: "var(--vscode-descriptionForeground)" }}>
+              {clipboardNotice}
+            </span>
+          ) : null}
+        </div>
+        <ControlSurfaceApp
+          dataSource={dataSource}
+          //initialState={payload}
+          viewKind="panel"
+        />
       </div>
-      <ControlSurfaceApp
-        dataSource={dataSource}
-        initialState={payload}
-        viewKind="panel"
-      />
-    </div>
+    </VsCodeApiProvider>
   );
 }

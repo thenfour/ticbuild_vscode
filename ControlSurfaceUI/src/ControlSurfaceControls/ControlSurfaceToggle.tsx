@@ -13,7 +13,7 @@
 import React from "react";
 import { CheckboxButton } from "../Buttons/CheckboxButton";
 import { ControlSurfaceToggleSpec } from "../defs";
-import { useControlSurfaceApi } from "../VsCodeApiContext";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceToggleProps extends ControlSurfaceToggleSpec {
   initialValue?: boolean;

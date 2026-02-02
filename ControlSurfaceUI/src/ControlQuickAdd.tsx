@@ -3,7 +3,7 @@ import { Button } from "./Buttons/PushButton";
 import { ButtonGroup } from "./Buttons/ButtonGroup";
 import { Dropdown } from "./basic/Dropdown";
 import { ControlRegistry, CATEGORY_NAMES } from "./controlRegistry";
-import { useControlSurfaceApi } from "./VsCodeApiContext";
+import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 
 export interface ControlQuickAddProps {
   parentPath: string[];

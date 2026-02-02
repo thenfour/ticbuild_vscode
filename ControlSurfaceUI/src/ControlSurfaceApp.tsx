@@ -216,8 +216,16 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   React.useEffect(() => {
     if (!pages.find((page) => page.id === selectedPageId)) {
       setSelectedPageId("root");
+      if (selectedPageId !== "root") {
+        resolvedApi?.postMessage({
+          type: "setSelectedPage",
+          pageId: "root",
+          pageLabel: "Root",
+          viewId: state.viewId,
+        });
+      }
     }
-  }, [pages, selectedPageId]);
+  }, [pages, resolvedApi, selectedPageId, state.viewId]);
 
   React.useEffect(() => {
     if (selectedControlPath && !resolvedSelection) {
@@ -321,6 +329,29 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         >
           {designMode ? "Exit Design Mode" : "Design Mode"}
         </Button>
+        {designMode ? (
+          <Button
+            onClick={() => {
+              if (!resolvedApi || selectedPageId === "root") {
+                return;
+              }
+              resolvedApi.postMessage({
+                type: "deleteControl",
+                path: activePagePath,
+              });
+              setSelectedPageId("root");
+              resolvedApi.postMessage({
+                type: "setSelectedPage",
+                pageId: "root",
+                pageLabel: "Root",
+                viewId: state.viewId,
+              });
+            }}
+            disabled={selectedPageId === "root"}
+          >
+            Delete Page
+          </Button>
+        ) : null}
         {/* <Divider />
         <Button onClick={() => resolvedApi?.postMessage({ type: "addWatch" })}>
           Add Watch

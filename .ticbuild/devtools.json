@@ -120,16 +120,6 @@
     },
     {
       "type": "divider"
-    },
-    {
-      "type": "string",
-      "label": "Text",
-      "symbol": "title"
-    },
-    {
-      "type": "page",
-      "label": "world 1",
-      "controls": []
     }
   ]
 }

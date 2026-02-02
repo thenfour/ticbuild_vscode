@@ -18,6 +18,7 @@ import { TabPanel, Tab } from "../basic/Tabs";
 import { ControlSurfaceTabsSpec, ControlSurfaceApi } from "../defs";
 import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
 import { buildTabPath } from "../controlPathBase";
+import { AddControlControl } from "../AddControlControl";
 
 export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     api: ControlSurfaceApi;
@@ -76,6 +77,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                             })
                         )}
                     </div>
+                    <AddControlControl api={api} parentPath={buildTabPath(parentPath, index)} disabled={designMode} />
                 </Tab>
             ))}
         </TabPanel>

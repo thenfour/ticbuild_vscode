@@ -179,6 +179,37 @@ export function activate(context: vscode.ExtensionContext): void {
         })();
         break;
       }
+      case 'showWarningMessage': {
+        const payload = message as { requestId?: string; message?: string; items?: string[] };
+        if (!payload.message || !payload.requestId) {
+          break;
+        }
+        void (async () => {
+          try {
+            const result = await vscode.window.showWarningMessage(
+              payload.message!,
+              ...(payload.items ?? [])
+            );
+            if (webview) {
+              void webview.postMessage({
+                type: 'showWarningMessageResult',
+                requestId: payload.requestId,
+                result,
+              });
+            }
+          } catch (error) {
+            output.appendLine(`[controlSurface] showWarningMessage error: ${String(error)}`);
+            if (webview) {
+              void webview.postMessage({
+                type: 'showWarningMessageResult',
+                requestId: payload.requestId,
+                error: error instanceof Error ? error.message : String(error),
+              });
+            }
+          }
+        })();
+        break;
+      }
       case 'eval': {
         if (!session.isConnected()) {
           output.appendLine('[controlSurface] eval ignored (not connected)');

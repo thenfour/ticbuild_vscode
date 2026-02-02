@@ -259,10 +259,24 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         </Button>
         {designMode ? (
           <Button
-            onClick={() => {
+            onClick={async () => {
               if (!api || selectedPageId === "root") {
                 return;
               }
+
+              // Get the page label for the confirmation message
+              const pageLabel = pages.find(p => p.id === selectedPageId)?.label ?? "this page";
+
+              const result = await api.showWarningMessage?.(
+                `Are you sure you want to delete "${pageLabel}"?`,
+                "Delete",
+                "Cancel"
+              );
+
+              if (result !== "Delete") {
+                return;
+              }
+
               api.postMessage({
                 type: "deleteControl",
                 path: activePagePath,

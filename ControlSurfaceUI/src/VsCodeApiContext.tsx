@@ -23,6 +23,7 @@ export const useVsCodeApi = (): VsCodeApi | undefined =>
 export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
     const rawApi = useVsCodeApi();
     const pendingEvaluationsRef = React.useRef(new Map<string, { resolve: (value: string) => void; reject: (error: Error) => void }>());
+    const pendingWarningsRef = React.useRef(new Map<string, { resolve: (value: string | undefined) => void; reject: (error: Error) => void }>());
 
     React.useEffect(() => {
         if (!rawApi) {
@@ -39,6 +40,16 @@ export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
                         pending.reject(new Error(message.error));
                     } else {
                         pending.resolve(message.result ?? "");
+                    }
+                }
+            } else if (message.type === "showWarningMessageResult" && typeof message.requestId === "string") {
+                const pending = pendingWarningsRef.current.get(message.requestId);
+                if (pending) {
+                    pendingWarningsRef.current.delete(message.requestId);
+                    if (message.error) {
+                        pending.reject(new Error(message.error));
+                    } else {
+                        pending.resolve(message.result);
                     }
                 }
             }
@@ -82,6 +93,28 @@ export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
                             reject(new Error("Evaluation timeout"));
                         }
                     }, 5000);
+                });
+            },
+            showWarningMessage: async <T extends string>(message: string, ...items: T[]): Promise<T | undefined> => {
+                const requestId = `warning_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+                return new Promise((resolve, reject) => {
+                    pendingWarningsRef.current.set(requestId, { resolve: resolve as (value: string | undefined) => void, reject });
+
+                    rawApi.postMessage({
+                        type: "showWarningMessage",
+                        requestId,
+                        message,
+                        items,
+                    });
+
+                    // Timeout after 30 seconds
+                    setTimeout(() => {
+                        if (pendingWarningsRef.current.has(requestId)) {
+                            pendingWarningsRef.current.delete(requestId);
+                            reject(new Error("Warning message timeout"));
+                        }
+                    }, 30000);
                 });
             },
         };

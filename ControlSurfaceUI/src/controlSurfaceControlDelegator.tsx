@@ -19,6 +19,7 @@ export type ControlSurfaceRenderOptions = {
     designMode: boolean;
     selectedPath?: string[] | null;
     onSelectPath?: (path: string[], node: ControlSurfaceNode) => void;
+    onDeletePath?: (path: string[], node: ControlSurfaceNode) => void;
 };
 
 export const renderControlSurfaceControl = (
@@ -35,6 +36,9 @@ export const renderControlSurfaceControl = (
     const handleSelect = options.onSelectPath
         ? (path: string[]) => options.onSelectPath?.(path, node)
         : undefined;
+    const handleDelete = options.onDeletePath
+        ? (path: string[]) => options.onDeletePath?.(path, node)
+        : undefined;
 
     const wrapSelectable = (content: JSX.Element, key: string) => (
         <ControlSurfaceSelectable
@@ -43,6 +47,7 @@ export const renderControlSurfaceControl = (
             designMode={options.designMode}
             isSelected={isSelected}
             onSelect={handleSelect}
+            onDelete={handleDelete}
         >
             {content}
         </ControlSurfaceSelectable>

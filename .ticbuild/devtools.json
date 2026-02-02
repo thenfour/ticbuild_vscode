@@ -101,17 +101,12 @@
       ]
     },
     {
-      "type": "label",
-      "label": "",
-      "expression": "\"x=\"..math.cos(1)"
-    },
-    {
       "type": "divider"
     },
     {
       "type": "label",
       "label": "",
-      "expression": "x"
+      "expression": "t"
     }
   ]
 }

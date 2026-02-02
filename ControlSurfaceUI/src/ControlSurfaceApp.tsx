@@ -435,6 +435,15 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
           designMode={designMode}
           selectedPath={selectedControlPath}
           onSelectPath={(path) => setSelectedControlPath(path)}
+          onDeletePath={(path) => {
+            resolvedApi?.postMessage({
+              type: "deleteControl",
+              path,
+            });
+            if (selectedControlPath && path.join("/") === selectedControlPath.join("/")) {
+              setSelectedControlPath(null);
+            }
+          }}
         />
       ) : (
         <div

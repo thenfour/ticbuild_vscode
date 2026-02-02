@@ -15,6 +15,7 @@ interface ControlSurfacePageProps {
   designMode: boolean;
   selectedPath?: string[] | null;
   onSelectPath?: (path: string[], node: any) => void;
+  onDeletePath?: (path: string[], node: any) => void;
 }
 
 export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
@@ -26,6 +27,7 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
   designMode,
   selectedPath,
   onSelectPath,
+  onDeletePath,
 }) => {
   return (
     <div className="controlSurfaceControl controlSurfaceControl-page">
@@ -36,6 +38,7 @@ export const ControlSurfacePage: React.FC<ControlSurfacePageProps> = ({
             designMode,
             selectedPath,
             onSelectPath,
+            onDeletePath,
           }),
         )
       ) : (

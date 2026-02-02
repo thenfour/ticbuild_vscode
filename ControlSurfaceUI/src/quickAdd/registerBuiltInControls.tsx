@@ -18,12 +18,14 @@ import {
   KnobPropertiesPanel,
   LabelPropertiesPanel,
   NumberPropertiesPanel,
+  PagePropertiesPanel,
   SliderPropertiesPanel,
   StringPropertiesPanel,
   TabsPropertiesPanel,
   TogglePropertiesPanel,
   TriggerButtonPropertiesPanel,
 } from "../ControlSurfacePropertiesPanels";
+import { ControlSurfacePage } from "../ControlSurfacePage";
 
 export function registerBuiltInControls() {
 
@@ -195,6 +197,80 @@ export function registerBuiltInControls() {
       type: "group",
       label: data.label || "Group",
       orientation: "horizontal",
+      controls: [],
+    }),
+  });
+
+  ControlRegistry.register({
+    type: "page",
+    displayName: "Page",
+    category: "layout",
+    description: "Defines a control surface",
+    quickAddComponent: (props) => {
+      const [label, setLabel] = React.useState("");
+      React.useEffect(() => {
+        props.onSubmit({ label });
+      }, [label, props]);
+      return (
+        <div>
+          <label style={{ display: "block", marginBottom: "4px" }}>Page title</label>
+          <input
+            type="text"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="Page title"
+            style={{
+              width: "100%",
+              padding: "4px 8px",
+              backgroundColor: "var(--vscode-input-background)",
+              color: "var(--vscode-input-foreground)",
+              border: "1px solid var(--vscode-input-border)",
+            }}
+          />
+        </div>
+      );
+    },
+    renderComponent: ControlSurfacePage,
+    propertiesPanelComponent: PagePropertiesPanel,
+    createDefaultSpec: (data) => ({
+      type: "page",
+      label: data.label || "Page",
+      controls: [],
+    }),
+  });
+
+  ControlRegistry.register({
+    type: "row",
+    displayName: "Row",
+    category: "layout",
+    description: "Horizontal layout container",
+    quickAddComponent: (props) => {
+      React.useEffect(() => {
+        props.onSubmit({});
+      }, [props]);
+      return null;
+    },
+    renderComponent: ControlSurfaceGroup,
+    createDefaultSpec: (data) => ({
+      type: "row",
+      controls: [],
+    }),
+  });
+
+  ControlRegistry.register({
+    type: "column",
+    displayName: "Column",
+    category: "layout",
+    description: "Vertical layout container",
+    quickAddComponent: (props) => {
+      React.useEffect(() => {
+        props.onSubmit({});
+      }, [props]);
+      return null;
+    },
+    renderComponent: ControlSurfaceGroup,
+    createDefaultSpec: (data) => ({
+      type: "column",
       controls: [],
     }),
   });

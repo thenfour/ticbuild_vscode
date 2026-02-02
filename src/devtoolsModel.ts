@@ -56,6 +56,16 @@ export type DevtoolsControlNode =
         [key: string]: unknown;
     }
     | {
+        type: 'row';
+        controls: DevtoolsControlNode[];
+        [key: string]: unknown;
+    }
+    | {
+        type: 'column';
+        controls: DevtoolsControlNode[];
+        [key: string]: unknown;
+    }
+    | {
         type: 'divider';
         [key: string]: unknown;
     }
@@ -226,6 +236,30 @@ const devtoolsSchema = {
                             type: 'string',
                             enum: ['horizontal', 'vertical'],
                         },
+                        controls: {
+                            type: 'array',
+                            items: { $ref: '#/$defs/controlNode' },
+                        },
+                    },
+                    required: ['type', 'controls'],
+                },
+                {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                        type: { const: 'row' },
+                        controls: {
+                            type: 'array',
+                            items: { $ref: '#/$defs/controlNode' },
+                        },
+                    },
+                    required: ['type', 'controls'],
+                },
+                {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                        type: { const: 'column' },
                         controls: {
                             type: 'array',
                             items: { $ref: '#/$defs/controlNode' },

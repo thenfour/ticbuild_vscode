@@ -25,7 +25,7 @@
   "controlSurfaceRoot": [
     {
       "type": "label",
-      "label": "",
+      "label": "t=",
       "expression": "t"
     },
     {
@@ -120,6 +120,16 @@
     },
     {
       "type": "divider"
+    },
+    {
+      "type": "string",
+      "label": "Text",
+      "symbol": "title"
+    },
+    {
+      "type": "page",
+      "label": "world 1",
+      "controls": []
     }
   ]
 }

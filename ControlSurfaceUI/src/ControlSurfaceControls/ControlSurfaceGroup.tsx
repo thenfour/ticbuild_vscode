@@ -10,13 +10,13 @@
 
 import React from "react";
 import { ButtonGroup } from "../Buttons/ButtonGroup";
-import { ControlSurfaceGroupSpec, ControlSurfaceApi } from "../defs";
+import { ControlSurfaceGroupSpec, ControlSurfaceApi, ControlSurfaceColumnSpec, ControlSurfaceRowSpec } from "../defs";
 import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
 import { AddControlControl } from "../AddControlControl";
 
 
 export interface ControlSurfaceGroupBaseProps {
-  label: string;
+  label?: string;
   orientation?: "horizontal" | "vertical";
   children?: React.ReactNode;
 }
@@ -40,7 +40,10 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
   );
 };
 
-export interface ControlSurfaceGroupProps extends ControlSurfaceGroupSpec {
+type Spec = Omit<ControlSurfaceGroupSpec, "type">;
+
+export interface ControlSurfaceGroupProps extends Spec {
+  layout: "group" | "column" | "row";
   api: ControlSurfaceApi;
   renderControl: (
     node: any,
@@ -60,7 +63,8 @@ export interface ControlSurfaceGroupProps extends ControlSurfaceGroupSpec {
 
 export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   label,
-  orientation = "horizontal",
+  orientation,
+  layout,
   controls,
   api,
   renderControl,

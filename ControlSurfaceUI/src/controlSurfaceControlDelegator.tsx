@@ -106,9 +106,12 @@ export const renderControlSurfaceControl = (
             );
 
         case "group":
+        case "column":
+        case "row":
             return wrapSelectable(
                 <ControlSurfaceGroup
                     {...node}
+                    layout={node.type}
                     api={api}
                     renderControl={renderControlSurfaceControl}
                     symbolValues={symbolValues}
@@ -120,7 +123,6 @@ export const renderControlSurfaceControl = (
                 />,
                 `group-${index}`,
             );
-
         case "tabs":
             return wrapSelectable(
                 <ControlSurfaceTabs

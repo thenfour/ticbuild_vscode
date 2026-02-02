@@ -61,8 +61,18 @@ export type ControlSurfaceSliderSpec = ControlSurfaceScalarCommonSpec & {
 
 export type ControlSurfaceGroupSpec = {
     type: "group";
-    label: string;
+    label?: string;
     orientation?: "horizontal" | "vertical";
+    controls: ControlSurfaceNode[];
+}
+
+export type ControlSurfaceRowSpec = {
+    type: "row";
+    controls: ControlSurfaceNode[];
+}
+
+export type ControlSurfaceColumnSpec = {
+    type: "column";
     controls: ControlSurfaceNode[];
 }
 
@@ -108,6 +118,8 @@ export type ControlSurfaceNode =
     | ControlSurfaceToggleSpec
     | ControlSurfacePageSpec
     | ControlSurfaceGroupSpec
+    | ControlSurfaceRowSpec
+    | ControlSurfaceColumnSpec
     | ControlSurfaceDividerSpec
     | ControlSurfaceEnumButtonsSpec
     | ControlSurfaceLabelSpec

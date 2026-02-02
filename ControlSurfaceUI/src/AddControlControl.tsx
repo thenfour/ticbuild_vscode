@@ -5,11 +5,11 @@ import { ControlSurfaceApi } from "./defs";
 
 export interface AddControlControlProps {
   api: ControlSurfaceApi;
-  parentPath?: string[]; // Path to the parent container (for targeting where to add)
-  disabled?: boolean;
+  parentPath: string[]; // Path to the parent container (for targeting where to add)
+  disabled: boolean;
 }
 
-export const AddControlControl: React.FC<AddControlControlProps> = ({ api, parentPath = [], disabled = false }) => {
+export const AddControlControl: React.FC<AddControlControlProps> = ({ api, parentPath, disabled }) => {
   const [isAdding, setIsAdding] = React.useState(false);
   React.useEffect(() => {
     if (disabled && isAdding) {
@@ -31,7 +31,7 @@ export const AddControlControl: React.FC<AddControlControlProps> = ({ api, paren
   return (
     <div style={{ padding: "8px" }}>
       <Button onClick={() => setIsAdding(true)} style={{ width: "100%" }} disabled={disabled}>
-        + Add Control
+        + Add Control {parentPath}
       </Button>
     </div>
   );

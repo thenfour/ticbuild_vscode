@@ -33,20 +33,6 @@
 }
 
 
-.control-surface-row {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-}
-
-
-.control-surface-column {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: var(--control-surface-column-max-width);
-}
-
 /* Fieldset and Legend styling with VS Code theming */
 fieldset {
   border: 1px solid var(--vscode-panel-border, var(--border));

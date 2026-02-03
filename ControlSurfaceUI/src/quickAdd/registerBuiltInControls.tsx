@@ -10,6 +10,7 @@ import { ControlSurfaceLabel } from "../ControlSurfaceControls/ControlSurfaceLab
 import { ControlSurfaceTriggerButton } from "../ControlSurfaceControls/ControlSurfaceTriggerButton";
 import { ControlSurfaceGroup } from "../ControlSurfaceControls/ControlSurfaceGroup";
 import { ControlSurfaceTabs } from "../ControlSurfaceControls/ControlSurfaceTabs";
+import { ControlSurfaceStringProp } from "../PropControlsAdaptors/ControlSurfaceStringProp";
 import { SymbolQuickAdd } from "./SymbolQuickAdd";
 import {
   DividerPropertiesPanel,
@@ -104,7 +105,7 @@ export function registerBuiltInControls() {
     category: "input",
     description: "Text input field",
     quickAddComponent: SymbolQuickAdd,
-    renderComponent: ControlSurfaceString,
+    renderComponent: ControlSurfaceStringProp,
     propertiesPanelComponent: StringPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "string",

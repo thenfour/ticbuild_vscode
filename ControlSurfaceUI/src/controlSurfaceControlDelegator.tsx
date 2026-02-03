@@ -14,6 +14,8 @@ import { ControlSurfaceTriggerButton } from "./ControlSurfaceControls/ControlSur
 import { ControlSurfaceSelectable } from "./ControlBase/ControlSurfaceSelectable";
 import { buildControlPath, isPathEqual } from "./controlPathBase";
 import { ControlSurfaceStateApi } from "./hooks/ControlSurfaceState";
+import { ControlSurfaceStringProp } from "./PropControlsAdaptors/ControlSurfaceStringProp";
+import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 
 export type ControlSurfaceRenderOptions = {
     parentPath: string[];
@@ -90,9 +92,16 @@ export const renderControlSurfaceControl = (
             );
 
         case "string":
-            return wrapSelectable(
-                <ControlSurfaceString {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
-                `string-${index}`,
+            // New PropControl-based implementation
+            return (
+                <ControlSurfaceStringProp
+                    key={`string-${index}`}
+                    {...node}
+                    path={currentPath}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                />
             );
 
         case "toggle":

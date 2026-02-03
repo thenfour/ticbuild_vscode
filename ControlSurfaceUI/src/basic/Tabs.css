@@ -59,14 +59,6 @@
     color: var(--vscode-button-foreground);
 }
 
-.tab-header-notselected {
-    /* opacity: 0.5; */
-}
-
-.tab-header-notselected:hover {
-    /* opacity: 1; */
-}
-
 .tab-header-l2 {
     display: flex;
     align-items: center;

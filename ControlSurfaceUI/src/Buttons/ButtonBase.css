@@ -35,8 +35,6 @@
     color: var(--vscode-button-secondaryForeground);
 }
 
-.somatic-button-base.somatic-button-base--not-highlighted {}
-
 .somatic-button-base.somatic-button-base--highlighted {
     background-color: var(--vscode-button-background);
     color: var(--vscode-button-foreground);
@@ -133,8 +131,6 @@
     border-radius: 2px;
     box-sizing: border-box;
 }
-
-.somatic-checkbox-button .somatic-checkbox-button__checkmark svg {}
 
 .somatic-button-group.somatic-button-group--vertical .somatic-checkbox-button {
     /*

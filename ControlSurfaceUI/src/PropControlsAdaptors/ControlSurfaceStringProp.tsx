@@ -1,0 +1,56 @@
+import React from "react";
+import { ControlSurfaceStringSpec } from "../defs";
+import { PropControlString } from "../PropControls/PropControlString";
+import { useSymbolBinding } from "../hooks/useSymbolBinding";
+import { useControlSurfaceState } from "../hooks/ControlSurfaceState";
+import { createDesignTools } from "../utils/designTools";
+
+export interface ControlSurfaceStringPropProps extends ControlSurfaceStringSpec {
+    path: string[];
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
+    onDelete?: () => void;
+    onSettings?: () => void;
+}
+
+/**
+ * Control Surface wrapper for PropControlString.
+ * Handles symbol binding, state management, and design mode integration.
+ */
+export const ControlSurfaceStringProp: React.FC<ControlSurfaceStringPropProps> = ({
+    label,
+    symbol,
+    path,
+    onMoveUp,
+    onMoveDown,
+    onDelete,
+    onSettings,
+}) => {
+    const stateApi = useControlSurfaceState();
+    const { value, onChange, bindingStatus } = useSymbolBinding<string>(symbol, "");
+
+    const designMode = stateApi.state.designMode;
+    const selected = JSON.stringify(stateApi.state.selectedControlPath) === JSON.stringify(path);
+
+    const designTools = designMode
+        ? createDesignTools({
+            onMoveUp,
+            onMoveDown,
+            onDelete,
+            onSettings,
+        })
+        : null;
+
+    return (
+        <PropControlString
+            label={label}
+            value={value}
+            onChange={onChange}
+            designMode={designMode}
+            selected={selected}
+            bindingStatus={bindingStatus}
+            bindingStatusSeverity="error"
+            designTools={designTools}
+        />
+    );
+};

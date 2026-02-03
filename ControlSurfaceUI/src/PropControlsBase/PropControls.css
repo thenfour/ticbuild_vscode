@@ -9,7 +9,23 @@
     flex-direction: column;
     gap: 12px;
 }
-/* .cs-pp-control-column-design-mode */
+
+.pp-root .cs-pp-control-column .cs-pp-control-column-content {
+    display:flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pp-root .cs-pp-control-row {
+    display:flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.pp-root .cs-pp-control-row .cs-pp-control-row-content {
+    display:flex;
+    flex-direction: row;
+    gap: 8px;
+}
 
 .cs-pp-control-shell {
     display: flex;
@@ -19,6 +35,12 @@
     /* border: 1px solid #f00;
     background-color: #0ff; */
     border: 2px solid transparent;
+    padding:3px;
+}
+
+
+.cs-pp-control-shell:hover {
+    border-color: var(--vscode-focusBorder, var(--accent));
 }
 
 .cs-pp-control-shell-labelvaluerow {
@@ -39,4 +61,8 @@
     display: flex;
     gap: 8px;
     align-items: center;
+}
+
+.cs-pp-control-shell-value:hover {
+    background-color: var(--vscode-inputOption-activeBackground);
 }

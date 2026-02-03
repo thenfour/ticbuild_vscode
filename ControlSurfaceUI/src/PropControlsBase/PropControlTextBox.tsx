@@ -4,36 +4,60 @@ import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { Button } from "../Buttons/PushButton";
 import { CheckboxButton } from "../Buttons/CheckboxButton";
 import { Dropdown } from "../basic/Dropdown";
+import { TextInput } from "../basic/TextInput";
+
+
 
 
 interface PropControlTextBoxProps {
     designMode: boolean;
     selected: boolean; // in design mode
+    disabled: boolean;
 
     validationStatus: string; // falsy if no error.
-    validationSeverity: PropControlSeverity; // ignored if no validation error.
+    validationSeverity?: PropControlSeverity; // ignored if no validation error.
     bindingStatus: string; // falsy if none.
-    bindingStatusSeverity: PropControlSeverity; // ignored if no binding status.
+    bindingStatusSeverity?: PropControlSeverity; // ignored if no binding status.
 
     label: string; // can be null; empty label
     value: string; // can be null and the value is not shown.
     designTools: React.ReactNode; // only show in design mode, on hover, or when selected.
+
+    onChange: (newValue: string) => void;
 }
 
 export const PropControlTextBox: React.FC<PropControlTextBoxProps> = (props) => {
     return <PropControl.Shell
         designMode={props.designMode}
         selected={props.selected}
+        disabled={props.disabled}
         validationStatus={props.validationStatus}
         validationSeverity={props.validationSeverity}
         bindingStatus={props.bindingStatus}
         bindingStatusSeverity={props.bindingStatusSeverity}
         label={props.label}
-        value={props.value}
+        value={
+            <TextInput disabled={props.disabled} value={props.value} onChange={props.onChange} />
+        }
         designTools={props.designTools}
     />;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+const PlaceholderControl: React.FC<{ designMode: boolean }> = ({ designMode }) => {
+    return <PropControlTextBox
+        designMode={designMode}
+        selected={false}
+        validationStatus={""}
+        bindingStatus={""}
+        label="Example Label"
+        value={"some text"}
+        designTools={null}
+        disabled={true}
+        onChange={() => { }}
+    />
+
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 export const PropControlTextBoxDemo: React.FC = () => {
@@ -48,34 +72,41 @@ export const PropControlTextBoxDemo: React.FC = () => {
     return (
         <div>
             <PropControl.Root>
-                <PropControl.Column
+                <PropControl.Row
                     designMode={designMode}
                     selected={false}
-                    label="Example Column"
+                    label="Example Row"
                 >
-                    <PropControlTextBox
-                        designMode={designMode}
-                        selected={selected}
-                        validationStatus={validationStatus}
-                        validationSeverity={validationSeverity}
-                        bindingStatus={bindingStatus}
-                        bindingStatusSeverity={bindingStatusSeverity}
-                        label="Example Label"
-                        value={value}
-                        designTools={null}
-                    />
-                    <PropControlTextBox
+                    <PropControl.Column
                         designMode={designMode}
                         selected={false}
-                        validationStatus={validationStatus}
-                        validationSeverity={"info"}
-                        bindingStatus={bindingStatus}
-                        bindingStatusSeverity={bindingStatusSeverity}
-                        label="Example Label"
-                        value={value}
-                        designTools={null}
-                    />
-                </PropControl.Column>
+                        label="Example Column"
+                    >
+                        <PlaceholderControl designMode={designMode} />
+                    </PropControl.Column>
+
+                    <PropControl.Column
+                        designMode={designMode}
+                        selected={false}
+                        label="Example Column"
+                    >
+                        <PlaceholderControl designMode={designMode} />
+                        <PropControlTextBox
+                            designMode={designMode}
+                            selected={selected}
+                            validationStatus={validationStatus}
+                            validationSeverity={validationSeverity}
+                            bindingStatus={bindingStatus}
+                            bindingStatusSeverity={bindingStatusSeverity}
+                            label="Example Label"
+                            value={value}
+                            designTools={null}
+                            disabled={false}
+                            onChange={setValue}
+                        />
+                        <PlaceholderControl designMode={designMode} />
+                    </PropControl.Column>
+                </PropControl.Row>
             </PropControl.Root>
             <ButtonGroup>
                 <CheckboxButton checked={designMode} onChange={setDesignMode}>Design Mode</CheckboxButton>

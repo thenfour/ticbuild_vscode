@@ -1,37 +1,34 @@
-// multiple of these are contained in
-//   - vertical groups
-//   - columns
-//   - page (acts like column)
-// horizontal layout options are still available:
-//   - row
-//   - horizontal group
-
-// property panel individual control shell
-// individual controls render as this shell, providing the layout and certain styling/behaviors specific
-// to control surface.
-// - selected state border
-// - design mode border
-// - tool buttons when in design mode
-// - drag-reordering (use smooth react dnd?)
 /*
 
-<PropControl.Shell>
-    <PropControl.Label>
-        Example Label
-    </PropControl.Label>
-    <PropControl.Value>
-        <input type="text" value="Example Value" readOnly />
-    </PropControl.Value>
-    <PropControl.Status severity="error">
-        Error message here.
-    </PropControl.Status>
-    <PropControl.DesignToolsContainer>
-        <PropControl.DesignToolButton tool="move" onClick={...} />
-        <PropControl.DesignToolButton tool="delete" onClick={...} />
-    </PropControl.DesignToolsContainer>
-</PropControl.Shell>
-*/
+The prop control shell provides the layout framework for all value-based individual controls.
+Layout controls won't be based on the prop control shell because they're too customized.
 
+These should be generally useable, not only in the control surface system -- so for
+example do not use controlSurfaceApi or controlSurfaceState. Prop controls shall be usable
+in our own property editing UIs (like in edit mode).
+
+# validation status
+is intended for input validation errors (e.g. invalid number format)
+subtle styling
+
+# binding status
+is intended for data binding status (errors not in the user's input; e.g. symbol not found)
+slightly more prominent styling (e.g. border around the whole control indicating there's
+an issue with the binding)
+
+# enabled/disabled state
+
+it's not supported yet, but the idea is that users can specify a boolean expression
+(executed on the tic-80) that determines whether the control is enabled or disabled.
+it's not related to design mode.
+
+# design mode
+
+- controls are not interactive in design mode
+- styling changes to indicate design mode (border, grayscale filter over value area, etc)
+- We display design tools (move up/down, delete, settings) in design mode.
+
+*/
 import React from "react";
 import "./PropControls.css";
 import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
@@ -49,59 +46,6 @@ const emptyStringToNull = (value: React.ReactNode): React.ReactNode => {
     }
     return value;
 }
-
-// ////////////////////////////////////////////////////////////////////////////////////////////////////////
-// interface PropControlLabelProps {
-//     children: React.ReactNode;
-// }
-
-// const PropControlLabel: React.FC<PropControlLabelProps> = ({ children }) => {
-//     return (
-//         <div className="cs-prop-control-label">
-//             {children}
-//         </div>
-//     );
-// };
-
-
-// ////////////////////////////////////////////////////////////////////////////////////////////////////////
-// interface PropControlValueProps {
-//     children: React.ReactNode;
-// }
-
-// const PropControlValue: React.FC<PropControlValueProps> = ({ children }) => {
-//     return (
-//         <div className="cs-prop-control-value">
-//             {children}
-//         </div>
-//     );
-// };
-
-// ////////////////////////////////////////////////////////////////////////////////////////////////////////
-// interface PropControlStatusProps {
-//     children: React.ReactNode;
-//     severity: PropControlSeverity;
-// }
-
-// const PropControlStatus: React.FC<PropControlStatusProps> = ({ severity, children }) => {
-//     return (
-//         <div className={`cs-prop-control-status cs-prop-control-status-${severity}`}>
-//             {children}
-//         </div>
-//     );
-// };
-
-// ////////////////////////////////////////////////////////////////////////////////////////////////////////
-// interface PropControlDesignToolsContainerProps {
-//     children: React.ReactNode;
-// }
-// const PropControlDesignToolsContainer: React.FC<PropControlDesignToolsContainerProps> = ({ children }) => {
-//     return (
-//         <div className="cs-prop-control-design-tools-container">
-//             {children}
-//         </div>
-//     );
-// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 interface PropControlDesignToolButtonProps {
@@ -136,6 +80,7 @@ export const PropControlDesignToolButton: React.FC<PropControlDesignToolButtonPr
 interface PropControlShellProps {
     designMode: boolean;
     selected: boolean; // in design mode
+    disabled: boolean;
 
     validationStatus: React.ReactNode; // falsy if no error.
     validationSeverity?: PropControlSeverity; // ignored if no validation error.
@@ -166,6 +111,7 @@ const PropControlShell: React.FC<PropControlShellProps> = (props) => {
                     props.selected && "cs-pp-control-shell-selected",
                     !!validationStatus && `cs-pp-control-shell-validation-${validationSeverity}`,
                     !!bindingStatus && `cs-pp-control-shell-binding-status-${bindingStatusSeverity}`,
+                    props.disabled && "cs-pp-control-shell-disabled",
                 )}
         >
             <div className="cs-pp-control-shell-inner">
@@ -189,7 +135,9 @@ const PropControlShell: React.FC<PropControlShellProps> = (props) => {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // layout controls.
-// tab, column, row
+// tab, column, row, group
+
+// columns are for vertical stacking of controls. most controls are expected to go in columns.
 interface PropControlColumnProps {
     designMode: boolean;
     selected: boolean; // in design mode
@@ -220,7 +168,18 @@ const PropControlColumn: React.FC<PropControlColumnProps> = (props) => {
     </div>;
 };
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
+// groups are collapsible sections that can hold multiple controls.
+// they have a header and can be expanded/collapsed.
+// even though the group spec can specify horizontal or vertical layout,
+// only support vertical layout for now.
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// tabs show multiple tab pages, only one visible at a time.
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// rows are for holding multiple columns side-by-side.
 interface PropControlRowProps {
     designMode: boolean;
     selected: boolean; // in design mode
@@ -265,9 +224,5 @@ export const PropControl = {
     Column: PropControlColumn,
     Row: PropControlRow,
     Root: PropControlRoot,
-    //Label: PropControlLabel,
-    //Value: PropControlValue,
-    //Status: PropControlStatus,
-    // DesignToolsContainer: PropControlDesignToolsContainer,
     DesignToolButton: PropControlDesignToolButton,
 };

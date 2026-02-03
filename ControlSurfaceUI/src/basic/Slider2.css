@@ -17,7 +17,7 @@
 .somatic-slider-track {
     position: relative;
     flex: 1;
-    height: 20px;
+    height: 10px;
     background: var(--vscode-input-background);
     border-radius: 2px;
     min-width: 0;
@@ -36,15 +36,15 @@
 .somatic-slider-thumb {
     position: absolute;
     top: 50%;
-    width: 8px;
-    height: 20px;
+    width: 4px;
+    height: 12px;
     background: var(--vscode-button-background);
     border: 2px solid var(--vscode-button-background);
     /* border-radius: 50%; */
     border-radius: 2px;
     transform: translate(-50%, -50%);
     pointer-events: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); */
 }
 
 .somatic-slider-thumb--error {

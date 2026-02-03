@@ -23,9 +23,9 @@ export const EnumButtons = <TValue extends TEnumButtonValue>({
     disabled = false,
 }: EnumButtonProps<TValue>) => {
     return <ButtonGroup>
-        {options.map((option) => (
+        {options.map((option, index) => (
             <Button
-                key={option.value.toString()}
+                key={index}//option.value.toString()} -- don't rely on unique values.
                 disabled={disabled || option.disabled === true}
                 //pressed={option.value === value}
                 highlighted={option.value === value}

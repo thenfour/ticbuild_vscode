@@ -42,6 +42,7 @@
 
 .somatic-button-group {
     display: inline-flex;
+    flex-wrap: wrap;
     --button-group-gap: 6px;
 }
 

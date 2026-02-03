@@ -22,6 +22,7 @@ import { useControlSurfaceState } from "./hooks/ControlSurfaceState";
 import { PropControl } from "./PropControlsBase/PropControlShell";
 import { ControlSurfacePageProp, ControlSurfaceRootPageProp } from "./PropControlsAdaptors/ControlSurfacePageProp";
 import { renderControlSurfaceControl } from "./controlSurfaceControlDelegator";
+import { CheckboxButton } from "./Buttons/CheckboxButton";
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
   subscribe: (listener) => {
@@ -161,8 +162,9 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             options={pages.map((val => ({ label: val.label, value: val.id })))}
           />
         </label>
-        <Button
-          onClick={() => {
+        <CheckboxButton
+          checked={designMode}
+          onChange={() => {
             setDesignMode((value) => {
               const next = !value;
               if (!next) {
@@ -171,10 +173,9 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
               return next;
             });
           }}
-          style={{ marginLeft: "auto" }}
         >
-          {designMode ? "Exit Design Mode" : "Design Mode"}
-        </Button>
+          Design Mode
+        </CheckboxButton>
         {designMode ? (
           <Button
             onClick={async () => {

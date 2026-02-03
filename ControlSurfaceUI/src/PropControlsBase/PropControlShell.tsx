@@ -7,6 +7,9 @@ These should be generally useable, not only in the control surface system -- so 
 example do not use controlSurfaceApi or controlSurfaceState. Prop controls shall be usable
 in our own property editing UIs (like in edit mode).
 
+For use with the control surface system (api & state), wrapper/adaptor components will be used
+(similar to those  in /ControlSurfaceControls/)
+
 # validation status
 is intended for input validation errors (e.g. invalid number format)
 subtle styling

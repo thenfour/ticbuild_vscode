@@ -11,6 +11,10 @@ import { ControlSurfaceTriggerButton } from "../ControlSurfaceControls/ControlSu
 import { ControlSurfaceGroup } from "../ControlSurfaceControls/ControlSurfaceGroup";
 import { ControlSurfaceTabs } from "../ControlSurfaceControls/ControlSurfaceTabs";
 import { ControlSurfaceStringProp } from "../PropControlsAdaptors/ControlSurfaceStringProp";
+import { ControlSurfaceToggleProp } from "../PropControlsAdaptors/ControlSurfaceToggleProp";
+import { ControlSurfaceNumberProp } from "../PropControlsAdaptors/ControlSurfaceNumberProp";
+import { ControlSurfaceKnobProp } from "../PropControlsAdaptors/ControlSurfaceKnobProp";
+import { ControlSurfaceSliderProp } from "../PropControlsAdaptors/ControlSurfaceSliderProp";
 import { SymbolQuickAdd } from "./SymbolQuickAdd";
 import {
   DividerPropertiesPanel,
@@ -36,7 +40,7 @@ export function registerBuiltInControls() {
     category: "input",
     description: "Rotary knob for numeric input",
     quickAddComponent: SymbolQuickAdd,
-    renderComponent: ControlSurfaceKnob,
+    renderComponent: ControlSurfaceKnobProp,
     propertiesPanelComponent: KnobPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "knob",
@@ -54,7 +58,7 @@ export function registerBuiltInControls() {
     category: "input",
     description: "Linear slider for numeric input",
     quickAddComponent: SymbolQuickAdd,
-    renderComponent: ControlSurfaceSlider,
+    renderComponent: ControlSurfaceSliderProp,
     propertiesPanelComponent: SliderPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "slider",
@@ -72,7 +76,7 @@ export function registerBuiltInControls() {
     category: "input",
     description: "On/off toggle switch",
     quickAddComponent: SymbolQuickAdd,
-    renderComponent: ControlSurfaceToggle,
+    renderComponent: ControlSurfaceToggleProp,
     propertiesPanelComponent: TogglePropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "toggle",
@@ -87,7 +91,7 @@ export function registerBuiltInControls() {
     category: "input",
     description: "Numeric input with up/down buttons",
     quickAddComponent: SymbolQuickAdd,
-    renderComponent: ControlSurfaceNumber,
+    renderComponent: ControlSurfaceNumberProp,
     propertiesPanelComponent: NumberPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "number",

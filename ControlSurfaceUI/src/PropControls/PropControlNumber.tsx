@@ -1,11 +1,14 @@
 import React from "react";
 import { PropControl, PropControlSeverity } from "../PropControlsBase/PropControlShell";
-import { TextInput } from "../basic/TextInput";
+import { NumericUpDown } from "../basic/NumericUpDown";
 
-export interface PropControlStringProps {
+export interface PropControlNumberProps {
     label: React.ReactNode;
-    value: string;
-    onChange: (value: string) => void;
+    value: number;
+    onChange: (value: number) => void;
+    min?: number;
+    max?: number;
+    step?: number;
 
     // PropControl Shell props
     designMode: boolean;
@@ -19,13 +22,16 @@ export interface PropControlStringProps {
 }
 
 /**
- * Pure UI component for string input using PropControl.Shell.
+ * Pure UI component for numeric input using PropControl.Shell.
  * Does not interact with control surface API or state directly.
  */
-export const PropControlString: React.FC<PropControlStringProps> = ({
+export const PropControlNumber: React.FC<PropControlNumberProps> = ({
     label,
     value,
     onChange,
+    min = 0,
+    max = 100,
+    step = 0.1,
     designMode,
     selected,
     disabled = false,
@@ -46,9 +52,12 @@ export const PropControlString: React.FC<PropControlStringProps> = ({
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
             value={
-                <TextInput
+                <NumericUpDown
                     value={value}
                     onChange={onChange}
+                    min={min}
+                    max={max}
+                    step={step}
                     disabled={disabled || designMode}
                 />
             }

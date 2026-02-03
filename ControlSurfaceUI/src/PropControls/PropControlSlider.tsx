@@ -1,11 +1,13 @@
 import React from "react";
 import { PropControl, PropControlSeverity } from "../PropControlsBase/PropControlShell";
-import { TextInput } from "../basic/TextInput";
 
-export interface PropControlStringProps {
+export interface PropControlSliderProps {
     label: React.ReactNode;
-    value: string;
-    onChange: (value: string) => void;
+    value: number;
+    onChange: (value: number) => void;
+    min?: number;
+    max?: number;
+    step?: number;
 
     // PropControl Shell props
     designMode: boolean;
@@ -19,13 +21,16 @@ export interface PropControlStringProps {
 }
 
 /**
- * Pure UI component for string input using PropControl.Shell.
+ * Pure UI component for slider input using PropControl.Shell.
  * Does not interact with control surface API or state directly.
  */
-export const PropControlString: React.FC<PropControlStringProps> = ({
+export const PropControlSlider: React.FC<PropControlSliderProps> = ({
     label,
     value,
     onChange,
+    min = 0,
+    max = 100,
+    step = 1,
     designMode,
     selected,
     disabled = false,
@@ -46,11 +51,20 @@ export const PropControlString: React.FC<PropControlStringProps> = ({
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
             value={
-                <TextInput
-                    value={value}
-                    onChange={onChange}
-                    disabled={disabled || designMode}
-                />
+                <>
+                    <input
+                        type="range"
+                        className="control-surface-slider-input"
+                        min={min}
+                        max={max}
+                        step={step}
+                        value={value}
+                        onChange={(e) => onChange(Number(e.target.value))}
+                        disabled={disabled || designMode}
+                        style={{ flex: 1 }}
+                    />
+                    <span className="control-surface-slider-value">{value}</span>
+                </>
             }
             designTools={designTools}
         />

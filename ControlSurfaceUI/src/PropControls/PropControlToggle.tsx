@@ -1,11 +1,11 @@
 import React from "react";
 import { PropControl, PropControlSeverity } from "../PropControlsBase/PropControlShell";
-import { TextInput } from "../basic/TextInput";
+import { CheckboxButton } from "../Buttons/CheckboxButton";
 
-export interface PropControlStringProps {
+export interface PropControlToggleProps {
     label: React.ReactNode;
-    value: string;
-    onChange: (value: string) => void;
+    value: boolean;
+    onChange: (value: boolean) => void;
 
     // PropControl Shell props
     designMode: boolean;
@@ -19,10 +19,10 @@ export interface PropControlStringProps {
 }
 
 /**
- * Pure UI component for string input using PropControl.Shell.
+ * Pure UI component for boolean toggle using PropControl.Shell.
  * Does not interact with control surface API or state directly.
  */
-export const PropControlString: React.FC<PropControlStringProps> = ({
+export const PropControlToggle: React.FC<PropControlToggleProps> = ({
     label,
     value,
     onChange,
@@ -46,11 +46,13 @@ export const PropControlString: React.FC<PropControlStringProps> = ({
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
             value={
-                <TextInput
-                    value={value}
+                <CheckboxButton
+                    checked={value}
                     onChange={onChange}
                     disabled={disabled || designMode}
-                />
+                >
+                    {/* Empty - label is shown in Shell */}
+                </CheckboxButton>
             }
             designTools={designTools}
         />

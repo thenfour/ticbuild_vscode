@@ -1,11 +1,16 @@
 import React from "react";
 import { PropControl, PropControlSeverity } from "../PropControlsBase/PropControlShell";
-import { TextInput } from "../basic/TextInput";
+import { Knob } from "../basic/Knob2";
+import { ControlSurfaceKnobSizeSpec } from "../defs";
 
-export interface PropControlStringProps {
+export interface PropControlKnobProps {
     label: React.ReactNode;
-    value: string;
-    onChange: (value: string) => void;
+    value: number;
+    onChange: (value: number) => void;
+    min?: number;
+    max?: number;
+    step?: number;
+    size?: ControlSurfaceKnobSizeSpec;
 
     // PropControl Shell props
     designMode: boolean;
@@ -19,13 +24,17 @@ export interface PropControlStringProps {
 }
 
 /**
- * Pure UI component for string input using PropControl.Shell.
+ * Pure UI component for knob input using PropControl.Shell.
  * Does not interact with control surface API or state directly.
  */
-export const PropControlString: React.FC<PropControlStringProps> = ({
+export const PropControlKnob: React.FC<PropControlKnobProps> = ({
     label,
     value,
     onChange,
+    min = 0,
+    max = 1,
+    step = 0.01,
+    size = "medium",
     designMode,
     selected,
     disabled = false,
@@ -35,6 +44,9 @@ export const PropControlString: React.FC<PropControlStringProps> = ({
     bindingStatusSeverity,
     designTools,
 }) => {
+    // Note: size is in the spec but Knob component doesn't currently support it
+    // const sizePixels = size === "small" ? 40 : size === "large" ? 80 : 60;
+
     return (
         <PropControl.Shell
             designMode={designMode}
@@ -46,9 +58,12 @@ export const PropControlString: React.FC<PropControlStringProps> = ({
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
             value={
-                <TextInput
+                <Knob
                     value={value}
                     onChange={onChange}
+                    min={min}
+                    max={max}
+                    step={step}
                     disabled={disabled || designMode}
                 />
             }

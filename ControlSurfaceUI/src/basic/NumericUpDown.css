@@ -56,3 +56,23 @@
     background-color: var(--error-surface-bg);
     color: var(--error-surface-text);
 }
+
+/* Text input styles */
+.text-input__input {
+    flex: 1;
+    border: 1px solid var(--vscode-input-border);
+    padding: 4px 8px;
+    font-size: 12px;
+    outline: none;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+}
+
+.text-input__input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.text-input__input:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+}

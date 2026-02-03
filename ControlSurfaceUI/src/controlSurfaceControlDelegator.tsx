@@ -15,6 +15,10 @@ import { ControlSurfaceSelectable } from "./ControlBase/ControlSurfaceSelectable
 import { buildControlPath, isPathEqual } from "./controlPathBase";
 import { ControlSurfaceStateApi } from "./hooks/ControlSurfaceState";
 import { ControlSurfaceStringProp } from "./PropControlsAdaptors/ControlSurfaceStringProp";
+import { ControlSurfaceToggleProp } from "./PropControlsAdaptors/ControlSurfaceToggleProp";
+import { ControlSurfaceNumberProp } from "./PropControlsAdaptors/ControlSurfaceNumberProp";
+import { ControlSurfaceKnobProp } from "./PropControlsAdaptors/ControlSurfaceKnobProp";
+import { ControlSurfaceSliderProp } from "./PropControlsAdaptors/ControlSurfaceSliderProp";
 import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 
 export type ControlSurfaceRenderOptions = {
@@ -68,9 +72,16 @@ export const renderControlSurfaceControl = (
             );
 
         case "knob":
-            return wrapSelectable(
-                <ControlSurfaceKnob {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
-                `knob-${index}`,
+            // New PropControl-based implementation
+            return (
+                <ControlSurfaceKnobProp
+                    key={`knob-${index}`}
+                    {...node}
+                    path={currentPath}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                />
             );
 
         case "label":
@@ -80,15 +91,29 @@ export const renderControlSurfaceControl = (
             );
 
         case "number":
-            return wrapSelectable(
-                <ControlSurfaceNumber {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
-                `number-${index}`,
+            // New PropControl-based implementation
+            return (
+                <ControlSurfaceNumberProp
+                    key={`number-${index}`}
+                    {...node}
+                    path={currentPath}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                />
             );
 
         case "slider":
-            return wrapSelectable(
-                <ControlSurfaceSlider {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
-                `slider-${index}`,
+            // New PropControl-based implementation
+            return (
+                <ControlSurfaceSliderProp
+                    key={`slider-${index}`}
+                    {...node}
+                    path={currentPath}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                />
             );
 
         case "string":
@@ -105,9 +130,16 @@ export const renderControlSurfaceControl = (
             );
 
         case "toggle":
-            return wrapSelectable(
-                <ControlSurfaceToggle {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
-                `toggle-${index}`,
+            // New PropControl-based implementation
+            return (
+                <ControlSurfaceToggleProp
+                    key={`toggle-${index}`}
+                    {...node}
+                    path={currentPath}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                />
             );
 
         case "triggerButton":

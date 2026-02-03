@@ -1,13 +1,14 @@
 .pp-root {
     /* establish variables at controls root */
     --cs-pp-control-label-width: 150px;
-    --cs-pp-control-total-width: 400px;
+    --cs-pp-control-column-width: 400px;
 }
 
 .pp-root .cs-pp-control-column {
     display:flex;
     flex-direction: column;
     gap: 12px;
+    width: var(--cs-pp-control-column-width);
 }
 
 .pp-root .cs-pp-control-column .cs-pp-control-column-content {
@@ -29,10 +30,10 @@
 
 .cs-pp-control-shell {
     display: flex;
-    width: var(--cs-pp-control-total-width);
     padding:3px; /* we will use the background as a fake "border"; padding indicates the border thickness */
     box-sizing: border-box; /* include padding in width */
     background-color: transparent;
+    position:relative; /* allow floating tool controls */
 }
 
 .cs-pp-control-shell .cs-pp-control-shell-inner{
@@ -67,4 +68,82 @@
 
 .cs-pp-control-shell-value:hover {
     background-color: var(--vscode-inputOption-activeBackground);
+}
+
+
+/* 
+    --vscode-inputValidation-infoBackground: #063b49;
+    --vscode-inputValidation-infoBorder: #007acc;
+    --vscode-inputValidation-warningBackground: #352a05;
+    --vscode-inputValidation-warningBorder: #b89500;
+    --vscode-inputValidation-errorBackground: #5a1d1d;
+    --vscode-inputValidation-errorBorder: #be1100;
+
+    --vscode-editorError-foreground: #f14c4c;
+    --vscode-editorWarning-foreground: #cca700;
+    --vscode-editorInfo-foreground: #59a4f9;
+ */
+
+.cs-pp-control-shell .cs-pp-control-shell-binding-status,
+.cs-pp-control-shell .cs-pp-control-shell-validation-status {
+    display:flex;
+    justify-content: flex-end;
+}
+
+
+.cs-pp-control-shell.cs-pp-control-shell-binding-status-error .cs-pp-control-shell-binding-status,
+.cs-pp-control-shell.cs-pp-control-shell-validation-error .cs-pp-control-shell-validation-status {
+    color: var(--vscode-editorError-foreground);
+}
+
+
+.cs-pp-control-shell.cs-pp-control-shell-binding-status-warning .cs-pp-control-shell-binding-status,
+.cs-pp-control-shell.cs-pp-control-shell-validation-warning .cs-pp-control-shell-validation-status {
+    color: var(--vscode-editorWarning-foreground);
+}
+
+
+.cs-pp-control-shell.cs-pp-control-shell-binding-status-info .cs-pp-control-shell-binding-status,
+.cs-pp-control-shell.cs-pp-control-shell-validation-info .cs-pp-control-shell-validation-status {
+    color: var(--vscode-editorInfo-foreground);
+}
+
+.cs-pp-control-page,
+.cs-pp-control-column {
+    position:relative;
+}
+ 
+
+.cs-pp-control-page-label
+{
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 14px;
+    margin-bottom: 2px;
+}
+
+.cs-pp-design-tools {
+    position:absolute;
+    top:3px;
+    right:3px;
+    opacity: 0;
+}
+/* 
+.cs-pp-control:hover:not(:has(.cs-pp-control:hover)) .cs-pp-design-tools {
+    opacity: 100%;
+} */
+
+/* 1) show tools for the deepest hovered control-column */
+.cs-pp-control:hover:not(:has(.cs-pp-control:hover))
+  .cs-pp-design-tools {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 2) but don't cross a nested .cs-pp-control-column boundary */
+.cs-pp-control:hover:not(:has(.cs-pp-control:hover))
+  .cs-pp-control
+  .cs-pp-design-tools {
+  opacity: 0;
+  pointer-events: none;
 }

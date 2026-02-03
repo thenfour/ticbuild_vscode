@@ -14,8 +14,8 @@ export interface PropControlNumberProps {
     designMode: boolean;
     selected: boolean;
     disabled?: boolean;
-    validationStatus?: React.ReactNode;
-    validationSeverity?: PropControlSeverity;
+    //validationStatus?: React.ReactNode;
+    //validationSeverity?: PropControlSeverity;
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
@@ -35,23 +35,38 @@ export const PropControlNumber: React.FC<PropControlNumberProps> = ({
     designMode,
     selected,
     disabled = false,
-    validationStatus,
-    validationSeverity,
+    //validationStatus,
+    //validationSeverity,
     bindingStatus,
     bindingStatusSeverity,
     designTools,
 }) => {
+
+    // if the input is not a number, or out of range, show validation error
+    let validationError: React.ReactNode = null;
+    let canRender = true;
+    console.log("PropControlNumber value:", value);
+    if ((typeof (value) !== "number") || !isFinite(value) || isNaN(value)) {
+        validationError = "Value must be a number";
+        canRender = false;
+    } else if (value < (min ?? -Infinity)) {
+        validationError = `Value must be at least ${min}`;
+    } else if (value > (max ?? Infinity)) {
+        validationError = `Value must be at most ${max}`;
+    }
+
     return (
         <PropControl.Shell
             designMode={designMode}
             selected={selected}
             disabled={disabled}
-            validationStatus={validationStatus ?? null}
-            validationSeverity={validationSeverity}
+            validationStatus={validationError}
+            validationSeverity={validationError ? "error" : undefined}
             bindingStatus={bindingStatus ?? null}
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
             value={
+                canRender &&
                 <NumericUpDown
                     value={value}
                     onChange={onChange}

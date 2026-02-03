@@ -14,6 +14,7 @@ export type MockControlSurfaceDataSourceOptions = {
     expressionResults: Record<string, { value?: string; error?: string }>;
     discoveredInstances?: ControlSurfaceDiscoveredInstance[];
     selectedPageId?: string;
+    symbolValues?: Record<string, any>;
 };
 
 export const useMockControlSurfaceDataSource = ({
@@ -23,6 +24,7 @@ export const useMockControlSurfaceDataSource = ({
     expressionResults,
     discoveredInstances,
     selectedPageId,
+    symbolValues,
 }: MockControlSurfaceDataSourceOptions): ControlSurfaceDataSource => {
     const subscribersRef = React.useRef(
         new Set<(payload: ControlSurfaceState) => void>(),
@@ -53,14 +55,14 @@ export const useMockControlSurfaceDataSource = ({
             controlSurfaceRoot,
             uiRefreshMs: 250,
             pollIntervalMs: 250,
-            symbolValues: { mockSymbol: 123 },
+            symbolValues: symbolValues ?? { mockSymbol: 123 },
             expressionResults,
             discoveredInstances,
             designMode: false,
             selectedControlPath: null,
             selectedPageId: selectedPageId ?? "root",
         } satisfies ControlSurfaceState;
-    }, [connected, controlSurfaceRoot, discoveredInstances, expressionResults, selectedPageId, watches]);
+    }, [connected, controlSurfaceRoot, discoveredInstances, expressionResults, selectedPageId, symbolValues, watches]);
 
     React.useEffect(() => {
         latestPayloadRef.current = payload;

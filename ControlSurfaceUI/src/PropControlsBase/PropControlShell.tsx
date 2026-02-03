@@ -32,13 +32,12 @@ it's not related to design mode.
 - We display design tools (move up/down, delete, settings) in design mode as an overlay.
 
 */
+import { mdiCog, mdiDelete, mdiMenuDown, mdiMenuUp } from "@mdi/js";
 import React from "react";
-import "./PropControls.css";
-import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
-import { useControlSurfaceState } from "../hooks/ControlSurfaceState";
-import Icon from "@mdi/react";
-import { mdiCog, mdiDelete, mdiMenuDown, mdiMenuLeft, mdiMenuUp } from "@mdi/js";
+import { ButtonGroup } from "../Buttons/ButtonGroup";
+import { IconButton } from "../Buttons/IconButton";
 import { classes, IsNullOrWhitespace } from "../utils";
+import "./PropControls.css";
 
 export type PropControlSeverity = "info" | "warning" | "error" | "success";
 
@@ -56,26 +55,24 @@ interface PropControlDesignToolButtonProps {
     onClick: () => void;
 }
 export const PropControlDesignToolButton: React.FC<PropControlDesignToolButtonProps> = ({ tool, onClick }) => {
-    let label: React.ReactNode = null;
+    let labelPath: string | null = null;
     switch (tool) {
         case "moveUp":
-            label = <Icon path={mdiMenuUp} />;
+            labelPath = mdiMenuUp;
             break;
         case "moveDown":
-            label = <Icon path={mdiMenuDown} />;
+            labelPath = mdiMenuDown;
             break;
         case "delete":
-            label = <Icon path={mdiDelete} />;
+            labelPath = mdiDelete;
             break;
         case "settings":
-            label = <Icon path={mdiCog} />;
+            labelPath = mdiCog;
             break;
     }
 
     return (
-        <button className={`cs-pp-design-tool-button cs-prop-control-design-tool-button-${tool}`} onClick={onClick}>
-            {label}
-        </button>
+        <IconButton className={`cs-pp-design-tool-button cs-prop-control-design-tool-button-${tool}`} onClick={onClick} iconPath={labelPath} />
     );
 };
 
@@ -109,7 +106,7 @@ const PropControlShell: React.FC<PropControlShellProps> = (props) => {
     return (
         <div
             className={
-                classes(`cs-pp-control-shell`,
+                classes(`cs-pp-control cs-pp-control-shell`,
                     props.designMode && "cs-pp-control-shell-design-mode",
                     props.selected && "cs-pp-control-shell-selected",
                     !!validationStatus && `cs-pp-control-shell-validation-${validationSeverity}`,
@@ -131,9 +128,9 @@ const PropControlShell: React.FC<PropControlShellProps> = (props) => {
                     {bindingStatus}
                 </div>}
             </div>
-            {props.designMode && props.designTools && <div className="cs-pp-control-shell-design-tools">
+            {props.designMode && props.designTools && <ButtonGroup className="cs-pp-design-tools">
                 {props.designTools}
-            </div>}
+            </ButtonGroup>}
         </div>
     );
 };
@@ -158,16 +155,16 @@ interface PropControlPageProps {
 const PropControlPage: React.FC<PropControlPageProps> = (props) => {
     return <div
         className={classes(
-            "cs-pp-control-page cs-pp-control-column",
+            "cs-pp-control cs-pp-control-page cs-pp-control-column",
             props.designMode && "cs-pp-control-page-design-mode cs-pp-control-column-design-mode",
             props.selected && "cs-pp-control-page-selected cs-pp-control-column-selected",
         )}
     >
         <div className="cs-pp-control-page-header cs-pp-control-column-header">
             <div className="cs-pp-control-page-label cs-pp-control-column-label">{props.label}</div>
-            <div className="cs-pp-control-page-design-tools cs-pp-control-column-design-tools">
+            <ButtonGroup className="cs-pp-design-tools">
                 {props.designMode && props.designTools}
-            </div>
+            </ButtonGroup>
         </div>
         <div className="cs-pp-control-page-content cs-pp-control-column-content">
             {props.children}
@@ -190,16 +187,16 @@ interface PropControlColumnProps {
 const PropControlColumn: React.FC<PropControlColumnProps> = (props) => {
     return <div
         className={classes(
-            "cs-pp-control-column",
+            "cs-pp-control cs-pp-control-column",
             props.designMode && "cs-pp-control-column-design-mode",
             props.selected && "cs-pp-control-column-selected",
         )}
     >
         <div className="cs-pp-control-column-header">
             <div className="cs-pp-control-column-label">{props.label}</div>
-            <div className="cs-pp-control-column-design-tools">
+            <ButtonGroup className="cs-pp-design-tools">
                 {props.designMode && props.designTools}
-            </div>
+            </ButtonGroup>
         </div>
         <div className="cs-pp-control-column-content">
             {props.children}
@@ -232,16 +229,16 @@ interface PropControlRowProps {
 const PropControlRow: React.FC<PropControlRowProps> = (props) => {
     return <div
         className={classes(
-            "cs-pp-control-row",
+            "cs-pp-control cs-pp-control-row",
             props.designMode && "cs-pp-control-row-design-mode",
             props.selected && "cs-pp-control-row-selected",
         )}
     >
         <div className="cs-pp-control-row-header">
             <div className="cs-pp-control-row-label">{props.label}</div>
-            <div className="cs-pp-control-row-design-tools">
+            <ButtonGroup className="cs-pp-design-tools">
                 {props.designMode && props.designTools}
-            </div>
+            </ButtonGroup>
         </div>
         <div className="cs-pp-control-row-content">
             {props.children}

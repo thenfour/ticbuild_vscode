@@ -27,7 +27,7 @@ import { ControlSurfacePageProp } from "./PropControlsAdaptors/ControlSurfacePag
 import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 
 export type ControlSurfaceRenderOptions = {
-    parentPath: string[];
+    parentPath: string[] | undefined; // the "root page" has no parent path.
     //designMode: boolean;
     //selectedPath?: string[] | null;
     onSelectPath?: (path: string[], node: ControlSurfaceNode) => void;
@@ -43,6 +43,9 @@ export const renderControlSurfaceControl = (
     //pollIntervalMs: number,
     options: ControlSurfaceRenderOptions,
 ): JSX.Element => {
+    if (!options.parentPath) {
+        throw new Error("parentPath is required in ControlSurfaceRenderOptions");
+    }
     const currentPath = buildControlPath(options.parentPath, index);
     const isSelected = isPathEqual(stateApi.state.selectedControlPath, currentPath);
 

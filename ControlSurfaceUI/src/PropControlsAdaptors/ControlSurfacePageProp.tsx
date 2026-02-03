@@ -67,3 +67,50 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
         </PropControl.Page>
     );
 };
+
+
+
+/*
+just like page prop, but for the root "page". cannot be edited; it doesn't have a real spec node.
+ */
+
+export interface ControlSurfaceRootPagePropProps {
+    spec: ControlSurfacePageSpec;
+    //path: string;
+    renderControl: (
+        node: ControlSurfaceNode,
+        index: number,
+        api: ControlSurfaceApi,
+        stateApi: ControlSurfaceStateApi,
+        options: ControlSurfaceRenderOptions
+    ) => JSX.Element;
+    api: ControlSurfaceApi;
+    stateApi: ControlSurfaceStateApi;
+    options: ControlSurfaceRenderOptions;
+    currentPath: string[];
+}
+
+export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProps> = ({
+    spec,
+    renderControl,
+    api,
+    stateApi,
+    options,
+    currentPath,
+}) => {
+    return (
+        <PropControl.Page
+            label={spec.label}
+            designMode={stateApi.state.designMode}
+            selected={false}
+            designTools={null}
+        >
+            {spec.controls.map((child, childIndex) =>
+                renderControl(child, childIndex, api, stateApi, {
+                    ...options,
+                    parentPath: currentPath,
+                })
+            )}
+        </PropControl.Page>
+    );
+};

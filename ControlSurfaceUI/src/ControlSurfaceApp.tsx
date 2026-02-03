@@ -3,7 +3,6 @@ import React from "react";
 import { Divider } from "./basic/Divider";
 import { ButtonGroup } from "./Buttons/ButtonGroup";
 import { Button } from "./Buttons/PushButton";
-import { ControlSurfacePage } from "./ControlSurfacePage";
 import {
   ControlSurfaceApi,
   ControlSurfaceDataSource,
@@ -21,6 +20,8 @@ import { CONTROL_PATH_ROOT } from "./controlPathBase";
 import { findControlPathByNode, resolveControlByPath } from "./controlPathUtils";
 import { useControlSurfaceState } from "./hooks/ControlSurfaceState";
 import { PropControl } from "./PropControlsBase/PropControlShell";
+import { ControlSurfacePageProp, ControlSurfaceRootPageProp } from "./PropControlsAdaptors/ControlSurfacePageProp";
+import { renderControlSurfaceControl } from "./controlSurfaceControlDelegator";
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
   subscribe: (listener) => {
@@ -231,24 +232,35 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
       {/* main control surface body */}
 
       <PropControl.Root>
-        {stateApi.activePage && api ? (
-          <ControlSurfacePage
-            page={stateApi.activePage}
-            //symbolValues={state.symbolValues}
-            //pollIntervalMs={state.pollIntervalMs}
-            pagePath={stateApi.activePagePath}
-            //designMode={designMode}
-            //selectedPath={stateApi.state.selectedControlPath}
-            onSelectPath={(path) => setSelectedControlPath(path)}
-            onDeletePath={(path) => {
-              api?.postMessage({
-                type: "deleteControl",
-                path,
-              });
-              if (stateApi.state.selectedControlPath && path.join("/") === stateApi.state.selectedControlPath.join("/")) {
-                setSelectedControlPath(null);
-              }
-            }}
+        {(stateApi.activePage && api) ? (
+          <ControlSurfaceRootPageProp
+            spec={stateApi.activePage}
+            api={api}
+            stateApi={stateApi}
+            currentPath={stateApi.activePagePath}
+            renderControl={renderControlSurfaceControl}
+            options={{ parentPath: [CONTROL_PATH_ROOT] }}
+          // path={stateApi.activePagePath.join("/")}
+          //   spec={stateApi.activePage}
+          //   api={api}
+          //   stateApi={stateApi}
+          //   options={{ parentPath: CONTROL_PATH_ROOT }}
+          //   currentPath={stateApi.activePagePath}
+          //   path={stateApi.activePagePath.join("/")}
+          //   renderControl={stateApi.renderControl}
+
+          // page={stateApi.activePage}
+          // pagePath={stateApi.activePagePath}
+          // onSelectPath={(path) => setSelectedControlPath(path)}
+          // onDeletePath={(path) => {
+          //   api?.postMessage({
+          //     type: "deleteControl",
+          //     path,
+          //   });
+          //   if (stateApi.state.selectedControlPath && path.join("/") === stateApi.state.selectedControlPath.join("/")) {
+          //     setSelectedControlPath(null);
+          //   }
+          // }}
           />
         ) : (
           <>No active page or API not available.</>

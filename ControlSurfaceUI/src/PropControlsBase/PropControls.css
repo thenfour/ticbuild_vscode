@@ -29,15 +29,18 @@
 
 .cs-pp-control-shell {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
     width: var(--cs-pp-control-total-width);
-    /* border: 1px solid #f00;
-    background-color: #0ff; */
-    border: 2px solid transparent;
-    padding:3px;
+    padding:3px; /* we will use the background as a fake "border"; padding indicates the border thickness */
+    box-sizing: border-box; /* include padding in width */
+    background-color:#f0f;
 }
 
+.cs-pp-control-shell .cs-pp-control-shell-inner{
+    display: flex;
+    flex-direction: column;
+    flex:1; /* fill space to make sure the fake border effect is consistent */
+    background-color: var(--vscode-editor-background); /* cancel out the outer background to create border effect */
+}
 
 .cs-pp-control-shell:hover {
     border-color: var(--vscode-focusBorder, var(--accent));
@@ -57,7 +60,6 @@
 
 .cs-pp-control-shell-value {
     flex: 1;
-    width: var(--cs-pp-control-total-width);
     display: flex;
     gap: 8px;
     align-items: center;

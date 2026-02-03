@@ -26,7 +26,7 @@ it's not related to design mode.
 
 - controls are not interactive in design mode
 - styling changes to indicate design mode (border, grayscale filter over value area, etc)
-- We display design tools (move up/down, delete, settings) in design mode.
+- We display design tools (move up/down, delete, settings) in design mode as an overlay.
 
 */
 import React from "react";
@@ -114,6 +114,8 @@ const PropControlShell: React.FC<PropControlShellProps> = (props) => {
                     props.disabled && "cs-pp-control-shell-disabled",
                 )}
         >
+            {/* separate outer from inner, so we can use the outer background as
+            a border.  */}
             <div className="cs-pp-control-shell-inner">
                 <div className="cs-pp-control-shell-labelvaluerow">
                     <div className="cs-pp-control-shell-label">{label}</div>

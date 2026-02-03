@@ -163,3 +163,14 @@
   .cs-pp-control{
     background-color: transparent;
 }
+
+
+.cs-pp-control-divider {
+    margin: 12px 0;
+    position: relative;
+}
+
+.cs-pp-control-divider .cs-pp-control-divider-line {
+    border-top: 1px solid var(--vscode-panel-border);
+    margin: 12px 0;
+}

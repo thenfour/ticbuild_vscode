@@ -50,7 +50,7 @@ export const ControlSurfacePropertiesPanelContainer: React.FC<ControlSurfaceProp
                 <Button onClick={handleApplyDraft} disabled={!draftDirty}>
                     Apply
                 </Button>
-                <Button onClick={handleCancelDraft} disabled={!draftDirty}>
+                <Button onClick={handleCancelDraft}>
                     Cancel
                 </Button>
             </ButtonGroup>

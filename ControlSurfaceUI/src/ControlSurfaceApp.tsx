@@ -137,12 +137,17 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   }, [api, draftNode, stateApi.state.selectedControlPath]);
 
   const handleCancelDraft = React.useCallback(() => {
-    if (!resolvedSelection) {
-      return;
-    }
-    setDraftNode(resolvedSelection.node);
+    console.log("handleCancelDraft");
+    // if (!resolvedSelection) {
+    //   return;
+    // }
+    setDraftNode(null);
     setDraftDirty(false);
-  }, [resolvedSelection]);
+    setDraftPathKey(null);
+    stateApi.setSelectedControlPath(null);
+    // setDraftNode(resolvedSelection.node);
+    // setDraftDirty(false);
+  }, [draftNode, resolvedSelection]);
 
   React.useEffect(() => {
     const unsubscribe = resolvedDataSource.subscribe((payload) => {

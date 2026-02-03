@@ -239,7 +239,19 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             stateApi={stateApi}
             currentPath={stateApi.activePagePath}
             renderControl={renderControlSurfaceControl}
-            options={{ parentPath: [CONTROL_PATH_ROOT] }}
+            options={{
+              parentPath: [CONTROL_PATH_ROOT],
+              onSelectPath: (path) => setSelectedControlPath(path),
+              onDeletePath: (path) => {
+                api?.postMessage({
+                  type: "deleteControl",
+                  path,
+                });
+                if (stateApi.state.selectedControlPath && path.join("/") === stateApi.state.selectedControlPath.join("/")) {
+                  setSelectedControlPath(null);
+                }
+              }
+            }}
           // path={stateApi.activePagePath.join("/")}
           //   spec={stateApi.activePage}
           //   api={api}

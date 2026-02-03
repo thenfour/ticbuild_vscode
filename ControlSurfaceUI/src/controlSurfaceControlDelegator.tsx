@@ -94,6 +94,7 @@ export const renderControlSurfaceControl = (
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
                     onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
                     onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
                 />
             );
 
@@ -107,6 +108,7 @@ export const renderControlSurfaceControl = (
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
                     onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
                     onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
                 />
             );
 
@@ -134,6 +136,7 @@ export const renderControlSurfaceControl = (
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
                     onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
                     onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
                 />
             );
 
@@ -147,6 +150,7 @@ export const renderControlSurfaceControl = (
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
                     onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
                     onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
                 />
             );
 
@@ -160,6 +164,7 @@ export const renderControlSurfaceControl = (
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
                     onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
                     onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
                 />
             );
 
@@ -173,6 +178,7 @@ export const renderControlSurfaceControl = (
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
                     onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
                     onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
                 />
             );
 

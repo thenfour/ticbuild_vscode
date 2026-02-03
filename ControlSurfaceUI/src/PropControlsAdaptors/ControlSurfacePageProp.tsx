@@ -4,6 +4,7 @@ import { ControlSurfacePageSpec, ControlSurfaceNode, ControlSurfaceApi } from ".
 import { ControlSurfaceStateApi } from "../hooks/ControlSurfaceState";
 import { createDesignTools } from "../utils/designTools";
 import { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
+import { AddControlControl } from "../AddControlControl";
 
 export interface ControlSurfacePagePropProps {
     spec: ControlSurfacePageSpec;
@@ -64,6 +65,7 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
                     parentPath: currentPath,
                 })
             )}
+            <AddControlControl parentPath={currentPath} />
         </PropControl.Page>
     );
 };
@@ -111,6 +113,7 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
                     parentPath: currentPath,
                 })
             )}
+            <AddControlControl parentPath={currentPath} />
         </PropControl.Page>
     );
 };

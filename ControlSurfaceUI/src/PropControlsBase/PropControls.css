@@ -32,6 +32,7 @@
     display: flex;
     padding:3px; /* we will use the background as a fake "border"; padding indicates the border thickness */
     box-sizing: border-box; /* include padding in width */
+    border: 1px solid transparent; /* var(--vscode-panel-border); */
     background-color: transparent;
     position:relative; /* allow floating tool controls */
 }
@@ -44,7 +45,9 @@
 }
 
 .cs-pp-control-shell:hover {
-    border-color: var(--vscode-focusBorder, var(--accent));
+    /* border-color: var(--vscode-focusBorder); */
+    border-color: var(--vscode-panel-border);
+    
 }
 
 .cs-pp-control-shell-labelvaluerow {
@@ -57,6 +60,7 @@
     width: var(--cs-pp-control-label-width);
     font-size: 12px;
     color: var(--vscode-descriptionForeground);
+    padding-left:4px;
 }
 
 .cs-pp-control-shell-value {
@@ -67,7 +71,7 @@
 }
 
 .cs-pp-control-shell-value:hover {
-    background-color: var(--vscode-inputOption-activeBackground);
+    /* background-color: var(--vscode-inputOption-activeBackground); */
 }
 
 

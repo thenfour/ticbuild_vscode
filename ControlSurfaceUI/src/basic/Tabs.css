@@ -6,7 +6,7 @@
 }
 
 .tab-header {
-    border-bottom: 2px solid var(--vscode-button-background);
+    border-bottom: 1px solid var(--vscode-button-background);
     /* background: var(--vscode-button-secondaryBackground); */
     padding: 0;
 }
@@ -23,20 +23,20 @@
     position: relative;
     display: flex;
     align-items: center;
-    padding: 8px 16px;
+    padding: 2px 4px;
     cursor: pointer;
     border-right: 1px solid var(--vscode-panel-border);
     background: var(--vscode-button-secondaryBackground);
     color: var(--vscode-button-secondaryForeground);
-    min-width: 80px;
+    min-width: 50px;
 
-    --button-border-radius: 6px;
+    --button-border-radius: 2px;
 }
 
 /* first tab has rounded left corners */
 .tab-header-root:first-child {
     border-top-left-radius: var(--button-border-radius);
-    margin-left: 18px;
+    margin-left: 4px;
 }
 
 /* last tab has rounded right corners */
@@ -70,4 +70,5 @@
 
 .tab-expanded {
     padding: 8px;
+    border:1px solid var(--vscode-panel-border);
 }

@@ -28,6 +28,7 @@
 }
 /* Numeric (float) up-down styles */
 .numeric-up-down {
+    width:100%; /* for prop controls to fill value space */
     display: inline-flex;
     align-items: center;
     border: 1px solid var(--vscode-input-border);
@@ -35,7 +36,8 @@
 }
 
 .numeric-up-down__input {
-    width: 60px;
+    /* width: 60px; */
+    flex:1; /* fill available space */
     border: none;
     padding: 4px 8px;
     font-size: var(--ff-size-1x);

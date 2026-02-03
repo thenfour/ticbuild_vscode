@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "./Buttons/PushButton";
+import { Button, TextButton } from "./Buttons/PushButton";
 import { ControlQuickAdd } from "./ControlQuickAdd";
 import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 import { useControlSurfaceState } from "./hooks/ControlSurfaceState";
@@ -38,9 +38,9 @@ export const AddControlControl: React.FC<AddControlControlProps> = ({ parentPath
 
   return (
     <div className="control-surface-interactive" style={{ padding: "8px" }}>
-      <Button onClick={() => setIsAdding(true)} style={{ width: "100%" }}>
+      <TextButton onClick={() => setIsAdding(true)} style={{ width: "100%" }}>
         + Add Control {parentPath}
-      </Button>
+      </TextButton>
     </div>
   );
 };

@@ -14,6 +14,15 @@
     cursor: pointer;
 }
 
+.somatic-text-button {
+    cursor: pointer;
+    font-style: italic;
+}
+
+.somatic-text-button:hover {
+    text-decoration: underline;
+}
+
 /* focus rect */
 .somatic-button-base:focus-visible {
     outline: 1px solid var(--vscode-focusBorder);

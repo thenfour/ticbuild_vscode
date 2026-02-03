@@ -1,7 +1,7 @@
 .integer-up-down {
     display: inline-flex;
     align-items: center;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--vscode-input-border);
     /* border-radius: 4px; */
     overflow: hidden;
 }
@@ -18,20 +18,19 @@
 }
 
 .integer-up-down__input:disabled {
-    background-color: var(--panel);
-    color: var(--muted);
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .integer-up-down.integer-up-down--invalid input {
-    border-color: var(--error-surface-border);
-    background-color: var(--error-surface-bg);
-    color: var(--error-surface-text);
+    border-color: var(--vscode-inputValidation-errorBorder);
+    background-color: var(--vscode-inputValidation-errorBackground);
 }
 /* Numeric (float) up-down styles */
 .numeric-up-down {
     display: inline-flex;
     align-items: center;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--vscode-input-border);
     overflow: hidden;
 }
 
@@ -47,14 +46,13 @@
 }
 
 .numeric-up-down__input:disabled {
-    background-color: var(--panel);
-    color: var(--muted);
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .numeric-up-down.numeric-up-down--invalid input {
-    border-color: var(--error-surface-border);
-    background-color: var(--error-surface-bg);
-    color: var(--error-surface-text);
+    border-color: var(--vscode-inputValidation-errorBorder);
+    background-color: var(--vscode-inputValidation-errorBackground);
 }
 
 /* Text input styles */

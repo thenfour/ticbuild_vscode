@@ -15,6 +15,10 @@ import { ControlSurfaceToggleProp } from "../PropControlsAdaptors/ControlSurface
 import { ControlSurfaceNumberProp } from "../PropControlsAdaptors/ControlSurfaceNumberProp";
 import { ControlSurfaceKnobProp } from "../PropControlsAdaptors/ControlSurfaceKnobProp";
 import { ControlSurfaceSliderProp } from "../PropControlsAdaptors/ControlSurfaceSliderProp";
+import { ControlSurfaceEnumButtonsProp } from "../PropControlsAdaptors/ControlSurfaceEnumButtonsProp";
+import { ControlSurfaceLabelProp } from "../PropControlsAdaptors/ControlSurfaceLabelProp";
+import { ControlSurfaceTriggerButtonProp } from "../PropControlsAdaptors/ControlSurfaceTriggerButtonProp";
+import { ControlSurfaceDividerProp } from "../PropControlsAdaptors/ControlSurfaceDividerProp";
 import { SymbolQuickAdd } from "./SymbolQuickAdd";
 import {
   DividerPropertiesPanel,
@@ -124,7 +128,7 @@ export function registerBuiltInControls() {
     category: "input",
     description: "Multiple choice buttons",
     quickAddComponent: SymbolQuickAdd,
-    renderComponent: ControlSurfaceEnumButtons,
+    renderComponent: ControlSurfaceEnumButtonsProp,
     propertiesPanelComponent: EnumButtonsPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "enumButtons",
@@ -143,7 +147,7 @@ export function registerBuiltInControls() {
     category: "display",
     description: "Display dynamic text from expression",
     quickAddComponent: (props) => <SymbolQuickAdd {...props} label="Expression" />,
-    renderComponent: ControlSurfaceLabel,
+    renderComponent: ControlSurfaceLabelProp,
     propertiesPanelComponent: LabelPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "label",
@@ -158,7 +162,7 @@ export function registerBuiltInControls() {
     category: "action",
     description: "Execute code on click",
     quickAddComponent: (props) => <SymbolQuickAdd {...props} label="Expression" />,
-    renderComponent: ControlSurfaceTriggerButton,
+    renderComponent: ControlSurfaceTriggerButtonProp,
     propertiesPanelComponent: TriggerButtonPropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "triggerButton",
@@ -334,7 +338,7 @@ export function registerBuiltInControls() {
       }, [props]);
       return null;
     },
-    renderComponent: () => <hr />,
+    renderComponent: ControlSurfaceDividerProp,
     propertiesPanelComponent: DividerPropertiesPanel,
     createDefaultSpec: () => ({
       type: "divider",

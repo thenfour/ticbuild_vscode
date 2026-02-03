@@ -19,6 +19,10 @@ import { ControlSurfaceToggleProp } from "./PropControlsAdaptors/ControlSurfaceT
 import { ControlSurfaceNumberProp } from "./PropControlsAdaptors/ControlSurfaceNumberProp";
 import { ControlSurfaceKnobProp } from "./PropControlsAdaptors/ControlSurfaceKnobProp";
 import { ControlSurfaceSliderProp } from "./PropControlsAdaptors/ControlSurfaceSliderProp";
+import { ControlSurfaceEnumButtonsProp } from "./PropControlsAdaptors/ControlSurfaceEnumButtonsProp";
+import { ControlSurfaceLabelProp } from "./PropControlsAdaptors/ControlSurfaceLabelProp";
+import { ControlSurfaceTriggerButtonProp } from "./PropControlsAdaptors/ControlSurfaceTriggerButtonProp";
+import { ControlSurfaceDividerProp } from "./PropControlsAdaptors/ControlSurfaceDividerProp";
 import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 
 export type ControlSurfaceRenderOptions = {
@@ -63,12 +67,30 @@ export const renderControlSurfaceControl = (
 
     switch (node.type) {
         case "divider":
-            return wrapSelectable(<ControlSurfaceDivider {...node} />, `divider-${index}`);
+            // New PropControl-based implementation
+            return (
+                <ControlSurfaceDividerProp
+                    key={`divider-${index}`}
+                    spec={node}
+                    path={JSON.stringify(currentPath)}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                />
+            );
 
         case "enumButtons":
-            return wrapSelectable(
-                <ControlSurfaceEnumButtons {...node} initialValue={stateApi.state.symbolValues[node.symbol]} />,
-                `enumButtons-${index}`,
+            // New PropControl-based implementation
+            return (
+                <ControlSurfaceEnumButtonsProp
+                    key={`enumButtons-${index}`}
+                    {...node}
+                    path={currentPath}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                />
             );
 
         case "knob":
@@ -85,9 +107,17 @@ export const renderControlSurfaceControl = (
             );
 
         case "label":
-            return wrapSelectable(
-                <ControlSurfaceLabel {...node} />,
-                `label-${index}`,
+            // New PropControl-based implementation
+            return (
+                <ControlSurfaceLabelProp
+                    key={`label-${index}`}
+                    spec={node}
+                    path={JSON.stringify(currentPath)}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                />
             );
 
         case "number":
@@ -143,9 +173,17 @@ export const renderControlSurfaceControl = (
             );
 
         case "triggerButton":
-            return wrapSelectable(
-                <ControlSurfaceTriggerButton {...node} />,
-                `triggerButton-${index}`,
+            // New PropControl-based implementation
+            return (
+                <ControlSurfaceTriggerButtonProp
+                    key={`triggerButton-${index}`}
+                    spec={node}
+                    path={JSON.stringify(currentPath)}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                />
             );
 
         case "group":

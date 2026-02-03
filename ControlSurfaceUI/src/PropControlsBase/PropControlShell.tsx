@@ -121,10 +121,12 @@ const PropControlShell: React.FC<PropControlShellProps> = (props) => {
                     <div className="cs-pp-control-shell-label">{label}</div>
                     {value && <div className="cs-pp-control-shell-value">{value}</div>}
                 </div>
-                {validationStatus && <div className="cs-pp-control-shell-validation-status">
+                {/* don't show validation errors during design time */}
+                {!props.designMode && validationStatus && <div className="cs-pp-control-shell-validation-status">
                     {validationStatus}
                 </div>}
-                {bindingStatus && <div className="cs-pp-control-shell-binding-status">
+                {/* don't show validation errors during design time */}
+                {!props.designMode && bindingStatus && <div className="cs-pp-control-shell-binding-status">
                     {bindingStatus}
                 </div>}
             </div>

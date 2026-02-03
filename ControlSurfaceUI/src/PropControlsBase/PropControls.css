@@ -147,3 +147,15 @@
   opacity: 0;
   pointer-events: none;
 }
+
+
+.cs-pp-control:hover:not(:has(.cs-pp-control:hover))
+ {
+  background-color: var(--vscode-settings-rowHoverBackground);
+}
+
+/* 2) but don't cross a nested .cs-pp-control-column boundary */
+.cs-pp-control:hover:not(:has(.cs-pp-control:hover))
+  .cs-pp-control{
+    background-color: transparent;
+}

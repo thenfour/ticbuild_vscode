@@ -2,7 +2,7 @@
 
 .somatic-knob {
     display: inline-flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: 4px;
     user-select: none;

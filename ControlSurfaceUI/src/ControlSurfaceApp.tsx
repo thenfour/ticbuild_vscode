@@ -29,8 +29,17 @@ const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
     const handleMessage = (event: MessageEvent) => {
       const payload = event.data as ControlSurfaceState | undefined;
       if (!payload || !Array.isArray(payload.watches)) {
+        if (payload) {
+          console.warn("[ControlSurfaceApp] Ignored payload (missing watches array)", payload);
+        }
         return;
       }
+      // console.debug("[ControlSurfaceApp] Received payload", {
+      //   status: payload.status,
+      //   controlCount: payload.controlSurfaceRoot?.length ?? 0,
+      //   selectedPageId: payload.selectedPageId,
+      //   viewId: payload.viewId,
+      // });
       listener(payload);
     };
 
@@ -63,6 +72,15 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
     [stateApi.state.controlSurfaceRoot, stateApi.state.selectedControlPath],
   );
 
+  const selectedPathKey = React.useMemo(
+    () => (stateApi.state.selectedControlPath ? stateApi.state.selectedControlPath.join("/") : null),
+    [stateApi.state.selectedControlPath],
+  );
+
+  const [draftNode, setDraftNode] = React.useState<ControlSurfaceNode | null>(null);
+  const [draftDirty, setDraftDirty] = React.useState(false);
+  const [draftPathKey, setDraftPathKey] = React.useState<string | null>(null);
+
 
   const pages = stateApi.pageOptions;
   const selectedPageId = stateApi.state.selectedPageId;
@@ -91,6 +109,41 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
       setSelectedControlPath(null);
     }
   }, [resolvedSelection, stateApi.state.selectedControlPath]);
+
+  React.useEffect(() => {
+    if (!resolvedSelection || !selectedPathKey) {
+      setDraftNode(null);
+      setDraftDirty(false);
+      setDraftPathKey(null);
+      return;
+    }
+    if (draftDirty && draftPathKey === selectedPathKey) {
+      return;
+    }
+    setDraftNode(resolvedSelection.node);
+    setDraftDirty(false);
+    setDraftPathKey(selectedPathKey);
+  }, [resolvedSelection, selectedPathKey, draftDirty, draftPathKey]);
+
+  const handleApplyDraft = React.useCallback(() => {
+    if (!draftNode || !stateApi.state.selectedControlPath) {
+      return;
+    }
+    api?.postMessage({
+      type: "updateControl",
+      path: stateApi.state.selectedControlPath,
+      control: draftNode,
+    });
+    setDraftDirty(false);
+  }, [api, draftNode, stateApi.state.selectedControlPath]);
+
+  const handleCancelDraft = React.useCallback(() => {
+    if (!resolvedSelection) {
+      return;
+    }
+    setDraftNode(resolvedSelection.node);
+    setDraftDirty(false);
+  }, [resolvedSelection]);
 
   React.useEffect(() => {
     const unsubscribe = resolvedDataSource.subscribe((payload) => {
@@ -288,6 +341,14 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             </div>
           </div>
           <ButtonGroup>
+            <Button onClick={handleApplyDraft} disabled={!draftDirty}>
+              Apply
+            </Button>
+            <Button onClick={handleCancelDraft} disabled={!draftDirty}>
+              Cancel
+            </Button>
+          </ButtonGroup>
+          <ButtonGroup>
             <Button
               onClick={() => {
                 if (!stateApi.state.selectedControlPath) {
@@ -350,22 +411,17 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
           <div style={{ marginTop: 12 }}>
             {(() => {
-              const entry = ControlRegistry.getByType(resolvedSelection.node.type);
+              const activeNode = draftNode ?? resolvedSelection.node;
+              const entry = ControlRegistry.getByType(activeNode.type);
               const PropertiesPanel = entry?.propertiesPanelComponent;
               if (!PropertiesPanel) {
-                if (resolvedSelection.node.type === "page") {
+                if (activeNode.type === "page") {
                   return (
                     <PagePropertiesPanel
-                      node={resolvedSelection.node}
+                      node={activeNode}
                       onChange={(nextNode) => {
-                        if (!stateApi.state.selectedControlPath) {
-                          return;
-                        }
-                        api?.postMessage({
-                          type: "updateControl",
-                          path: stateApi.state.selectedControlPath,
-                          control: nextNode,
-                        });
+                        setDraftNode(nextNode);
+                        setDraftDirty(true);
                       }}
                     />
                   );
@@ -378,16 +434,10 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
               }
               return (
                 <PropertiesPanel
-                  node={resolvedSelection.node}
+                  node={activeNode}
                   onChange={(nextNode: ControlSurfaceNode) => {
-                    if (!stateApi.state.selectedControlPath) {
-                      return;
-                    }
-                    api?.postMessage({
-                      type: "updateControl",
-                      path: stateApi.state.selectedControlPath,
-                      control: nextNode,
-                    });
+                    setDraftNode(nextNode);
+                    setDraftDirty(true);
                   }}
                 />
               );

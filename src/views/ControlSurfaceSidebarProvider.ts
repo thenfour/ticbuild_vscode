@@ -30,6 +30,11 @@ export class ControlSurfaceSidebarProvider implements vscode.WebviewViewProvider
                 this.view = undefined;
             }
         }, undefined, this.disposables);
+        webviewView.onDidChangeVisibility(() => {
+            if (webviewView.visible) {
+                void this.update();
+            }
+        }, undefined, this.disposables);
         if (!this.registry.getById(this.registryId)) {
             this.registry.add({
                 id: this.registryId,

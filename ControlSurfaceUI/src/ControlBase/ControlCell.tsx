@@ -11,12 +11,12 @@
 */
 
 
-export interface ControlCellProps {
-    children: React.ReactNode;
-    style?: React.CSSProperties;
-    className?: string;
-};
+// export interface ControlCellProps {
+//     children: React.ReactNode;
+//     style?: React.CSSProperties;
+//     className?: string;
+// };
 
-export const ControlCell: React.FC<ControlCellProps> = ({ children, style, className }) => {
-    return <div className={`control-surface-cell ${className}`} style={style}>{children}</div>;
-};
+// export const ControlCell: React.FC<ControlCellProps> = ({ children, style, className }) => {
+//     return <div className={`control-surface-cell ${className}`} style={style}>{children}</div>;
+// };

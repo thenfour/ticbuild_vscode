@@ -6,8 +6,8 @@
 }
 
 .tab-header {
-    border-bottom: 2px solid var(--button-background-highlighted);
-    /* background: var(--button-background-enabled); */
+    border-bottom: 2px solid var(--vscode-button-background);
+    /* background: var(--vscode-button-secondaryBackground); */
     padding: 0;
 }
 
@@ -25,9 +25,9 @@
     align-items: center;
     padding: 8px 16px;
     cursor: pointer;
-    border-right: 1px solid var(--border);
-    background: var(--button-background-enabled);
-    color: var(--button-foreground-enabled);
+    border-right: 1px solid var(--vscode-panel-border);
+    background: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
     min-width: 80px;
 
     --button-border-radius: 6px;
@@ -45,18 +45,18 @@
 }
 
 .tab-header-root:hover {
-    background: var(--button-background-hovered);
-    color: var(--button-foreground-hovered);
+    background: var(--vscode-button-secondaryHoverBackground);
+    color: var(--vscode-button-secondaryForeground);
 }
 
 .tab-header-selected {
-    background: var(--button-background-highlighted);
-    color: var(--button-foreground-highlighted);
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
 }
 
 .tab-header-selected:hover {
-    background: var(--button-background-highlighted);
-    color: var(--button-foreground-highlighted);
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
 }
 
 .tab-header-notselected {

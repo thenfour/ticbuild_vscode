@@ -20,6 +20,7 @@ import { PagePropertiesPanel } from "./ControlSurfacePropertiesPanels";
 import { CONTROL_PATH_ROOT } from "./controlPathBase";
 import { findControlPathByNode, resolveControlByPath } from "./controlPathUtils";
 import { useControlSurfaceState } from "./hooks/ControlSurfaceState";
+import { PropControl } from "./PropControlsBase/PropControlShell";
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
   subscribe: (listener) => {
@@ -100,11 +101,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
   return (
     <div
-      style={{
-        padding: 12,
-        fontFamily: "var(--vscode-font-family)",
-        color: "var(--vscode-foreground)",
-      }}
+      className="control-surface-app"
+    // style={{
+    //   padding: 12,
+    //   fontFamily: "var(--vscode-font-family)",
+    //   color: "var(--vscode-foreground)",
+    // }}
     >
       {/* <h1 style={{ fontSize: 14, margin: "0 0 12px 0" }}>
         TIC-80 Control Surfaces
@@ -228,36 +230,30 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
 
       {/* main control surface body */}
 
-      {stateApi.activePage && api ? (
-        <ControlSurfacePage
-          page={stateApi.activePage}
-          //symbolValues={state.symbolValues}
-          //pollIntervalMs={state.pollIntervalMs}
-          pagePath={stateApi.activePagePath}
-          //designMode={designMode}
-          //selectedPath={stateApi.state.selectedControlPath}
-          onSelectPath={(path) => setSelectedControlPath(path)}
-          onDeletePath={(path) => {
-            api?.postMessage({
-              type: "deleteControl",
-              path,
-            });
-            if (stateApi.state.selectedControlPath && path.join("/") === stateApi.state.selectedControlPath.join("/")) {
-              setSelectedControlPath(null);
-            }
-          }}
-        />
-      ) : (
-        <div
-          style={{
-            color: "var(--vscode-descriptionForeground)",
-            fontStyle: "italic",
-            marginBottom: 12,
-          }}
-        >
-          No controls.
-        </div>
-      )}
+      <PropControl.Root>
+        {stateApi.activePage && api ? (
+          <ControlSurfacePage
+            page={stateApi.activePage}
+            //symbolValues={state.symbolValues}
+            //pollIntervalMs={state.pollIntervalMs}
+            pagePath={stateApi.activePagePath}
+            //designMode={designMode}
+            //selectedPath={stateApi.state.selectedControlPath}
+            onSelectPath={(path) => setSelectedControlPath(path)}
+            onDeletePath={(path) => {
+              api?.postMessage({
+                type: "deleteControl",
+                path,
+              });
+              if (stateApi.state.selectedControlPath && path.join("/") === stateApi.state.selectedControlPath.join("/")) {
+                setSelectedControlPath(null);
+              }
+            }}
+          />
+        ) : (
+          <>No active page or API not available.</>
+        )}
+      </PropControl.Root>
 
       {stateApi.state.designMode && resolvedSelection ? (
         <div className="control-surface-properties-panel">

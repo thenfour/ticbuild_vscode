@@ -10,10 +10,11 @@ import { EnumButtons } from "./basic/EnumButtons";
 import { Dropdown } from "./basic/Dropdown";
 import { Divider } from "./basic/Divider";
 import { ControlSurfaceGroup, ControlSurfaceGroupBase } from "./ControlSurfaceControls/ControlSurfaceGroup";
+import { PropControlTextBoxDemo } from "./PropControlsBase/PropControlTextBox";
 
 
 export const ComponentTester: React.FC = () => {
-    const [isCollapsed, setIsCollapsed] = React.useState(true);
+    const [isCollapsed, setIsCollapsed] = React.useState(false);
     const [knobValue, setKnobValue] = React.useState(0);
     const [integerValue, setIntegerValue] = React.useState(5);
     const [numericValue, setNumericValue] = React.useState(5.0);
@@ -40,6 +41,12 @@ export const ComponentTester: React.FC = () => {
 
             {!isCollapsed && (
                 <div style={{ padding: "8px", display: "flex", flexDirection: "column", gap: "16px" }}>
+
+                    <fieldset>
+                        <legend>PropControlTextBoxDemo</legend>
+                        <PropControlTextBoxDemo />
+                    </fieldset>
+
                     <section>
                         <h3 style={{ fontSize: 11, margin: "0 0 4px 0", opacity: 0.7 }}>Buttons</h3>
                         <ButtonGroup orientation="horizontal">

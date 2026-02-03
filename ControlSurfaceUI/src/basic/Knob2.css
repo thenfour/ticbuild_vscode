@@ -11,7 +11,7 @@
 .somatic-knob-label {
     font-size: 11px;
     font-weight: 500;
-    color: var(--text);
+    color: var(--vscode-foreground);
     text-align: center;
     white-space: nowrap;
 }
@@ -23,7 +23,7 @@
 .somatic-knob-value {
     font-size: 10px;
     font-weight: 400;
-    color: var(--text);
+    color: var(--vscode-foreground);
     text-align: center;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -32,19 +32,20 @@
 /* SVG Elements */
 
 .somatic-knob-track {
-    stroke: var(--knob-track);
+    stroke: var(--vscode-input-background);
 }
 
 .somatic-knob-highlight {
-    stroke: var(--knob-highlight);
+    stroke: var(--vscode-progressBar-background);
+    opacity:50%;
 }
 
 .somatic-knob-thumb {
-    fill: var(--knob-thumb);
+    fill: var(--vscode-button-background);
 }
 
 .somatic-knob-thumb--error {
-    fill: var(--knob-thumb-error);
+    fill: var(--vscode-inputValidation-errorBorder);
 }
 
 /* Disabled State */

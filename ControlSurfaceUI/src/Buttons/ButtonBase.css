@@ -1,19 +1,10 @@
 .somatic-button-base {
-    /* --button-background-enabled: #0ff;
-    --button-foreground-enabled: #000;
-    --button-background-hovered: #f80;
-    --button-foreground-hovered: #000;
-    --button-background-disabled: #333;
-    --button-foreground-disabled: #888;
-    --button-background-highlighted: #808;
-    --button-foreground-highlighted: #fff; */
-
     /* doesn't really work with dividers; need to emit more classes for beginning & ends of sub groups*/
     --button-border-radius: 0;
 
-    background-color: var(--button-background-enabled);
-    color: var(--button-foreground-enabled);
-    border: 1px solid var(--border);
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border: 1px solid var(--vscode-panel-border);
     border-radius: var(--button-border-radius);
     padding: 3px 8px;
     margin: 2px;
@@ -25,30 +16,30 @@
 
 /* focus rect */
 .somatic-button-base:focus-visible {
-    outline: 1px solid var(--button-foreground-highlighted);
+    outline: 1px solid var(--vscode-focusBorder);
     /* outline-offset: 2px; */
 }
 
 .somatic-button-base.somatic-button-base--disabled {
-    background-color: var(--button-background-disabled);
-    color: var(--button-foreground-disabled);
+    background-color: transparent;
+    color: var(--vscode-disabledForeground);
     cursor: not-allowed;
     /* Keep a visible border for disabled buttons so disabled+disabled and edge cases render logically.
        Enabled borders will take priority inside ButtonGroup via z-index overlap rules. */
-    /* border-color: color-mix(in srgb, var(--border) 55%, transparent); */
+    /* border-color: color-mix(in srgb, var(--vscode-panel-border) 55%, transparent); */
     border-color: transparent;
 }
 
 .somatic-button-base:hover:not(.somatic-button-base--disabled) {
-    background-color: var(--button-background-hovered);
-    color: var(--button-foreground-hovered);
+    background-color: var(--vscode-button-secondaryHoverBackground);
+    color: var(--vscode-button-secondaryForeground);
 }
 
 .somatic-button-base.somatic-button-base--not-highlighted {}
 
 .somatic-button-base.somatic-button-base--highlighted {
-    background-color: var(--button-background-highlighted);
-    color: var(--button-foreground-highlighted);
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
 }
 
 .somatic-button-group {
@@ -138,7 +129,7 @@
     width: var(--checkbox-size);
     height: var(--checkbox-size);
     margin-right: 6px;
-    border: 2px solid var(--text);
+    border: 2px solid var(--vscode-foreground);
     border-radius: 2px;
     box-sizing: border-box;
 }

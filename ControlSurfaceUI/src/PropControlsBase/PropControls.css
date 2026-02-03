@@ -1,0 +1,42 @@
+.pp-root {
+    /* establish variables at controls root */
+    --cs-pp-control-label-width: 150px;
+    --cs-pp-control-total-width: 400px;
+}
+
+.pp-root .cs-pp-control-column {
+    display:flex;
+    flex-direction: column;
+    gap: 12px;
+}
+/* .cs-pp-control-column-design-mode */
+
+.cs-pp-control-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: var(--cs-pp-control-total-width);
+    /* border: 1px solid #f00;
+    background-color: #0ff; */
+    border: 2px solid transparent;
+}
+
+.cs-pp-control-shell-labelvaluerow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.cs-pp-control-shell-label {
+    width: var(--cs-pp-control-label-width);
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+}
+
+.cs-pp-control-shell-value {
+    flex: 1;
+    width: var(--cs-pp-control-total-width);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}

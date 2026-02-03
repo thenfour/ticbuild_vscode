@@ -66,3 +66,12 @@ export function CoalesceBoolean(value: boolean | null | undefined, defaultValue:
     }
     return value;
 }
+
+
+export function classes(...classNames: (string | boolean | undefined)[]) {
+    return classNames.filter(Boolean).join(" ");
+}
+
+export function IsNullOrWhitespace(str: string | null | undefined): boolean {
+    return str === null || str === undefined || !str.trim().length;
+}   

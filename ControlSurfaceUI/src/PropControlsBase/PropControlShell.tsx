@@ -142,6 +142,40 @@ const PropControlShell: React.FC<PropControlShellProps> = (props) => {
 // layout controls.
 // tab, column, row, group
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// page is essentially a column with slightly different styling.
+interface PropControlPageProps {
+    designMode: boolean;
+    selected: boolean; // in design mode
+
+    label: React.ReactNode; // can be null; empty label
+    designTools?: React.ReactNode; // only show in design mode, on hover, or when selected.
+
+    children?: React.ReactNode;
+}
+
+const PropControlPage: React.FC<PropControlPageProps> = (props) => {
+    return <div
+        className={classes(
+            "cs-pp-control-page cs-pp-control-column",
+            props.designMode && "cs-pp-control-page-design-mode cs-pp-control-column-design-mode",
+            props.selected && "cs-pp-control-page-selected cs-pp-control-column-selected",
+        )}
+    >
+        <div className="cs-pp-control-page-header cs-pp-control-column-header">
+            <div className="cs-pp-control-page-label cs-pp-control-column-label">{props.label}</div>
+            <div className="cs-pp-control-page-design-tools cs-pp-control-column-design-tools">
+                {props.designMode && props.designTools}
+            </div>
+        </div>
+        <div className="cs-pp-control-page-content cs-pp-control-column-content">
+            {props.children}
+        </div>
+    </div>;
+};
+
+
 // columns are for vertical stacking of controls. most controls are expected to go in columns.
 interface PropControlColumnProps {
     designMode: boolean;
@@ -228,6 +262,7 @@ export const PropControl = {
     Shell: PropControlShell,
     Column: PropControlColumn,
     Row: PropControlRow,
+    Page: PropControlPage,
     Root: PropControlRoot,
     DesignToolButton: PropControlDesignToolButton,
 };

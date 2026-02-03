@@ -1,0 +1,74 @@
+/* Slider2 Component Styles */
+
+.somatic-slider {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    user-select: none;
+}
+
+.somatic-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.somatic-slider-track {
+    position: relative;
+    flex: 1;
+    height: 20px;
+    background: var(--vscode-input-background);
+    border-radius: 2px;
+    min-width: 0;
+}
+
+.somatic-slider-highlight {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: var(--vscode-progressBar-background);
+    opacity: 0.5;
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.somatic-slider-thumb {
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 20px;
+    background: var(--vscode-button-background);
+    border: 2px solid var(--vscode-button-background);
+    /* border-radius: 50%; */
+    border-radius: 2px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.somatic-slider-thumb--error {
+    background: var(--vscode-inputValidation-errorBorder);
+    border-color: var(--vscode-inputValidation-errorBorder);
+}
+
+.somatic-slider-value {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--vscode-foreground);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Disabled State */
+
+.somatic-slider:has([aria-disabled="true"]) {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.somatic-slider:has([aria-disabled="true"]) .somatic-slider-track {
+    cursor: not-allowed;
+}

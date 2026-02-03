@@ -19,6 +19,7 @@ import { ControlSurfaceEnumButtonsProp } from "../PropControlsAdaptors/ControlSu
 import { ControlSurfaceLabelProp } from "../PropControlsAdaptors/ControlSurfaceLabelProp";
 import { ControlSurfaceTriggerButtonProp } from "../PropControlsAdaptors/ControlSurfaceTriggerButtonProp";
 import { ControlSurfaceDividerProp } from "../PropControlsAdaptors/ControlSurfaceDividerProp";
+import { ControlSurfacePageProp } from "../PropControlsAdaptors/ControlSurfacePageProp";
 import { SymbolQuickAdd } from "./SymbolQuickAdd";
 import {
   DividerPropertiesPanel,
@@ -239,7 +240,7 @@ export function registerBuiltInControls() {
         </div>
       );
     },
-    renderComponent: ControlSurfacePage,
+    renderComponent: ControlSurfacePageProp,
     propertiesPanelComponent: PagePropertiesPanel,
     createDefaultSpec: (data) => ({
       type: "page",

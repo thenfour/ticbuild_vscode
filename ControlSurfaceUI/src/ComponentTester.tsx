@@ -14,7 +14,7 @@ import { PropControlTextBoxDemo } from "./PropControlsBase/PropControlTextBox";
 
 
 export const ComponentTester: React.FC = () => {
-    const [isCollapsed, setIsCollapsed] = React.useState(false);
+    const [isCollapsed, setIsCollapsed] = React.useState(true);
     const [knobValue, setKnobValue] = React.useState(0);
     const [integerValue, setIntegerValue] = React.useState(5);
     const [numericValue, setNumericValue] = React.useState(5.0);

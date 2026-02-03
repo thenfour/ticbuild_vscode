@@ -23,6 +23,7 @@ import { ControlSurfaceEnumButtonsProp } from "./PropControlsAdaptors/ControlSur
 import { ControlSurfaceLabelProp } from "./PropControlsAdaptors/ControlSurfaceLabelProp";
 import { ControlSurfaceTriggerButtonProp } from "./PropControlsAdaptors/ControlSurfaceTriggerButtonProp";
 import { ControlSurfaceDividerProp } from "./PropControlsAdaptors/ControlSurfaceDividerProp";
+import { ControlSurfacePageProp } from "./PropControlsAdaptors/ControlSurfacePageProp";
 import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 
 export type ControlSurfaceRenderOptions = {
@@ -219,19 +220,22 @@ export const renderControlSurfaceControl = (
             );
 
         case "page":
-            return wrapSelectable(
-                <div className="control-surface-page">
-                    <h3 className="control-surface-page-title">{node.label}</h3>
-                    <div className="control-surface-page-content">
-                        {node.controls.map((child, childIndex) =>
-                            renderControlSurfaceControl(child, childIndex, api, stateApi, {
-                                ...options,
-                                parentPath: currentPath,
-                            }),
-                        )}
-                    </div>
-                </div>,
-                `page-${index}`,
+            // New PropControl-based implementation
+            return (
+                <ControlSurfacePageProp
+                    key={`page-${index}`}
+                    spec={node}
+                    path={JSON.stringify(currentPath)}
+                    renderControl={renderControlSurfaceControl}
+                    api={api}
+                    stateApi={stateApi}
+                    options={options}
+                    currentPath={currentPath}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                />
             );
 
         default:

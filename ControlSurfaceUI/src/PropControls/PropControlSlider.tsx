@@ -1,5 +1,6 @@
 import React from "react";
 import { PropControl, PropControlSeverity } from "../PropControlsBase/PropControlShell";
+import { Slider2 } from "../basic/Slider2";
 
 export interface PropControlSliderProps {
     label: React.ReactNode;
@@ -51,20 +52,15 @@ export const PropControlSlider: React.FC<PropControlSliderProps> = ({
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
             value={
-                <>
-                    <input
-                        type="range"
-                        className="control-surface-slider-input"
-                        min={min}
-                        max={max}
-                        step={step}
-                        value={value}
-                        onChange={(e) => onChange(Number(e.target.value))}
-                        disabled={disabled || designMode}
-                        style={{ flex: 1 }}
-                    />
-                    <span className="control-surface-slider-value">{value}</span>
-                </>
+                <Slider2
+                    value={value}
+                    onChange={onChange}
+                    min={min}
+                    max={max}
+                    step={step}
+                    disabled={disabled || designMode}
+                    showValue={true}
+                />
             }
             designTools={designTools}
         />

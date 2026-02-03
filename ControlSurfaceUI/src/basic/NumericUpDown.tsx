@@ -235,7 +235,7 @@ export const NumericUpDown: React.FC<NumericUpDownProps> = (props) => {
 
   return (
     <div className={classes.join(" ")}>
-      <ButtonGroup style={{ width: "100%" }}>
+      <ButtonGroup style={{ flexWrap: "nowrap" }}>
         <input
           type="text"
           className="numeric-up-down__input"

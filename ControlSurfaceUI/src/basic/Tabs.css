@@ -69,6 +69,6 @@
 }
 
 .tab-expanded {
-    padding: 8px;
+    padding: 2px;
     border:1px solid var(--vscode-panel-border);
 }

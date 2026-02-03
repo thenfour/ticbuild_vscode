@@ -38,6 +38,7 @@ import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { IconButton } from "../Buttons/IconButton";
 import { classes, IsNullOrWhitespace } from "../utils";
 import "./PropControls.css";
+import { createPropControlClasses } from "../utils/designTools";
 
 export type PropControlSeverity = "info" | "warning" | "error" | "success";
 
@@ -106,13 +107,16 @@ const PropControlShell: React.FC<PropControlShellProps> = (props) => {
     return (
         <div
             className={
-                classes(`cs-pp-control cs-pp-control-shell`,
-                    props.designMode && "cs-pp-control-shell-design-mode",
-                    props.selected && "cs-pp-control-shell-selected",
-                    !!validationStatus && `cs-pp-control-shell-validation-${validationSeverity}`,
-                    !!bindingStatus && `cs-pp-control-shell-binding-status-${bindingStatusSeverity}`,
-                    props.disabled && "cs-pp-control-shell-disabled",
-                )}
+                createPropControlClasses({
+                    designMode: props.designMode,
+                    selected: props.selected,
+                    disabled: props.disabled,
+                    additionalClasses: classes(`cs-pp-control-shell`,
+                        !!validationStatus && `cs-pp-control-shell-validation-${validationSeverity}`,
+                        !!bindingStatus && `cs-pp-control-shell-binding-status-${bindingStatusSeverity}`,
+                    )
+                })
+            }
         >
             {/* separate outer from inner, so we can use the outer background as
             a border.  */}
@@ -156,17 +160,23 @@ interface PropControlPageProps {
 
 const PropControlPage: React.FC<PropControlPageProps> = (props) => {
     return <div
-        className={classes(
-            "cs-pp-control cs-pp-control-page cs-pp-control-column",
-            props.designMode && "cs-pp-control-page-design-mode cs-pp-control-column-design-mode",
-            props.selected && "cs-pp-control-page-selected cs-pp-control-column-selected",
-        )}
+        // className={classes(
+        //     "cs-pp-control cs-pp-control-page cs-pp-control-column",
+        //     props.designMode && "cs-pp-control-page-design-mode cs-pp-control-column-design-mode",
+        //     props.selected && "cs-pp-control-page-selected cs-pp-control-column-selected",
+        // )}
+        className={createPropControlClasses({
+            designMode: props.designMode,
+            selected: props.selected,
+            disabled: false,
+            additionalClasses: "cs-pp-control-page cs-pp-control-column"
+        })}
     >
         <div className="cs-pp-control-page-header cs-pp-control-column-header">
             <div className="cs-pp-control-page-label cs-pp-control-column-label">{props.label}</div>
-            <ButtonGroup className="cs-pp-design-tools">
+            {props.designMode && props.designTools && <ButtonGroup className="cs-pp-design-tools">
                 {props.designMode && props.designTools}
-            </ButtonGroup>
+            </ButtonGroup>}
         </div>
         <div className="cs-pp-control-page-content cs-pp-control-column-content">
             {props.children}
@@ -188,17 +198,23 @@ interface PropControlColumnProps {
 
 const PropControlColumn: React.FC<PropControlColumnProps> = (props) => {
     return <div
-        className={classes(
-            "cs-pp-control cs-pp-control-column",
-            props.designMode && "cs-pp-control-column-design-mode",
-            props.selected && "cs-pp-control-column-selected",
-        )}
+        // className={classes(
+        //     "cs-pp-control cs-pp-control-column",
+        //     props.designMode && "cs-pp-control-column-design-mode",
+        //     props.selected && "cs-pp-control-column-selected",
+        // )}
+        className={createPropControlClasses({
+            designMode: props.designMode,
+            selected: props.selected,
+            disabled: false,
+            additionalClasses: "cs-pp-control-column"
+        })}
     >
         <div className="cs-pp-control-column-header">
             <div className="cs-pp-control-column-label">{props.label}</div>
-            <ButtonGroup className="cs-pp-design-tools">
+            {props.designMode && props.designTools && <ButtonGroup className="cs-pp-design-tools">
                 {props.designMode && props.designTools}
-            </ButtonGroup>
+            </ButtonGroup>}
         </div>
         <div className="cs-pp-control-column-content">
             {props.children}
@@ -230,17 +246,23 @@ interface PropControlRowProps {
 
 const PropControlRow: React.FC<PropControlRowProps> = (props) => {
     return <div
-        className={classes(
-            "cs-pp-control cs-pp-control-row",
-            props.designMode && "cs-pp-control-row-design-mode",
-            props.selected && "cs-pp-control-row-selected",
-        )}
+        // className={classes(
+        //     "cs-pp-control cs-pp-control-row",
+        //     props.designMode && "cs-pp-control-row-design-mode",
+        //     props.selected && "cs-pp-control-row-selected",
+        // )}
+        className={createPropControlClasses({
+            designMode: props.designMode,
+            selected: props.selected,
+            disabled: false,
+            additionalClasses: "cs-pp-control-row"
+        })}
     >
         <div className="cs-pp-control-row-header">
             <div className="cs-pp-control-row-label">{props.label}</div>
-            <ButtonGroup className="cs-pp-design-tools">
+            {props.designMode && props.designTools && <ButtonGroup className="cs-pp-design-tools">
                 {props.designMode && props.designTools}
-            </ButtonGroup>
+            </ButtonGroup>}
         </div>
         <div className="cs-pp-control-row-content">
             {props.children}

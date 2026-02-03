@@ -1,5 +1,6 @@
 import React from "react";
 import { PropControl } from "../PropControlsBase/PropControlShell";
+import { classes } from "../utils";
 
 export interface DesignToolsConfig {
     onMoveUp?: () => void;
@@ -62,3 +63,20 @@ export const createDesignTools = (config: DesignToolsConfig): React.ReactNode =>
 
     return buttons.length > 0 ? <>{buttons}</> : null;
 };
+
+type CreatePropControlClassesArgs = {
+    designMode: boolean;
+    selected: boolean;
+    disabled: boolean;
+    additionalClasses?: string;
+}
+
+export function createPropControlClasses(args: CreatePropControlClassesArgs): string {
+    return classes(
+        "cs-pp-control",
+        args.designMode ? "cs-pp-design-mode" : "",
+        args.selected ? "cs-pp-control-selected" : "",
+        args.disabled ? "cs-pp-control-disabled" : "",
+        args.additionalClasses
+    );
+}

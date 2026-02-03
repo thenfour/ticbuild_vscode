@@ -21,6 +21,8 @@ import { buildTabPath } from "../controlPathBase";
 import { AddControlControl } from "../AddControlControl";
 import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 import { ControlSurfaceStateApi, useControlSurfaceState } from "../hooks/ControlSurfaceState";
+import { ButtonGroup } from "../Buttons/ButtonGroup";
+import { createDesignTools, createPropControlClasses } from "../utils/designTools";
 
 export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     renderControl: (
@@ -38,6 +40,10 @@ export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     // designMode: boolean;
     // selectedPath?: string[] | null;
     onSelectPath?: (path: string[], node: any) => void;
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
+    onDelete?: () => void;
+    onSettings?: () => void;
 }
 
 export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
@@ -49,6 +55,10 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     // designMode,
     // selectedPath,
     onSelectPath,
+    onMoveUp,
+    onMoveDown,
+    onDelete,
+    onSettings,
 }) => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
@@ -62,31 +72,52 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
         return null;
     }
 
+    const designTools = stateApi.state.designMode
+        ? createDesignTools({
+            onMoveUp,
+            onMoveDown,
+            onDelete,
+            onSettings,
+        })
+        : null;
+
     return (
-        <TabPanel
-            selectedTabId={selectedTabId}
-            handleTabChange={(e, id) => handleTabChange(e, id as number)}
-            className="control-surface-tabs"
-        >
-            {tabs.map((tab, index) => (
-                <Tab
-                    key={index}
-                    thisTabId={index}
-                    summaryTitle={tab.label}
-                >
-                    <div className="control-surface-tab-content">
-                        {tab.controls.map((child, childIndex) =>
-                            renderControl(child, childIndex, api, stateApi, {
-                                parentPath: buildTabPath(parentPath, index),
-                                // designMode,
-                                // selectedPath,
-                                onSelectPath,
-                            })
-                        )}
-                    </div>
-                    <AddControlControl parentPath={buildTabPath(parentPath, index)} />
-                </Tab>
-            ))}
-        </TabPanel>
+        <div className={createPropControlClasses({
+            designMode: stateApi.state.designMode,
+            selected: false,
+            disabled: false,
+            additionalClasses: "control-surface-tabs-wrapper cs-pp-control-tabs"
+        })}>
+            {stateApi.state.designMode && designTools ? (
+                <ButtonGroup className="cs-pp-design-tools">
+                    {designTools}
+                </ButtonGroup>
+            ) : null}
+            <TabPanel
+                selectedTabId={selectedTabId}
+                handleTabChange={(e, id) => handleTabChange(e, id as number)}
+                className="control-surface-tabs"
+            >
+                {tabs.map((tab, index) => (
+                    <Tab
+                        key={index}
+                        thisTabId={index}
+                        summaryTitle={tab.label}
+                    >
+                        <div className="control-surface-tab-content">
+                            {tab.controls.map((child, childIndex) =>
+                                renderControl(child, childIndex, api, stateApi, {
+                                    parentPath: buildTabPath(parentPath, index),
+                                    // designMode,
+                                    // selectedPath,
+                                    onSelectPath,
+                                })
+                            )}
+                        </div>
+                        <AddControlControl parentPath={buildTabPath(parentPath, index)} />
+                    </Tab>
+                ))}
+            </TabPanel>
+        </div>
     );
 };

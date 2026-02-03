@@ -56,18 +56,18 @@ export const renderControlSurfaceControl = (
         ? (path: string[]) => options.onDeletePath?.(path, node)
         : undefined;
 
-    const wrapSelectable = (content: JSX.Element, key: string) => (
-        <ControlSurfaceSelectable
-            key={key}
-            path={currentPath}
-            designMode={stateApi.state.designMode}
-            isSelected={isSelected}
-            onSelect={handleSelect}
-            onDelete={handleDelete}
-        >
-            {content}
-        </ControlSurfaceSelectable>
-    );
+    // const wrapSelectable = (content: JSX.Element, key: string) => (
+    //     <ControlSurfaceSelectable
+    //         key={key}
+    //         path={currentPath}
+    //         designMode={stateApi.state.designMode}
+    //         isSelected={isSelected}
+    //         onSelect={handleSelect}
+    //         onDelete={handleDelete}
+    //     >
+    //         {content}
+    //     </ControlSurfaceSelectable>
+    // );
 
     switch (node.type) {
         case "divider":
@@ -199,8 +199,9 @@ export const renderControlSurfaceControl = (
         case "group":
         case "column":
         case "row":
-            return wrapSelectable(
+            return (
                 <ControlSurfaceGroup
+                    key={`${node.type}-${index}`}
                     {...node}
                     layout={node.type}
                     renderControl={renderControlSurfaceControl}
@@ -210,12 +211,15 @@ export const renderControlSurfaceControl = (
                     //designMode={stateApi.state.designMode}
                     //selectedPath={stateApi.state.selectedControlPath}
                     onSelectPath={options.onSelectPath}
-                />,
-                `group-${index}`,
-            );
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                />);
         case "tabs":
-            return wrapSelectable(
+            return (
                 <ControlSurfaceTabs
+                    key={`${node.type}-${index}`}
                     {...node}
                     renderControl={renderControlSurfaceControl}
                     //symbolValues={stateApi.state.symbolValues}
@@ -224,9 +228,11 @@ export const renderControlSurfaceControl = (
                     //designMode={stateApi.state.designMode}
                     //selectedPath={stateApi.state.selectedControlPath}
                     onSelectPath={options.onSelectPath}
-                />,
-                `tabs-${index}`,
-            );
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                />);
 
         case "page":
             // New PropControl-based implementation
@@ -248,6 +254,6 @@ export const renderControlSurfaceControl = (
             );
 
         default:
-            return wrapSelectable(<div>Unknown control type.</div>, `unknown-${index}`);
+            return <div>Unknown control type.</div>;
     }
 };

@@ -80,7 +80,7 @@ export const ComponentTester: React.FC = () => {
                     <Divider />
 
                     <section>
-                        <ControlSurfaceGroupBase label="Up/Down Controls" orientation="horizontal">
+                        <ControlSurfaceGroupBase label="Up/Down Controls" designMode={true} orientation="vertical" selected={false}>
                             <IntegerUpDown
                                 min={3}
                                 max={10}

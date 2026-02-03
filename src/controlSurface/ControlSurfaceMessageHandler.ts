@@ -228,7 +228,7 @@ export class ControlSurfaceMessageHandler {
                 if (!expr) {
                     break;
                 }
-                void this.session.evalExpr(expr).catch((error) => {
+                void this.session.eval(expr).catch((error) => {
                     this.output.appendLine(`[controlSurface] eval error: ${String(error)}`);
                 });
                 break;

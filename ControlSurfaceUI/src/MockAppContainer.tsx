@@ -248,6 +248,12 @@ export function MockAppContainer(): JSX.Element {
         }, 100);
       }
 
+      // Handle eval (statement) requests
+      if ((message as any).type === 'eval') {
+        const payload = message as { type: string; expression?: string };
+        console.log("[mock] eval", payload.expression);
+      }
+
       // Handle showWarningMessage requests
       if ((message as any).type === 'showWarningMessage') {
         const payload = message as { type: string; requestId: string; message: string; items?: string[] };

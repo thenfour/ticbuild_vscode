@@ -153,7 +153,7 @@ export function registerBuiltInControls() {
     displayName: "Button",
     category: "action",
     description: "Execute code on click",
-    quickAddComponent: (props) => <SymbolQuickAdd {...props} label="Expression" />,
+    quickAddComponent: (props) => <SymbolQuickAdd {...props} label="statement" />,
     renderComponent: ControlSurfaceTriggerButtonProp,
     propertiesPanelComponent: TriggerButtonPropertiesPanel,
     createDefaultSpec: (data) => ({

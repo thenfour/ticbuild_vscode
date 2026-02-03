@@ -128,12 +128,27 @@ fieldset:disabled legend {
   color: var(--error-surface-text, var(--vscode-errorForeground));
 }
 
+.control-surface-app {
+--control-surface-properties-panel-height: 200px;
+  padding-bottom: calc(var(--control-surface-properties-panel-height) + 16px);
+}
+
 .control-surface-properties-panel {
-  margin-top: 16px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
   padding: 12px;
-  border: 1px solid var(--vscode-panel-border, var(--border));
-  border-radius: 4px;
-  background-color: var(--vscode-editor-background, var(--bg));
+  border: 0;
+  border-top: 1px solid var(--vscode-panel-border);
+  border-radius: 0;
+  background-color: var(--vscode-editor-background);
+  z-index: 5;
+  max-height: 40vh;
+  height: var(--control-surface-properties-panel-height);
+  overflow: auto;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .control-surface-properties-header {

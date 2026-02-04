@@ -22,7 +22,7 @@ import {
 import { discoverRunningInstancesBase, watchDiscoverySessionFiles } from './remoting/discovery';
 import { setupAutoConnectWatcher } from './session/autoConnect';
 import { formatDateDiff, formatInstanceLabel, parseHostPort } from './utils';
-import { buildControlSurfaceWebviewHtml, buildControlSurfaceWebviewPayloadWithSymbols } from './views/ControlSurfaceWebview';
+import { buildControlSurfaceWebviewHtml, buildControlSurfaceWebviewPayload } from './views/ControlSurfaceWebview';
 import { ExpressionSubscriptionMonitor } from './controlSurface/ExpressionSubscriptionMonitor';
 import { PlotSubscriptionManager } from './controlSurface/PlotSubscriptionManager';
 import { ControlSurfaceRegistry } from './views/ControlSurfaceRegistry';
@@ -202,11 +202,10 @@ export function activate(context: vscode.ExtensionContext): void {
     const key = viewId ? `${STATE_KEY_SELECTED_PAGE}.${viewId}` : undefined;
     const selectedPageId = key ? context.workspaceState.get<string>(key) : undefined;
 
-    const payload = await buildControlSurfaceWebviewPayloadWithSymbols(
+    const payload = buildControlSurfaceWebviewPayload(
       session.snapshot,
       watchSystem.store.getAll(),
       watchSystem.store.getControlSurfaceRoot(),
-      (expr) => session.evalExpr(expr),
       getPollHz(),
       getUiRefreshMs(),
       controlSurfaceRegistry.getActiveSidebarId(),

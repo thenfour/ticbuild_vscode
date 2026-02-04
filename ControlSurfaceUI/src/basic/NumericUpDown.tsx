@@ -4,6 +4,7 @@ import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { IconButton } from "../Buttons/IconButton";
 import "./NumericUpDown.css";
 import { mdiMenuLeft, mdiMenuRight } from "@mdi/js";
+import { useDraftInput } from "../hooks/useDraftInput";
 
 interface IntegerUpDownProps {
   value: number;
@@ -15,33 +16,33 @@ interface IntegerUpDownProps {
 
 // allows typing intermediate invalid values (free text); highlights when invalid.
 export const IntegerUpDown: React.FC<IntegerUpDownProps> = (props) => {
-  const [inputValue, setInputValue] = React.useState<string>(
-    props.value.toString(),
+  const formatValue = (val: number): string => val.toString();
+  const isValidValue = (val: number): boolean => (
+    Number.isFinite(val) && val >= props.min && val <= props.max
   );
 
-  React.useEffect(() => {
-    setInputValue(props.value.toString());
-  }, [props.value]);
+  const draft = useDraftInput<number>({
+    value: props.value,
+    format: formatValue,
+    parse: (text) => {
+      const parsed = Number.parseInt(text, 10);
+      if (!Number.isFinite(parsed)) {
+        return { value: props.value, isValid: false };
+      }
+      return { value: parsed, isValid: isValidValue(parsed) };
+    },
+    onCommit: (newValue) => {
+      if (!isValidValue(newValue)) {
+        return;
+      }
+      props.onChange(newValue);
+    },
+  });
 
   const handleNewIntegerValue = (newValue: number) => {
-    if (newValue < props.min || newValue > props.max) return;
-    setInputValue(newValue.toString());
+    if (!isValidValue(newValue)) return;
     props.onChange(newValue);
-  };
-
-  const isValidValue = (val: any): boolean => {
-    // try parse it, if it's non-integral or out of range, return false
-    const parsed = parseInt(val, 10);
-    if (isNaN(parsed)) return false;
-    return val >= props.min && val <= props.max;
-  };
-
-  const handleNewTextInput = (newText: string) => {
-    setInputValue(newText);
-    const parsed = parseInt(newText, 10);
-    if (isValidValue(parsed)) {
-      props.onChange(parsed);
-    }
+    draft.onChangeText(formatValue(newValue));
   };
 
   const applyStep = (delta: number) => {
@@ -85,12 +86,13 @@ export const IntegerUpDown: React.FC<IntegerUpDownProps> = (props) => {
         handleNewIntegerValue(props.max);
         return;
       default:
+        draft.onKeyDown(e);
         return;
     }
   };
 
   const classes = ["integer-up-down"];
-  if (!isValidValue(inputValue)) {
+  if (!draft.isValid) {
     classes.push("integer-up-down--invalid");
   }
   if (props.disabled) {
@@ -104,8 +106,10 @@ export const IntegerUpDown: React.FC<IntegerUpDownProps> = (props) => {
           type="text"
           className="integer-up-down__input"
           disabled={props.disabled}
-          value={inputValue}
-          onChange={(e) => handleNewTextInput(e.target.value)}
+          value={draft.text}
+          onChange={(e) => draft.onChangeText(e.target.value)}
+          onFocus={draft.onFocus}
+          onBlur={draft.onBlur}
           onKeyDown={onKeyDown}
           inputMode="numeric"
         />
@@ -146,36 +150,36 @@ export const NumericUpDown: React.FC<NumericUpDownProps> = (props) => {
     return val.toFixed(decimals);
   };
 
-  const [inputValue, setInputValue] = React.useState<string>(
-    formatValue(props.value),
-  );
-
-  React.useEffect(() => {
-    setInputValue(formatValue(props.value));
-  }, [props.value, decimals]);
-
   const clampValue = (val: number): number => {
     return Math.min(props.max, Math.max(props.min, val));
   };
 
+  const isValidValue = (val: number): boolean => (
+    Number.isFinite(val) && val >= props.min && val <= props.max
+  );
+
+  const draft = useDraftInput<number>({
+    value: props.value,
+    format: formatValue,
+    parse: (text) => {
+      const parsed = Number.parseFloat(text);
+      if (!Number.isFinite(parsed)) {
+        return { value: props.value, isValid: false };
+      }
+      return { value: parsed, isValid: isValidValue(parsed) };
+    },
+    onCommit: (newValue) => {
+      if (!isValidValue(newValue)) {
+        return;
+      }
+      props.onChange(clampValue(newValue));
+    },
+  });
+
   const handleNewNumericValue = (newValue: number) => {
     const clamped = clampValue(newValue);
-    setInputValue(formatValue(clamped));
     props.onChange(clamped);
-  };
-
-  const isValidValue = (val: any): boolean => {
-    const parsed = parseFloat(val);
-    if (isNaN(parsed)) return false;
-    return parsed >= props.min && parsed <= props.max;
-  };
-
-  const handleNewTextInput = (newText: string) => {
-    setInputValue(newText);
-    const parsed = parseFloat(newText);
-    if (isValidValue(parsed)) {
-      props.onChange(clampValue(parsed));
-    }
+    draft.onChangeText(formatValue(clamped));
   };
 
   const applyStep = (delta: number) => {
@@ -218,12 +222,13 @@ export const NumericUpDown: React.FC<NumericUpDownProps> = (props) => {
         handleNewNumericValue(props.max);
         return;
       default:
+        draft.onKeyDown(e);
         return;
     }
   };
 
   const classes = ["numeric-up-down"];
-  if (!isValidValue(inputValue)) {
+  if (!draft.isValid) {
     classes.push("numeric-up-down--invalid");
   }
   if (props.disabled) {
@@ -240,8 +245,10 @@ export const NumericUpDown: React.FC<NumericUpDownProps> = (props) => {
           type="text"
           className="numeric-up-down__input"
           disabled={props.disabled}
-          value={inputValue}
-          onChange={(e) => handleNewTextInput(e.target.value)}
+          value={draft.text}
+          onChange={(e) => draft.onChangeText(e.target.value)}
+          onFocus={draft.onFocus}
+          onBlur={draft.onBlur}
           onKeyDown={onKeyDown}
           inputMode="decimal"
         />

@@ -15,7 +15,7 @@ renders as a <NumericUpDown>
 import React from "react";
 import { NumericUpDown } from "../basic/NumericUpDown";
 import { ControlSurfaceNumberSpec } from "../defs";
-import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
+import { useSymbolBinding } from "../hooks/useSymbolBinding";
 
 export interface ControlSurfaceNumberProps extends ControlSurfaceNumberSpec {
     initialValue?: number;
@@ -29,27 +29,14 @@ export const ControlSurfaceNumber: React.FC<ControlSurfaceNumberProps> = ({
     step = 0.1,
     initialValue
 }) => {
-    const api = useControlSurfaceApi();
-    const [value, setValue] = React.useState<number>(initialValue ?? min);
-
-    // Update value when initialValue changes
-    React.useEffect(() => {
-        if (initialValue !== undefined) {
-            setValue(initialValue);
-        }
-    }, [initialValue]);
-
-    const handleChange = (newValue: number) => {
-        setValue(newValue);
-        api?.postMessage({ type: "setSymbol", symbol, value: newValue });
-    };
+    const { value, onChange } = useSymbolBinding<number>(symbol, initialValue ?? min);
 
     return (
         <div>
             <label>{label}</label>
             <NumericUpDown
                 value={value}
-                onChange={handleChange}
+                onChange={onChange}
                 min={min}
                 max={max}
                 step={step}

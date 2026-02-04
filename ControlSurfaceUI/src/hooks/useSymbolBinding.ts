@@ -8,10 +8,34 @@ export interface SymbolBinding<T> {
     bindingStatus: string;
 }
 
+
+// Raw expression results are Lua strings; need to parse them into appropriate types.
+const parseExpressionValue = <T>(valueText: string, fallback: T): T => {
+    const trimmed = valueText.trim();
+    if (trimmed.length === 0) {
+        return fallback;
+    }
+    try {
+        // weird but practical.
+        return JSON.parse(trimmed) as T;
+    } catch {
+        if (typeof fallback === "number") {
+            const parsed = Number(trimmed);
+            return (Number.isFinite(parsed) ? parsed : fallback) as T;
+        }
+        if (typeof fallback === "boolean") {
+            if (trimmed === "true") return true as T;
+            if (trimmed === "false") return false as T;
+            return fallback;
+        }
+        return trimmed as T;
+    }
+};
+
 /**
  * Hook for managing symbol bindings in control surface controls.
- * Handles state synchronization with symbolValues, posting updates to the API,
- * and detecting binding errors (symbol not found).
+ * Handles state synchronization with expression results, posting updates to the API,
+ * and surfacing expression errors.
  * 
  * @param symbol - The symbol name to bind to
  * @param defaultValue - Default value when symbol is not found
@@ -23,30 +47,40 @@ export const useSymbolBinding = <T = any>(
 ): SymbolBinding<T> => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
+    const isConnected = stateApi.state.connectionState === "connected";
+    const result = stateApi.state.expressionResults?.[symbol];
 
-    // Initialize with value from symbolValues or default
-    const [value, setValue] = React.useState<T>(
-        stateApi.state.symbolValues[symbol] ?? defaultValue
-    );
+    const [value, setValue] = React.useState<T>(defaultValue);
 
-    // Sync with symbolValues when it changes
     React.useEffect(() => {
-        const newValue = stateApi.state.symbolValues[symbol];
-        if (newValue !== undefined) {
-            setValue(newValue);
-        }
-    }, [stateApi.state.symbolValues[symbol], symbol]);
+        setValue(defaultValue);
+    }, [defaultValue, symbol]);
 
-    // Handler to update both local state and post to API
+    React.useEffect(() => {
+        if (!api || !isConnected || !symbol) {
+            return;
+        }
+        api.subscribeExpression(symbol);
+        return () => {
+            api.unsubscribeExpression(symbol);
+        };
+    }, [api, isConnected, symbol]);
+
+    React.useEffect(() => {
+        if (!result?.value) {
+            return;
+        }
+        setValue(parseExpressionValue(result.value, defaultValue));
+    }, [result?.value, defaultValue]);
+
     const handleChange = React.useCallback((newValue: T) => {
         setValue(newValue);
-        api?.postMessage({ type: "setSymbol", symbol, value: newValue });
+        if (symbol) {
+            api?.setSymbolValue(symbol, newValue);
+        }
     }, [api, symbol]);
 
-    // Determine binding status
-    const bindingStatus = symbol && !stateApi.state.symbolValues.hasOwnProperty(symbol)
-        ? `Symbol "${symbol}" not found`
-        : "";
+    const bindingStatus = result?.error ? `Expression error: ${result.error}` : "";
 
     return { value, onChange: handleChange, bindingStatus };
 };

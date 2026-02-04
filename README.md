@@ -3,10 +3,18 @@
 This is a VS Code extension adding support for
 [ticbuild](https://github.com/thenfour/ticbuild). [ticbuild](https://github.com/thenfour/ticbuild) is a build system for [TIC-80](https://tic80.com/).
 
-This extension:
+This extension allows you to
 
-- Adds monitoring and remote control of TIC-80 for debugging and development.
-- Adds syntax highlighting to Lua preprocessing done by ticbuild
+## Control and monitor TIC-80 for debugging and development
+
+Control surface, with a graphical designer, allows you to use knobs and controls to dial in
+the perfect variables, and to monitor variables over time.
+
+![alt text](.attachments/image-3.png)
+
+## Adds syntax highlighting to Lua preprocessing done by ticbuild
+
+![alt text](.attachments/image.png)
 
 ## Links
 
@@ -29,8 +37,6 @@ This project is free, a labor of love; if you find it useful, please support by 
 After installing, you should see syntax highlighting for Lua preprocessor (used by
 ticbuild)
 
-![alt text](.attachments/image.png)
-
 You can also attach to a running instance of TIC-80 for control surface support.
 To do this, <kbd>F5</kbd> on a ticbuild project to launch the cart in watch mode.
 
@@ -48,27 +54,98 @@ Select `TIC-80: Attach.` and you can specify a running instance.
 
 Select `TIC-80: Add Panel` to add a control surface.
 
-# Building
+# Control Surfaces
 
-```bash
-# create package
-npx @vscode/vsce package
+A ticbuild project can define a control surface for your cart. A control surface is
+a set of pages, knobs, inputs, labels, for interacting with Lua variables in a TIC-80
+instance. Useful for dialing in things like physics variables or positioning things
+on screen.
+
+Also useful for monitoring values or Lua expressions over time (via a scope).
+
+## Add your first control
+
+Let's start with an example program
+
+```lua
+x,y=50,50
+str="hello"
+
+function reset()
+    x,y=0,0
+    str="reset!"
+end
+
+function TIC()
+  cls(14)
+  print(str, x, y)
+end
 ```
 
-# Make certain it's really updated in case of updates/reinstall
+We can bind controls to any global variable in Lua. In this case, `x`,`y`, and `str`
+are usable. Buttons can invoke global functions, in this case `reset()`.
 
-(mostly for development)
+### 1. Add a control surface panel by running `TIC-80: Add Panel` in the command palette.
 
-You can use `--force` to `code --install-extension`, however most reliable is to:
+### 2. On the new panel, click design mode to enable editing.
 
-- in the command palette, `Developer: Reload Window`
+![design mode button](.attachments/image-6.png)
 
-or more forcefully,
+### 3. Click `+ Add Control` ![alt text](.attachments/image-7.png), and select the `XY` control.
 
-1. in vs code, extensions, open the page for this extension. uninstall it.
-2. click on the little size (2.14kb) hyperlink; it opens the dir where it is on disk. Delete its folder.
+Set `x` and `y` as the symbols to bind for the axes.
 
-# Instance discovery
+![select xy control](.attachments/image-5.png)
+
+### 4. Click "add control"
+
+### 5. Exit design mode to make the control usable
+
+![design mode disabled](.attachments/image-8.png)
+
+### 6. That's it! Animate your game by remote control.
+
+Drag the thumb around the XY pad and you'll see the position update in the TIC-80
+in real-time.
+
+![xy in action](.attachments/image-9.png)
+
+### 7. Add a button: Enter design mode, add a button control.
+
+![button control](.attachments/image-10.png)
+
+### 8. Set the statement to `reset()`, and click Add Control
+
+![add new button gui](.attachments/image-11.png)
+
+### 9. Exit design mode, and click the new button.
+
+You should see the text reset to position to the top-left corner `0,0`,
+and the text is reset to `"reset!"` because the `reset()` function was invoked
+by your button press.
+
+### 10. Try it out-- try adding a label control to see the value of `str`.
+
+You can also use full Lua expressions in a label, so `"Length: "..#str`
+works as well.
+
+## Pages and views
+
+Click on the TIC-80 activity button to show a control surface in a sidebar.
+Can be useful if you want a narrow control surface while you write code at the
+same time.
+
+![activity icon](.attachments/image-4.png)
+
+You can also use the command palette `TIC-80: Add Panel` to add a full-page control surface.
+
+Only one control surface is defined per project, but a control surface can
+define many pages, and each view can select which page it's displaying. By default,
+views show the "root" page which will show the entire control surface.
+
+## Layout
+
+# TIC-80 discovery mechanism
 
 Discovery of running TIC-80 instances is described in the [TIC-80-ticbuild fork](https://github.com/thenfour/TIC-80-ticbuild/tree/main/src/ticbuild_remoting#discovery-protocol).
 
@@ -83,9 +160,9 @@ This allows VS Code to auto-connect when the current project is launched.
 This project is in alpha state. You might not know what's going on. Places
 to check for issues:
 
--
-
-Output window -> select `TIC-80 Remote` in the output channel.
+- Output console; select the `TIC-80 Remote` output channel.
+- Command palette -> Webview Developer Tools, the console may show output if there are errors
+- Look in the TIC-80 itself; if Lua execution errors occur it may appear there.
 
 # building
 

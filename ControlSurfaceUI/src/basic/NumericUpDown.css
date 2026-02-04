@@ -6,6 +6,10 @@
     overflow: hidden;
 }
 
+.integer-up-down:focus-within {
+    border: 1px solid var(--vscode-focusBorder);
+}
+
 .integer-up-down__input {
     width: 40px;
     border: none;
@@ -33,6 +37,10 @@
     align-items: center;
     border: 1px solid var(--vscode-input-border);
     overflow: hidden;
+}
+
+.numeric-up-down:focus-within {
+    border: 1px solid var(--vscode-focusBorder);
 }
 
 .numeric-up-down__input {

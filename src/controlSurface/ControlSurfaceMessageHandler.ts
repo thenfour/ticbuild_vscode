@@ -312,9 +312,9 @@ export class ControlSurfaceMessageHandler {
                 })();
                 break;
             }
-            case 'setSymbol': {
+            case 'setSymbolValue': {
                 if (!this.session.isConnected()) {
-                    this.output.appendLine('[controlSurface] setSymbol ignored (not connected)');
+                    this.output.appendLine('[controlSurface] setSymbolValue ignored (not connected)');
                     break;
                 }
                 const payload = message as { symbol?: string; value?: unknown };
@@ -323,9 +323,8 @@ export class ControlSurfaceMessageHandler {
                 }
                 const serialized = JSON.stringify(payload.value ?? null);
                 const expr = `${payload.symbol} = ${serialized}`;
-                //this.output.appendLine(`[controlSurface] setSymbol: ${expr}`);
                 void this.session.eval(expr).catch((error) => {
-                    this.output.appendLine(`[controlSurface] setSymbol error: ${String(error)}`);
+                    this.output.appendLine(`[controlSurface] setSymbolValue error: ${String(error)}`);
                 });
                 break;
             }

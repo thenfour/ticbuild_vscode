@@ -25,7 +25,6 @@ export type ControlSurfaceState = {
     connectedInstance?: ControlSurfaceConnectedInstance;
     watches: WatchItem[];
     controlSurfaceRoot: ControlSurfaceNode[];
-    symbolValues: Record<string, any>; // map of symbol names to their current values
     expressionResults?: Record<string, { value?: string; error?: string }>;
     plotData?: ControlSurfacePlotData;
     discoveredInstances?: ControlSurfaceDiscoveredInstance[];
@@ -196,6 +195,7 @@ export type ControlSurfaceNode =
 export type ControlSurfaceApi = {
     postMessage: (message: unknown) => void;
     evalExpression: (expression: string) => Promise<string>;
+    setSymbolValue: (symbol: string, value: unknown) => void;
     log: (message: string) => void;
     showWarningMessage: <T extends string>(message: string, ...items: T[]) => Promise<T | undefined>;
     subscribeExpression: (expression: string) => void;

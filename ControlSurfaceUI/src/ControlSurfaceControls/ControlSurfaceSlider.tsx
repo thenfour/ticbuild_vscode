@@ -13,7 +13,7 @@
 
 import React from "react";
 import { ControlSurfaceSliderSpec } from "../defs";
-import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
+import { useSymbolBinding } from "../hooks/useSymbolBinding";
 
 export interface ControlSurfaceSliderProps extends ControlSurfaceSliderSpec {
   initialValue?: number;
@@ -27,20 +27,11 @@ export const ControlSurfaceSlider: React.FC<ControlSurfaceSliderProps> = ({
   step = 1,
   initialValue
 }) => {
-  const api = useControlSurfaceApi();
-  const [value, setValue] = React.useState<number>(initialValue ?? min);
-
-  // Update value when initialValue changes
-  React.useEffect(() => {
-    if (initialValue !== undefined) {
-      setValue(initialValue);
-    }
-  }, [initialValue]);
+  const { value, onChange } = useSymbolBinding<number>(symbol, initialValue ?? min);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(e.target.value);
-    setValue(newValue);
-    api?.postMessage({ type: "setSymbol", symbol, value: newValue });
+    onChange(newValue);
   };
 
   return (

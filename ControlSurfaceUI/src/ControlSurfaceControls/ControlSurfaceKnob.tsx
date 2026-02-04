@@ -14,7 +14,7 @@
 import React from "react";
 import { Knob } from "../basic/Knob2";
 import { ControlSurfaceKnobSpec } from "../defs";
-import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
+import { useSymbolBinding } from "../hooks/useSymbolBinding";
 
 export interface ControlSurfaceKnobProps extends ControlSurfaceKnobSpec {
   initialValue?: number;
@@ -29,21 +29,7 @@ export const ControlSurfaceKnob: React.FC<ControlSurfaceKnobProps> = ({
   size = "medium", // Note: size is currently not used by Knob component
   initialValue
 }) => {
-  const api = useControlSurfaceApi();
-  const [value, setValue] = React.useState<number>(initialValue ?? min);
-
-  // Update value when initialValue changes
-  React.useEffect(() => {
-    if (initialValue !== undefined) {
-      setValue(initialValue);
-    }
-  }, [initialValue]);
-
-  const handleChange = (newValue: number) => {
-    setValue(newValue);
-    //console.log("Knob value changed:", newValue);
-    api?.postMessage({ type: "setSymbol", symbol, value: newValue });
-  };
+  const { value, onChange } = useSymbolBinding<number>(symbol, initialValue ?? min);
 
   //console.log("Rendering ControlSurfaceKnob with value:", value);
 
@@ -51,7 +37,7 @@ export const ControlSurfaceKnob: React.FC<ControlSurfaceKnobProps> = ({
     <Knob
       label={label}
       value={value}
-      onChange={handleChange}
+      onChange={onChange}
       min={min}
       max={max}
       step={step}

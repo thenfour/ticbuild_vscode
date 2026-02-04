@@ -12,28 +12,14 @@ not yet necessary to have maxlength et al; just allow single line string. multi-
 
 import React from "react";
 import { ControlSurfaceStringSpec } from "../defs";
-import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
+import { useSymbolBinding } from "../hooks/useSymbolBinding";
 
 export interface ControlSurfaceStringProps extends ControlSurfaceStringSpec {
     initialValue?: string;
 }
 
 export const ControlSurfaceString: React.FC<ControlSurfaceStringProps> = ({ label, symbol, initialValue }) => {
-    const api = useControlSurfaceApi();
-    const [value, setValue] = React.useState<string>(initialValue ?? "");
-
-    // Update value when initialValue changes
-    React.useEffect(() => {
-        if (initialValue !== undefined) {
-            setValue(initialValue);
-        }
-    }, [initialValue]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value;
-        setValue(newValue);
-        api?.postMessage({ type: "setSymbol", symbol, value: newValue });
-    };
+    const { value, onChange } = useSymbolBinding<string>(symbol, initialValue ?? "");
 
     return (
         <div className="control-surface-string">
@@ -42,7 +28,7 @@ export const ControlSurfaceString: React.FC<ControlSurfaceStringProps> = ({ labe
                 type="text"
                 className="control-surface-string-input"
                 value={value}
-                onChange={handleChange}
+                onChange={(e) => onChange(e.target.value)}
             />
         </div>
     );

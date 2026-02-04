@@ -56,14 +56,6 @@ export function MockAppContainer(): JSX.Element {
   const [clipboardNotice, setClipboardNotice] = React.useState<string>("");
   const [discoveredInstances, setDiscoveredInstances] = React.useState<ControlSurfaceDiscoveredInstance[]>([]);
 
-  // Symbol management state
-  const [symbolValues, setSymbolValues] = useLocalStorage<Record<string, any>>(
-    'tic80-mock-symbolValues',
-    { mockSymbol: 123 }
-  );
-  const [newSymbolName, setNewSymbolName] = React.useState("");
-  const [newSymbolValue, setNewSymbolValue] = React.useState("0");
-
   // Expression management state
   const [newExpressionText, setNewExpressionText] = React.useState("");
   const [newExpressionValue, setNewExpressionValue] = React.useState("");
@@ -183,6 +175,21 @@ export function MockAppContainer(): JSX.Element {
         setExpressionResults((prev) => ({
           ...prev,
           [payload.expression]: { value: `mock result for: ${payload.expression}` },
+        }));
+        return;
+      }
+
+      if ((message as any).type === 'setSymbolValue') {
+        const payload = message as { type: string; symbol?: string; value?: unknown };
+        if (!payload.symbol) {
+          return;
+        }
+        const valueText = typeof payload.value === "string"
+          ? payload.value
+          : JSON.stringify(payload.value ?? null);
+        setExpressionResults((prev) => ({
+          ...prev,
+          [payload.symbol!]: { value: valueText },
         }));
         return;
       }
@@ -320,7 +327,6 @@ export function MockAppContainer(): JSX.Element {
     expressionResults,
     discoveredInstances,
     selectedPageId,
-    symbolValues,
   });
 
   const handleCopyControlSurfaceRoot = async () => {
@@ -356,63 +362,6 @@ export function MockAppContainer(): JSX.Element {
       setClipboardNotice("controlSurfaceRoot pasted.");
     } catch (error) {
       setClipboardNotice("Failed to paste controlSurfaceRoot.");
-    }
-  };
-
-  const handleAddSymbol = () => {
-    if (!newSymbolName.trim()) return;
-    try {
-      const parsedValue = JSON.parse(newSymbolValue);
-      setSymbolValues(prev => ({ ...prev, [newSymbolName]: parsedValue }));
-      setNewSymbolName("");
-      setNewSymbolValue("0");
-    } catch {
-      // If JSON parse fails, store as string
-      setSymbolValues(prev => ({ ...prev, [newSymbolName]: newSymbolValue }));
-      setNewSymbolName("");
-      setNewSymbolValue("0");
-    }
-  };
-
-  const handleRemoveSymbol = (symbolName: string) => {
-    setSymbolValues(prev => {
-      const next = { ...prev };
-      delete next[symbolName];
-      return next;
-    });
-  };
-
-  const handleCopySymbols = async () => {
-    setClipboardNotice("");
-    try {
-      if (!navigator.clipboard?.writeText) {
-        setClipboardNotice("Clipboard API unavailable.");
-        return;
-      }
-      await navigator.clipboard.writeText(JSON.stringify(symbolValues, null, 2));
-      setClipboardNotice("Symbols copied.");
-    } catch (error) {
-      setClipboardNotice("Failed to copy symbols.");
-    }
-  };
-
-  const handlePasteSymbols = async () => {
-    setClipboardNotice("");
-    try {
-      if (!navigator.clipboard?.readText) {
-        setClipboardNotice("Clipboard API unavailable.");
-        return;
-      }
-      const text = await navigator.clipboard.readText();
-      const parsed = JSON.parse(text);
-      if (typeof parsed !== 'object' || Array.isArray(parsed)) {
-        setClipboardNotice("Clipboard data must be an object.");
-        return;
-      }
-      setSymbolValues(parsed);
-      setClipboardNotice("Symbols pasted.");
-    } catch (error) {
-      setClipboardNotice("Failed to paste symbols.");
     }
   };
 
@@ -510,78 +459,6 @@ export function MockAppContainer(): JSX.Element {
               </span>
             ) : null}
           </ButtonGroup>
-
-          {/* Symbol Management */}
-          <div style={{ padding: "8px", borderBottom: "1px solid var(--vscode-panel-border)", display: "flex", flexDirection: "column", gap: "8px" }}>
-            <div style={{ fontSize: "12px", fontWeight: "bold" }}>Mock Symbols</div>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <input
-                type="text"
-                placeholder="Symbol name"
-                value={newSymbolName}
-                onChange={(e) => setNewSymbolName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAddSymbol()}
-                style={{
-                  padding: "4px 8px",
-                  backgroundColor: "var(--vscode-input-background)",
-                  color: "var(--vscode-input-foreground)",
-                  border: "1px solid var(--vscode-input-border)",
-                  flex: "0 0 120px",
-                }}
-              />
-              <input
-                type="text"
-                placeholder="Value (JSON)"
-                value={newSymbolValue}
-                onChange={(e) => setNewSymbolValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAddSymbol()}
-                style={{
-                  padding: "4px 8px",
-                  backgroundColor: "var(--vscode-input-background)",
-                  color: "var(--vscode-input-foreground)",
-                  border: "1px solid var(--vscode-input-border)",
-                  flex: 1,
-                }}
-              />
-              <Button onClick={handleAddSymbol}>Add</Button>
-              <Divider />
-              <Button onClick={handleCopySymbols}>Copy Symbols JSON</Button>
-              <Button onClick={handlePasteSymbols}>Paste Symbols JSON</Button>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
-              {Object.entries(symbolValues).map(([name, value]) => (
-                <div
-                  key={name}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    padding: "4px 8px",
-                    backgroundColor: "var(--vscode-button-secondaryBackground)",
-                    border: "1px solid var(--vscode-button-border)",
-                    borderRadius: "3px",
-                    fontSize: "11px",
-                  }}
-                >
-                  <span style={{ fontWeight: "bold" }}>{name}:</span>
-                  <span>{JSON.stringify(value)}</span>
-                  <button
-                    onClick={() => handleRemoveSymbol(name)}
-                    style={{
-                      marginLeft: "4px",
-                      padding: "0 4px",
-                      cursor: "pointer",
-                      background: "transparent",
-                      border: "none",
-                      color: "var(--vscode-errorForeground)",
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* Expression Management */}
           <div style={{ padding: "8px", borderBottom: "1px solid var(--vscode-panel-border)", display: "flex", flexDirection: "column", gap: "8px" }}>

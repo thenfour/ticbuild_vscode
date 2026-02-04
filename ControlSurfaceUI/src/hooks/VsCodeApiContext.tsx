@@ -112,6 +112,13 @@ export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
                     }, 5000);
                 });
             },
+            setSymbolValue: (symbol: string, value: unknown) => {
+                rawApi.postMessage({
+                    type: "setSymbolValue",
+                    symbol,
+                    value,
+                });
+            },
             subscribeExpression: (expression: string) => {
                 rawApi.postMessage({
                     type: "subscribeExpression",

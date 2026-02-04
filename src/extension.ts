@@ -433,9 +433,14 @@ export function activate(context: vscode.ExtensionContext): void {
 
         const options =
           await getAttachTargets(defaultHost, defaultPort, timeoutMs);
-        const pick = await vscode.window.showQuickPick(options, {
+        const manualEntry: AttachPickItem = {
+          label: 'Manual entry…',
+          description: 'Enter host:port or port',
+          value: '__manual__',
+        };
+        const pick = await vscode.window.showQuickPick([manualEntry, ...options], {
           title: 'Attach to TIC-80',
-          placeHolder: 'Select a TIC-80 instance',
+          placeHolder: 'Select a TIC-80 instance or choose Manual entry…',
           ignoreFocusOut: true,
         });
 
@@ -443,8 +448,27 @@ export function activate(context: vscode.ExtensionContext): void {
           return;
         }
 
-        const target = pick.value;
-        const parsed = parseHostPort(target);
+        let target = pick.value;
+        if (target === '__manual__') {
+          const manual = await vscode.window.showInputBox({
+            title: 'Attach to TIC-80',
+            prompt: 'Enter host:port or port',
+            placeHolder: `${defaultHost}:${defaultPort} or ${defaultPort}`,
+            ignoreFocusOut: true,
+          });
+          if (!manual) {
+            return;
+          }
+          target = manual.trim();
+        }
+
+        let parsed = parseHostPort(target);
+        if (!parsed && /^\d+$/.test(target)) {
+          const port = Number(target);
+          if (Number.isFinite(port) && port > 0) {
+            parsed = { host: defaultHost, port };
+          }
+        }
         if (!parsed) {
           void vscode.window.showErrorMessage(
             `Invalid host:port selection: ${target}`);

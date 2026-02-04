@@ -159,10 +159,7 @@ export function MockAppContainer(): JSX.Element {
           }
           const [removed] = resolved.parentControls.splice(resolved.index, 1);
           const clampedIndex = Math.max(0, Math.min(payload.targetIndex ?? targetControls.length, targetControls.length));
-          const insertIndex = resolved.parentControls === targetControls && resolved.index < clampedIndex
-            ? clampedIndex - 1
-            : clampedIndex;
-          targetControls.splice(insertIndex, 0, removed);
+          targetControls.splice(clampedIndex, 0, removed);
           return next;
         });
         return;

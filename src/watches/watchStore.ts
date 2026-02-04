@@ -320,10 +320,7 @@ export class WatchStore {
 
     const [removed] = resolvedSource.parentControls.splice(resolvedSource.index, 1);
     const clampedIndex = Math.max(0, Math.min(targetIndex ?? targetControls.length, targetControls.length));
-    const insertIndex = resolvedSource.parentControls === targetControls && resolvedSource.index < clampedIndex
-      ? clampedIndex - 1
-      : clampedIndex;
-    targetControls.splice(insertIndex, 0, removed);
+    targetControls.splice(clampedIndex, 0, removed);
 
     this.controlSurfaceRoot = controlSurfaceRoot;
     await this.persistControlSurface(existing, controlSurfaceRoot);

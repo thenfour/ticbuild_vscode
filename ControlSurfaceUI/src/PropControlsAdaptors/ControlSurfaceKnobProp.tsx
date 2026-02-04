@@ -35,6 +35,7 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
 
     const designMode = stateApi.state.designMode;
     const selected = JSON.stringify(stateApi.state.selectedControlPath) === JSON.stringify(path);
+    const isConnected = stateApi.state.connectionState === "connected";
 
     const designTools = designMode
         ? createDesignTools({
@@ -55,6 +56,7 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
             step={step}
             size={size}
             designMode={designMode}
+            isConnected={isConnected}
             selected={selected}
             bindingStatus={bindingStatus}
             bindingStatusSeverity="error"

@@ -31,6 +31,7 @@ export const ControlSurfaceStringProp: React.FC<ControlSurfaceStringPropProps> =
 
     const designMode = stateApi.state.designMode;
     const selected = JSON.stringify(stateApi.state.selectedControlPath) === JSON.stringify(path);
+    const isConnected = stateApi.state.connectionState === "connected";
 
     const designTools = designMode
         ? createDesignTools({
@@ -47,6 +48,7 @@ export const ControlSurfaceStringProp: React.FC<ControlSurfaceStringPropProps> =
             value={value}
             onChange={onChange}
             designMode={designMode}
+            isConnected={isConnected}
             selected={selected}
             bindingStatus={bindingStatus}
             bindingStatusSeverity="error"

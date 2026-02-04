@@ -158,7 +158,9 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
     >
 
       <ConnectionStateControl
-        status={stateApi.state.status}
+        connectionState={stateApi.state.connectionState}
+        statusText={stateApi.state.statusText}
+        connectedInstance={stateApi.state.connectedInstance}
         discoveredInstances={stateApi.state.discoveredInstances}
       />
 

@@ -19,7 +19,7 @@ export const useLuaExpressionResult = (
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
     const result = stateApi.state.expressionResults?.[expression];
-    const isConnected = (stateApi.state.status ?? "").includes("Connected");
+    const isConnected = stateApi.state.connectionState === "connected";
 
     React.useEffect(() => {
         if (!api || !isConnected) {

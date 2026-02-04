@@ -12,8 +12,17 @@ export type WatchItem = {
 // the serialized state of the control surface UI;
 // this is what's sent from the extension host to the webview
 // must be serializable
+export type ControlSurfaceConnectionState = "connected" | "connecting" | "disconnected" | "error";
+
+export type ControlSurfaceConnectedInstance = {
+    host: string;
+    port: number;
+};
+
 export type ControlSurfaceState = {
-    status: string;
+    connectionState: ControlSurfaceConnectionState;
+    statusText: string;
+    connectedInstance?: ControlSurfaceConnectedInstance;
     watches: WatchItem[];
     controlSurfaceRoot: ControlSurfaceNode[];
     symbolValues: Record<string, any>; // map of symbol names to their current values

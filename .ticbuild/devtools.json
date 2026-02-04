@@ -108,7 +108,13 @@
           "tabs": [
             {
               "label": "Tab 1",
-              "controls": []
+              "controls": [
+                {
+                  "type": "toggle",
+                  "label": "Toggle",
+                  "symbol": "enabled"
+                }
+              ]
             },
             {
               "label": "Tab 2",

@@ -41,7 +41,7 @@ export const ControlSurfaceLabelProp: React.FC<ControlSurfaceLabelPropProps> = (
 
     return (
         <PropControlLabel
-            isConnected={stateApi.state.status === "connected"}
+            isConnected={stateApi.state.connectionState === "connected"}
             label={spec.label}
             displayValue={displayValue ?? spec.expression}
             error={error ?? undefined}

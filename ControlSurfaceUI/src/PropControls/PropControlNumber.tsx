@@ -47,7 +47,7 @@ export const PropControlNumber: React.FC<PropControlNumberProps> = ({
     // if the input is not a number, or out of range, show validation error
     let validationError: React.ReactNode = null;
     let canRender = true;
-    console.log("PropControlNumber value:", value);
+    //console.log("PropControlNumber value:", value);
     if ((typeof (value) !== "number") || !isFinite(value) || isNaN(value)) {
         validationError = "Value must be a number";
         canRender = false;

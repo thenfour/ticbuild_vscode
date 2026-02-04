@@ -66,7 +66,9 @@ export function buildControlSurfaceWebviewPayload(
     selectedPageId?: string,
     viewId?: string,
 ): {
-    status: string;
+    connectionState: "connected" | "connecting" | "disconnected" | "error";
+    statusText: string;
+    connectedInstance?: { host: string; port: number };
     watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>;
     controlSurfaceRoot: DevtoolsControlNode[];
     symbolValues?: Record<string, any>;
@@ -76,7 +78,7 @@ export function buildControlSurfaceWebviewPayload(
     selectedPageId?: string;
     viewId?: string;
 } {
-    const status = snapshot.state === 'Connected'
+    const statusText = snapshot.state === 'Connected'
         ? `Connected ${snapshot.host}:${snapshot.port}`
         : snapshot.state === 'Connecting'
             ? 'Connecting'
@@ -84,11 +86,25 @@ export function buildControlSurfaceWebviewPayload(
                 ? 'Error'
                 : 'Disconnected';
 
+    const connectionState = snapshot.state === 'Connected'
+        ? "connected"
+        : snapshot.state === 'Connecting'
+            ? "connecting"
+            : snapshot.state === 'Error'
+                ? "error"
+                : "disconnected";
+
+    const connectedInstance = snapshot.state === 'Connected'
+        ? { host: snapshot.host, port: snapshot.port }
+        : undefined;
+
     const fallbackPollIntervalMs = Math.max(Math.floor(1000 / pollHz), 10); // At least 10ms
     const pollIntervalMs = Math.max(uiRefreshMs ?? fallbackPollIntervalMs, 10);
 
     return {
-        status,
+        connectionState,
+        statusText,
+        connectedInstance,
         watches: watches.map((watch) => ({
             id: watch.id,
             label: watch.label,
@@ -119,7 +135,9 @@ export async function buildControlSurfaceWebviewPayloadWithSymbols(
     selectedPageId?: string,
     viewId?: string,
 ): Promise<{
-    status: string;
+    connectionState: "connected" | "connecting" | "disconnected" | "error";
+    statusText: string;
+    connectedInstance?: { host: string; port: number };
     watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>;
     controlSurfaceRoot: DevtoolsControlNode[];
     symbolValues?: Record<string, any>;

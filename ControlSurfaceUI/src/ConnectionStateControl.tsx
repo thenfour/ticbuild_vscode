@@ -6,30 +6,38 @@ import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 import { Divider } from "./basic/Divider";
 
 export type ConnectionStateControlProps = {
-    status: string;
+    connectionState: "connected" | "connecting" | "disconnected" | "error";
+    statusText: string;
+    connectedInstance?: { host: string; port: number };
     discoveredInstances?: ControlSurfaceDiscoveredInstance[];
 };
 
 export const ConnectionStateControl: React.FC<ConnectionStateControlProps> = ({
-    status,
+    connectionState,
+    statusText,
+    connectedInstance,
     discoveredInstances,
 }) => {
     const api = useControlSurfaceApi();
-    const isConnected = status.includes("Connected");
+    const isConnected = connectionState === "connected";
     const instances = discoveredInstances ?? [];
 
-    const connectedMatch = status.match(/Connected\s+([^:\s]+):(\d+)/i);
-    const connectedHost = connectedMatch?.[1];
-    const connectedPort = connectedMatch ? Number(connectedMatch[2]) : undefined;
-
     const isConnectedTo = (instance: ControlSurfaceDiscoveredInstance) => {
-        if (!isConnected || !connectedHost || connectedPort == null) {
+        if (!isConnected || !connectedInstance) {
             return false;
         }
-        return instance.host === connectedHost && instance.port === connectedPort;
+        return instance.host === connectedInstance.host && instance.port === connectedInstance.port;
     };
 
     const filteredInstances = instances.filter((instance) => !isConnectedTo(instance));
+
+    const formatInstanceLabel = (instance: ControlSurfaceDiscoveredInstance): string => {
+        const rawLabel = (instance.label ?? "").trim();
+        if (!rawLabel || rawLabel === "(empty)") {
+            return `${instance.host}:${instance.port}`;
+        }
+        return rawLabel;
+    };
 
 
     const statusColor = isConnected ? "var(--vscode-testing-iconPassed)"
@@ -48,7 +56,7 @@ export const ConnectionStateControl: React.FC<ConnectionStateControlProps> = ({
             <div
                 style={{ color: statusColor }}
             >
-                {status}
+                {statusText}
             </div>
             <ButtonGroup>
                 {isConnected ? (
@@ -74,7 +82,7 @@ export const ConnectionStateControl: React.FC<ConnectionStateControlProps> = ({
                             port: instance.port,
                         })}
                     >
-                        {instance.label || "?"}
+                        {formatInstanceLabel(instance)}
                     </Button>
                 ))}
             </ButtonGroup>

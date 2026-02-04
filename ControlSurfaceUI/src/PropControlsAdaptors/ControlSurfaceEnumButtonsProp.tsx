@@ -33,6 +33,7 @@ export const ControlSurfaceEnumButtonsProp: React.FC<ControlSurfaceEnumButtonsPr
 
     const designMode = stateApi.state.designMode;
     const selected = JSON.stringify(stateApi.state.selectedControlPath) === JSON.stringify(path);
+    const isConnected = stateApi.state.connectionState === "connected";
 
     const designTools = designMode
         ? createDesignTools({
@@ -50,6 +51,7 @@ export const ControlSurfaceEnumButtonsProp: React.FC<ControlSurfaceEnumButtonsPr
             onChange={onChange}
             options={options}
             designMode={designMode}
+            isConnected={isConnected}
             selected={selected}
             bindingStatus={bindingStatus}
             bindingStatusSeverity="error"

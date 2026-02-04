@@ -23,7 +23,9 @@ const DEFAULT_POLL_MS = 220;
 const DEFAULT_UI_MS = 220;
 
 const makeState = (overrides?: Partial<ControlSurfaceState>, prev?: ControlSurfaceState): ControlSurfaceState => ({
-    status: overrides?.status ?? prev?.status ?? "Disconnected",
+    connectionState: overrides?.connectionState ?? prev?.connectionState ?? "disconnected",
+    statusText: overrides?.statusText ?? prev?.statusText ?? "Disconnected",
+    connectedInstance: overrides?.connectedInstance ?? prev?.connectedInstance,
     watches: overrides?.watches ?? prev?.watches ?? [],
     controlSurfaceRoot: overrides?.controlSurfaceRoot ?? prev?.controlSurfaceRoot ?? [],
     symbolValues: overrides?.symbolValues ?? prev?.symbolValues ?? {},

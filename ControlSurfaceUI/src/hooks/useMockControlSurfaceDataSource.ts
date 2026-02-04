@@ -1,5 +1,11 @@
 import React from "react";
-import { ControlSurfaceDataSource, ControlSurfaceDiscoveredInstance, ControlSurfaceNode, ControlSurfaceState, WatchItem } from "../defs";
+import {
+    ControlSurfaceDataSource,
+    ControlSurfaceDiscoveredInstance,
+    ControlSurfaceNode,
+    ControlSurfaceState,
+    WatchItem,
+} from "../defs";
 
 type MockWatch = {
     id: string;
@@ -30,7 +36,9 @@ export const useMockControlSurfaceDataSource = ({
         new Set<(payload: ControlSurfaceState) => void>(),
     );
     const latestPayloadRef = React.useRef<ControlSurfaceState>({
-        status: "Disconnected (mock)",
+        connectionState: "disconnected",
+        statusText: "Disconnected (mock)",
+        connectedInstance: undefined,
         watches: [],
         controlSurfaceRoot: [],
         symbolValues: {},
@@ -50,7 +58,11 @@ export const useMockControlSurfaceDataSource = ({
             value: watch.value,
         }));
         return {
-            status: connected ? "Connected (mock)" : "Disconnected (mock)",
+            connectionState: connected ? "connected" : "disconnected",
+            statusText: connected ? "Connected (mock)" : "Disconnected (mock)",
+            connectedInstance: connected && discoveredInstances?.[0]
+                ? { host: discoveredInstances[0].host, port: discoveredInstances[0].port }
+                : undefined,
             watches: mappedWatches,
             controlSurfaceRoot,
             uiRefreshMs: 250,

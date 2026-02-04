@@ -42,11 +42,14 @@ export const ControlSurfaceTriggerButtonProp: React.FC<ControlSurfaceTriggerButt
         onSettings,
     });
 
+    const isConnected = stateApi.state.connectionState === "connected";
+
     return (
         <PropControlTriggerButton
             label={spec.label}
             onTrigger={handleTrigger}
             designMode={stateApi.state.designMode}
+            isConnected={isConnected}
             selected={JSON.stringify(stateApi.state.selectedControlPath) === path}
             designTools={designTools}
         />

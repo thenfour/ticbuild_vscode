@@ -153,6 +153,29 @@ export function MockAppContainer(): JSX.Element {
         return;
       }
 
+      if ((message as any).type === 'reorderControl') {
+        const payload = message as { type: string; sourcePath?: string[]; targetParentPath?: string[]; targetIndex?: number };
+        if (!payload.sourcePath || !payload.targetParentPath || payload.targetIndex === undefined) {
+          return;
+        }
+        setControlSurfaceRoot((prev) => {
+          const next = JSON.parse(JSON.stringify(prev)) as ControlSurfaceNode[];
+          const resolved = resolveControlByPath(next, payload.sourcePath);
+          const targetControls = resolveControlsByPath(next, payload.targetParentPath);
+          if (!resolved || !targetControls) {
+            return next;
+          }
+          const [removed] = resolved.parentControls.splice(resolved.index, 1);
+          const clampedIndex = Math.max(0, Math.min(payload.targetIndex ?? targetControls.length, targetControls.length));
+          const insertIndex = resolved.parentControls === targetControls && resolved.index < clampedIndex
+            ? clampedIndex - 1
+            : clampedIndex;
+          targetControls.splice(insertIndex, 0, removed);
+          return next;
+        });
+        return;
+      }
+
       if ((message as any).type === 'subscribeExpression') {
         const payload = message as { type: string; expression: string };
         const nextCount = (expressionSubscriptionsRef.current.get(payload.expression) ?? 0) + 1;

@@ -1,10 +1,12 @@
 import React from "react";
+import { DndContainer, DndDraggable } from "../dnd";
 import { PropControl } from "../PropControlsBase/PropControlShell";
 import { ControlSurfacePageSpec, ControlSurfaceNode, ControlSurfaceApi } from "../defs";
 import { ControlSurfaceStateApi } from "../hooks/ControlSurfaceState";
 import { createDesignTools } from "../utils/designTools";
 import { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
 import { AddControlControl } from "../AddControlControl";
+import { buildControlPath } from "../controlPathBase";
 
 export interface ControlSurfacePagePropProps {
     spec: ControlSurfacePageSpec;
@@ -52,6 +54,26 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
         onSettings,
     });
 
+    const handleDrop = React.useCallback((dropResult: any) => {
+        if (!stateApi.state.designMode) {
+            return;
+        }
+        const { addedIndex, payload } = dropResult;
+        if (addedIndex === null || addedIndex === undefined) {
+            return;
+        }
+        const sourcePath = (payload as { sourcePath?: string[] } | undefined)?.sourcePath;
+        if (!sourcePath) {
+            return;
+        }
+        api.postMessage({
+            type: "reorderControl",
+            sourcePath,
+            targetParentPath: currentPath,
+            targetIndex: addedIndex,
+        });
+    }, [api, currentPath, stateApi.state.designMode]);
+
     return (
         <PropControl.Page
             label={spec.label}
@@ -59,12 +81,24 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
             selected={JSON.stringify(stateApi.state.selectedControlPath) === path}
             designTools={designTools}
         >
-            {spec.controls.map((child, childIndex) =>
-                renderControl(child, childIndex, api, stateApi, {
-                    ...options,
-                    parentPath: currentPath,
-                })
-            )}
+            <DndContainer
+                groupName="control-surface-controls"
+                orientation="vertical"
+                disabled={!stateApi.state.designMode}
+                onDrop={handleDrop}
+                getChildPayload={(index: number) => ({ sourcePath: buildControlPath(currentPath, index) })}
+                dropPlaceholder={{ animationDuration: 150, showOnTop: true, className: "cs-dnd-drop-placeholder" }}
+                className="cs-dnd-container"
+            >
+                {spec.controls.map((child, childIndex) => (
+                    <DndDraggable key={`page-${childIndex}`}>
+                        {renderControl(child, childIndex, api, stateApi, {
+                            ...options,
+                            parentPath: currentPath,
+                        })}
+                    </DndDraggable>
+                ))}
+            </DndContainer>
             <AddControlControl parentPath={currentPath} />
         </PropControl.Page>
     );
@@ -100,6 +134,26 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
     options,
     currentPath,
 }) => {
+    const handleDrop = React.useCallback((dropResult: any) => {
+        if (!stateApi.state.designMode) {
+            return;
+        }
+        const { addedIndex, payload } = dropResult;
+        if (addedIndex === null || addedIndex === undefined) {
+            return;
+        }
+        const sourcePath = (payload as { sourcePath?: string[] } | undefined)?.sourcePath;
+        if (!sourcePath) {
+            return;
+        }
+        api.postMessage({
+            type: "reorderControl",
+            sourcePath,
+            targetParentPath: currentPath,
+            targetIndex: addedIndex,
+        });
+    }, [api, currentPath, stateApi.state.designMode]);
+
     return (
         <PropControl.Page
             label={spec.label}
@@ -107,12 +161,24 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
             selected={false}
             designTools={null}
         >
-            {spec.controls.map((child, childIndex) =>
-                renderControl(child, childIndex, api, stateApi, {
-                    ...options,
-                    parentPath: currentPath,
-                })
-            )}
+            <DndContainer
+                groupName="control-surface-controls"
+                orientation="vertical"
+                disabled={!stateApi.state.designMode}
+                onDrop={handleDrop}
+                getChildPayload={(index: number) => ({ sourcePath: buildControlPath(currentPath, index) })}
+                dropPlaceholder={{ animationDuration: 150, showOnTop: true, className: "cs-dnd-drop-placeholder" }}
+                className="cs-dnd-container"
+            >
+                {spec.controls.map((child, childIndex) => (
+                    <DndDraggable key={`root-${childIndex}`}>
+                        {renderControl(child, childIndex, api, stateApi, {
+                            ...options,
+                            parentPath: currentPath,
+                        })}
+                    </DndDraggable>
+                ))}
+            </DndContainer>
             <AddControlControl parentPath={currentPath} />
         </PropControl.Page>
     );

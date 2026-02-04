@@ -14,10 +14,11 @@ each tab is basically a group, where the group label is rendered as a tab.
 */
 
 import React from "react";
+import { DndContainer, DndDraggable } from "../dnd";
 import { TabPanel, Tab } from "../basic/Tabs";
 import { ControlSurfaceTabsSpec, ControlSurfaceApi } from "../defs";
 import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
-import { buildTabPath } from "../controlPathBase";
+import { buildControlPath, buildTabPath } from "../controlPathBase";
 import { AddControlControl } from "../AddControlControl";
 import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 import { ControlSurfaceStateApi, useControlSurfaceState } from "../hooks/ControlSurfaceState";
@@ -81,6 +82,26 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
         })
         : null;
 
+    const handleDrop = React.useCallback((tabPath: string[], dropResult: any) => {
+        if (!api || !stateApi.state.designMode) {
+            return;
+        }
+        const { addedIndex, payload } = dropResult;
+        if (addedIndex === null || addedIndex === undefined) {
+            return;
+        }
+        const sourcePath = (payload as { sourcePath?: string[] } | undefined)?.sourcePath;
+        if (!sourcePath) {
+            return;
+        }
+        api.postMessage({
+            type: "reorderControl",
+            sourcePath,
+            targetParentPath: tabPath,
+            targetIndex: addedIndex,
+        });
+    }, [api, stateApi.state.designMode]);
+
     return (
         <div className={createPropControlClasses({
             designMode: stateApi.state.designMode,
@@ -105,14 +126,26 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                         summaryTitle={tab.label}
                     >
                         <div className="control-surface-tab-content">
-                            {tab.controls.map((child, childIndex) =>
-                                renderControl(child, childIndex, api, stateApi, {
-                                    parentPath: buildTabPath(parentPath, index),
-                                    // designMode,
-                                    // selectedPath,
-                                    onSelectPath,
-                                })
-                            )}
+                            <DndContainer
+                                groupName="control-surface-controls"
+                                orientation="vertical"
+                                disabled={!stateApi.state.designMode}
+                                onDrop={(dropResult: any) => handleDrop(buildTabPath(parentPath, index), dropResult)}
+                                getChildPayload={(childIndex: number) => ({ sourcePath: buildControlPath(buildTabPath(parentPath, index), childIndex) })}
+                                dropPlaceholder={{ animationDuration: 150, showOnTop: true, className: "cs-dnd-drop-placeholder" }}
+                                className="cs-dnd-container"
+                            >
+                                {tab.controls.map((child, childIndex) => (
+                                    <DndDraggable key={`tab-${index}-${childIndex}`}>
+                                        {renderControl(child, childIndex, api, stateApi, {
+                                            parentPath: buildTabPath(parentPath, index),
+                                            // designMode,
+                                            // selectedPath,
+                                            onSelectPath,
+                                        })}
+                                    </DndDraggable>
+                                ))}
+                            </DndContainer>
                         </div>
                         <AddControlControl parentPath={buildTabPath(parentPath, index)} />
                     </Tab>

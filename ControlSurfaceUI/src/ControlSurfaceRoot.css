@@ -195,3 +195,15 @@ fieldset:disabled legend {
   font-size: 11px;
   color: var(--vscode-descriptionForeground);
 }
+
+.cs-dnd-container {
+  min-height: 8px;
+}
+
+.cs-dnd-drop-placeholder {
+  background: color-mix(in srgb, var(--vscode-focusBorder, var(--accent)) 35%, transparent);
+  border: 1px dashed var(--vscode-focusBorder, var(--accent));
+  border-radius: 4px;
+  min-height: 24px;
+  margin: 4px 0;
+}

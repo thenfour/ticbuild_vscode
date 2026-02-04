@@ -295,6 +295,41 @@ export class WatchStore {
     this.emitter.fire();
   }
 
+  async moveControlTo(sourcePath: string[], targetParentPath: string[], targetIndex: number): Promise<void> {
+    if (!this.devtoolsPath) {
+      this.log('[watchStore] moveControlTo skipped (no workspace root)');
+      return;
+    }
+
+    const existing = await readDevtoolsFile(this.devtoolsPath, this.output);
+    const controlSurfaceRoot = Array.isArray(existing.controlSurfaceRoot)
+      ? existing.controlSurfaceRoot
+      : [];
+
+    const resolvedSource = this.resolveControlByPath(controlSurfaceRoot, sourcePath);
+    if (!resolvedSource) {
+      this.log(`[watchStore] moveControlTo failed: invalid source path ${sourcePath.join('/')}`);
+      return;
+    }
+
+    const targetControls = this.resolveControlsContainer(controlSurfaceRoot, targetParentPath);
+    if (!targetControls) {
+      this.log(`[watchStore] moveControlTo failed: invalid target path ${targetParentPath.join('/')}`);
+      return;
+    }
+
+    const [removed] = resolvedSource.parentControls.splice(resolvedSource.index, 1);
+    const clampedIndex = Math.max(0, Math.min(targetIndex ?? targetControls.length, targetControls.length));
+    const insertIndex = resolvedSource.parentControls === targetControls && resolvedSource.index < clampedIndex
+      ? clampedIndex - 1
+      : clampedIndex;
+    targetControls.splice(insertIndex, 0, removed);
+
+    this.controlSurfaceRoot = controlSurfaceRoot;
+    await this.persistControlSurface(existing, controlSurfaceRoot);
+    this.emitter.fire();
+  }
+
   private resolveControlByPath(
     controlSurfaceRoot: DevtoolsControlNode[],
     path: string[],

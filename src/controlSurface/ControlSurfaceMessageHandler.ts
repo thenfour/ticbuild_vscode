@@ -102,6 +102,16 @@ export class ControlSurfaceMessageHandler {
                 }
                 break;
             }
+            case 'reorderControl': {
+                const payload = message as { sourcePath?: string[]; targetParentPath?: string[]; targetIndex?: number };
+                if (payload.sourcePath && payload.targetParentPath && payload.targetIndex !== undefined) {
+                    this.output.appendLine(`[controlSurface] reorderControl request: source=${JSON.stringify(payload.sourcePath)}, targetParent=${JSON.stringify(payload.targetParentPath)}, targetIndex=${payload.targetIndex}`);
+                    void this.watchStore.moveControlTo(payload.sourcePath, payload.targetParentPath, payload.targetIndex).catch((error) => {
+                        this.output.appendLine(`[controlSurface] reorderControl failed: ${String(error)}`);
+                    });
+                }
+                break;
+            }
             case 'evalExpression': {
                 if (!this.session.isConnected()) {
                     const payload = message as { requestId?: string; expression?: string };

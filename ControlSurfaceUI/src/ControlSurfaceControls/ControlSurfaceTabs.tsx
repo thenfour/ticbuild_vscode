@@ -130,6 +130,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                                 groupName="control-surface-controls"
                                 orientation="vertical"
                                 disabled={!stateApi.state.designMode}
+                                dragHandleSelector=".cs-dnd-handle"
                                 onDrop={(dropResult: any) => handleDrop(buildTabPath(parentPath, index), dropResult)}
                                 getChildPayload={(childIndex: number) => ({ sourcePath: buildControlPath(buildTabPath(parentPath, index), childIndex) })}
                                 dropPlaceholder={{ animationDuration: 150, showOnTop: true, className: "cs-dnd-drop-placeholder" }}

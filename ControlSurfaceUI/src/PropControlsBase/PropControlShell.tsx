@@ -32,7 +32,7 @@ it's not related to design mode.
 - We display design tools (move up/down, delete, settings) in design mode as an overlay.
 
 */
-import { mdiCog, mdiDelete, mdiMenuDown, mdiMenuUp } from "@mdi/js";
+import { mdiCog, mdiDelete, mdiMenuDown, mdiMenuUp, mdiDrag } from "@mdi/js";
 import React from "react";
 import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { IconButton } from "../Buttons/IconButton";
@@ -52,8 +52,8 @@ const emptyStringToNull = (value: React.ReactNode): React.ReactNode => {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 interface PropControlDesignToolButtonProps {
-    tool: "moveUp" | "moveDown" | "delete" | "settings";
-    onClick: () => void;
+    tool: "moveUp" | "moveDown" | "delete" | "settings" | "drag";
+    onClick?: () => void;
 }
 export const PropControlDesignToolButton: React.FC<PropControlDesignToolButtonProps> = ({ tool, onClick }) => {
     let labelPath: string | null = null;
@@ -64,6 +64,9 @@ export const PropControlDesignToolButton: React.FC<PropControlDesignToolButtonPr
         case "moveDown":
             labelPath = mdiMenuDown;
             break;
+        case "drag":
+            labelPath = mdiDrag;
+            break;
         case "delete":
             labelPath = mdiDelete;
             break;
@@ -73,7 +76,11 @@ export const PropControlDesignToolButton: React.FC<PropControlDesignToolButtonPr
     }
 
     return (
-        <IconButton className={`cs-pp-design-tool-button cs-prop-control-design-tool-button-${tool}`} onClick={onClick} iconPath={labelPath} />
+        <IconButton
+            className={`cs-pp-design-tool-button cs-prop-control-design-tool-button-${tool}${tool === "drag" ? " cs-dnd-handle" : ""}`}
+            onClick={onClick}
+            iconPath={labelPath}
+        />
     );
 };
 

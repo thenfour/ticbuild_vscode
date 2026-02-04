@@ -202,3 +202,11 @@
     border-color: var(--vscode-focusBorder);
     box-shadow: 0 0 6px var(--vscode-focusBorder);
 }
+
+.cs-dnd-handle {
+    cursor: grab;
+}
+
+.cs-dnd-handle:active {
+    cursor: grabbing;
+}

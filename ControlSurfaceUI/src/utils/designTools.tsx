@@ -9,6 +9,7 @@ export interface DesignToolsConfig {
     onSettings?: () => void;
     canMoveUp?: boolean;
     canMoveDown?: boolean;
+    includeDragHandle?: boolean;
 }
 
 /**
@@ -21,25 +22,25 @@ export interface DesignToolsConfig {
 export const createDesignTools = (config: DesignToolsConfig): React.ReactNode => {
     const buttons: React.ReactNode[] = [];
 
-    if (config.onMoveUp) {
-        buttons.push(
-            <PropControl.DesignToolButton
-                key="moveUp"
-                tool="moveUp"
-                onClick={config.onMoveUp}
-            />
-        );
-    }
+    // if (config.onMoveUp) {
+    //     buttons.push(
+    //         <PropControl.DesignToolButton
+    //             key="moveUp"
+    //             tool="moveUp"
+    //             onClick={config.onMoveUp}
+    //         />
+    //     );
+    // }
 
-    if (config.onMoveDown) {
-        buttons.push(
-            <PropControl.DesignToolButton
-                key="moveDown"
-                tool="moveDown"
-                onClick={config.onMoveDown}
-            />
-        );
-    }
+    // if (config.onMoveDown) {
+    //     buttons.push(
+    //         <PropControl.DesignToolButton
+    //             key="moveDown"
+    //             tool="moveDown"
+    //             onClick={config.onMoveDown}
+    //         />
+    //     );
+    // }
 
     if (config.onDelete) {
         buttons.push(
@@ -57,6 +58,16 @@ export const createDesignTools = (config: DesignToolsConfig): React.ReactNode =>
                 key="settings"
                 tool="settings"
                 onClick={config.onSettings}
+            />
+        );
+    }
+
+    const includeDragHandle = config.includeDragHandle ?? true;
+    if (includeDragHandle) {
+        buttons.push(
+            <PropControl.DesignToolButton
+                key="drag"
+                tool="drag"
             />
         );
     }

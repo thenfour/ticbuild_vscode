@@ -85,6 +85,7 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
                 groupName="control-surface-controls"
                 orientation="vertical"
                 disabled={!stateApi.state.designMode}
+                dragHandleSelector=".cs-dnd-handle"
                 onDrop={handleDrop}
                 getChildPayload={(index: number) => ({ sourcePath: buildControlPath(currentPath, index) })}
                 dropPlaceholder={{ animationDuration: 150, showOnTop: true, className: "cs-dnd-drop-placeholder" }}
@@ -165,6 +166,7 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
                 groupName="control-surface-controls"
                 orientation="vertical"
                 disabled={!stateApi.state.designMode}
+                dragHandleSelector=".cs-dnd-handle"
                 onDrop={handleDrop}
                 getChildPayload={(index: number) => ({ sourcePath: buildControlPath(currentPath, index) })}
                 dropPlaceholder={{ animationDuration: 150, showOnTop: true, className: "cs-dnd-drop-placeholder" }}

@@ -158,6 +158,7 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
       groupName="control-surface-controls"
       orientation={dndOrientation}
       disabled={!stateApi.state.designMode}
+      dragHandleSelector=".cs-dnd-handle"
       onDrop={handleDrop}
       getChildPayload={(index: number) => ({ sourcePath: buildControlPath(parentPath, index) })}
       dropPlaceholder={{ animationDuration: 150, showOnTop: true, className: "cs-dnd-drop-placeholder" }}

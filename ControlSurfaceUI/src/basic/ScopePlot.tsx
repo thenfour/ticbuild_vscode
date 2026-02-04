@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import "./ScopePlot.css";
 import { DEFAULT_SCOPE_HEIGHT, DEFAULT_SCOPE_WIDTH } from "../scopeConstants";
+import { Button, TextButton } from "../Buttons/PushButton";
+import { IconButton } from "../Buttons/IconButton";
+import { mdiPause, mdiPlay } from "@mdi/js";
+import Icon from "@mdi/react";
 
 export type ScopeRangeMode = "autoUnified" | "autoPerSeries";
 
@@ -17,6 +21,8 @@ export interface ScopePlotProps {
     height?: number;
     rangeMode?: ScopeRangeMode;
     series: ScopeSeriesData[];
+    paused: boolean;
+    setPaused: (paused: boolean) => void;
 }
 
 const DEFAULT_WIDTH = DEFAULT_SCOPE_WIDTH;
@@ -66,10 +72,13 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
     height = DEFAULT_HEIGHT,
     rangeMode = "autoUnified",
     series,
+    paused,
+    setPaused,
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const emptyLoggedRef = useRef(false);
     const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
+    const [hiddenIndices, setHiddenIndices] = React.useState<Set<number>>(() => new Set());
 
     const ranges = useMemo(() => {
         const computed = series.map((item) => ({
@@ -141,6 +150,9 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
         context.strokeRect(0.5, 0.5, width - 1, height - 1);
 
         series.forEach((item, index) => {
+            if (hiddenIndices.has(index)) {
+                return;
+            }
             const values = item.values;
             if (!values || values.length < 2) {
                 return;
@@ -187,7 +199,7 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
         }
 
         context.restore();
-    }, [series, ranges, width, height]);
+    }, [series, ranges, width, height, hiddenIndices]);
 
     const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
@@ -218,6 +230,18 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
         return value.toFixed(3);
     };
 
+    const toggleHidden = (index: number) => {
+        setHiddenIndices((prev) => {
+            const next = new Set(prev);
+            if (next.has(index)) {
+                next.delete(index);
+            } else {
+                next.add(index);
+            }
+            return next;
+        });
+    };
+
     return (
         <div className="scope-plot">
             <canvas
@@ -231,13 +255,26 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
                     const text = hoverIndex != null
                         ? `${item.expression} = ${formatLegendValue(value)}`
                         : item.expression;
+                    const hidden = hiddenIndices.has(index);
                     return (
-                        <div className="scope-plot-legend-row" key={`${item.expression}-${index}`}>
-                            <span className="scope-plot-legend-swatch" style={{ background: resolveCssColor(item.color, "#41a6f6") }} />
+                        <button
+                            type="button"
+                            className={`scope-plot-legend-row ${hidden ? "scope-plot-legend-row--hidden" : ""}`}
+                            key={`${item.expression}-${index}`}
+                            onClick={() => toggleHidden(index)}
+                        >
+                            <span
+                                className={`scope-plot-legend-swatch ${hidden ? "scope-plot-legend-swatch--hidden" : ""}`}
+                                style={{
+                                    borderColor: resolveCssColor(item.color, "#41a6f6"),
+                                    background: hidden ? "transparent" : resolveCssColor(item.color, "#41a6f6"),
+                                }}
+                            />
                             <span className="scope-plot-legend-text">{text}</span>
-                        </div>
+                        </button>
                     );
                 })}
+                <SmallChipIconButton onClick={() => setPaused(!paused)} iconPath={paused ? mdiPlay : mdiPause} />
             </div>
         </div>
     );

@@ -138,6 +138,14 @@ export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
                     rateHz,
                 });
             },
+            setPlotPaused: (expression: string, rateHz: number, paused: boolean) => {
+                rawApi.postMessage({
+                    type: "setPlotPaused",
+                    expression,
+                    rateHz,
+                    paused,
+                });
+            },
             showWarningMessage: async <T extends string>(message: string, ...items: T[]): Promise<T | undefined> => {
                 const requestId = `warning_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 

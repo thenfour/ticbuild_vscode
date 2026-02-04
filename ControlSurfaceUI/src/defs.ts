@@ -202,6 +202,7 @@ export type ControlSurfaceApi = {
     unsubscribeExpression: (expression: string) => void;
     subscribePlotSeries: (expression: string, rateHz: number) => void;
     unsubscribePlotSeries: (expression: string, rateHz: number) => void;
+    setPlotPaused: (expression: string, rateHz: number, paused: boolean) => void;
     listGlobals: () => Promise<string[]>;
 };
 

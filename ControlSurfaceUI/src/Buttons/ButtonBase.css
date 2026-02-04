@@ -23,6 +23,8 @@
     text-decoration: underline;
 }
 
+
+
 /* focus rect */
 .somatic-button-base:focus-visible {
     outline: 1px solid var(--vscode-focusBorder);

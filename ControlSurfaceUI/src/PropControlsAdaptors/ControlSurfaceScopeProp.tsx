@@ -33,6 +33,7 @@ export const ControlSurfaceScopeProp: React.FC<ControlSurfaceScopePropProps> = (
     const designMode = stateApi.state.designMode;
     const selected = JSON.stringify(stateApi.state.selectedControlPath) === JSON.stringify(path);
     const isConnected = stateApi.state.connectionState === "connected";
+    const [paused, setPaused] = React.useState(false);
 
     const resolvedRateHz = Number.isFinite(rateHz) && (rateHz ?? 0) > 0 ? (rateHz as number) : DEFAULT_SCOPE_RATE_HZ;
     const rangeMode = range ?? DEFAULT_SCOPE_RANGE;
@@ -76,6 +77,13 @@ export const ControlSurfaceScopeProp: React.FC<ControlSurfaceScopePropProps> = (
         };
     }, [api, expressionsKey, resolvedRateHz]);
 
+    React.useEffect(() => {
+        if (!api) {
+            return;
+        }
+        expressions.forEach((expression) => api.setPlotPaused(expression, resolvedRateHz, paused));
+    }, [api, expressionsKey, resolvedRateHz, paused]);
+
     const lastLengthsRef = React.useRef<Record<string, number>>({});
 
     React.useEffect(() => {
@@ -109,6 +117,8 @@ export const ControlSurfaceScopeProp: React.FC<ControlSurfaceScopePropProps> = (
             height={height ?? DEFAULT_SCOPE_HEIGHT}
             rangeMode={rangeMode}
             series={resolvedSeries}
+            paused={paused}
+            setPaused={setPaused}
             designMode={designMode}
             isConnected={isConnected}
             selected={selected}

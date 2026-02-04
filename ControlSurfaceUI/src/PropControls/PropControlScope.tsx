@@ -1,6 +1,7 @@
 import React from "react";
 import { PropControl, PropControlSeverity } from "../PropControlsBase/PropControlShell";
 import { ScopePlot, ScopeRangeMode, ScopeSeriesData } from "../basic/ScopePlot";
+import { Button } from "../Buttons/PushButton";
 
 export interface PropControlScopeProps {
     label?: React.ReactNode;
@@ -8,6 +9,8 @@ export interface PropControlScopeProps {
     height?: number;
     rangeMode?: ScopeRangeMode;
     series: ScopeSeriesData[];
+    paused: boolean;
+    setPaused: (paused: boolean) => void;
 
     // PropControl Shell props
     designMode: boolean;
@@ -31,6 +34,8 @@ export const PropControlScope: React.FC<PropControlScopeProps> = ({
     height,
     rangeMode,
     series,
+    paused,
+    setPaused,
     designMode,
     selected,
     disabled = false,
@@ -58,6 +63,8 @@ export const PropControlScope: React.FC<PropControlScopeProps> = ({
                     height={height}
                     rangeMode={rangeMode}
                     series={series}
+                    paused={paused}
+                    setPaused={setPaused}
                 />
             }
             designTools={designTools}

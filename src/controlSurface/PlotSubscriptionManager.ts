@@ -55,6 +55,7 @@ type PlotSeriesState = {
     lastSampleAt: number;
     count: number;
     busy: boolean;
+    paused: boolean;
 };
 
 export class PlotSubscriptionManager implements vscode.Disposable {
@@ -103,6 +104,7 @@ export class PlotSubscriptionManager implements vscode.Disposable {
             lastSampleAt: 0,
             count: 1,
             busy: false,
+            paused: false,
         });
         //this.output.appendLine(`[controlSurface] plot subscribe ${expression} @ ${normalized}Hz`);
     }
@@ -137,6 +139,20 @@ export class PlotSubscriptionManager implements vscode.Disposable {
             });
             this.scheduleUiRefresh();
         }
+    }
+
+    setPaused(expression: string, rateHz: number | undefined, paused: boolean): void {
+        if (!expression) {
+            return;
+        }
+        const normalized = Number.isFinite(rateHz) && (rateHz ?? 0) > 0 ? (rateHz as number) : DEFAULT_RATE_HZ;
+        const key = makeKey(expression, normalized);
+        const existing = this.subscriptions.get(key);
+        if (!existing) {
+            return;
+        }
+        existing.paused = paused;
+        this.output.appendLine(`[controlSurface] plot ${paused ? "paused" : "resumed"} ${expression} @ ${normalized}Hz`);
     }
 
     getSnapshot(): Record<string, PlotSeriesPayload> {
@@ -208,6 +224,9 @@ export class PlotSubscriptionManager implements vscode.Disposable {
 
         for (const state of this.subscriptions.values()) {
             if (state.busy) {
+                continue;
+            }
+            if (state.paused) {
                 continue;
             }
             const intervalMs = Math.max(Math.floor(1000 / state.rateHz), 1);

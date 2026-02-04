@@ -23,6 +23,11 @@
     align-items: center;
     gap: 6px;
     white-space: nowrap;
+    background: transparent;
+    border: none;
+    color: inherit;
+    padding: 0;
+    cursor: pointer;
 }
 
 .scope-plot-legend-swatch {
@@ -31,6 +36,14 @@
     border-radius: 2px;
     border: 1px solid var(--vscode-panel-border);
     flex: 0 0 auto;
+}
+
+.scope-plot-legend-swatch--hidden {
+    background: transparent;
+}
+
+.scope-plot-legend-row--hidden {
+    opacity: 0.6;
 }
 
 .scope-plot-legend-text {

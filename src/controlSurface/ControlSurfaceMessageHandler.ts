@@ -268,6 +268,14 @@ export class ControlSurfaceMessageHandler {
                 this.plotSubscriptionManager.unsubscribe(payload.expression, payload.rateHz);
                 break;
             }
+            case 'setPlotPaused': {
+                const payload = message as { expression?: string; rateHz?: number; paused?: boolean };
+                if (!payload.expression) {
+                    break;
+                }
+                this.plotSubscriptionManager.setPaused(payload.expression, payload.rateHz, !!payload.paused);
+                break;
+            }
             case 'attach':
                 void vscode.commands.executeCommand('tic80.attach');
                 break;

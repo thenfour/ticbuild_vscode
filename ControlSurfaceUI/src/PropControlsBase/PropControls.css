@@ -7,6 +7,7 @@
 .cs-pp-control {
     border: 1px solid transparent;
     box-sizing: border-box; /* include border in width */
+    overflow: visible;
 }
 
 /* any container controls should be able to expand to children. */
@@ -58,6 +59,7 @@ full width available).*/
     box-sizing: border-box; /* include padding in width */
     background-color: transparent;
     position:relative; /* allow floating tool controls */
+    overflow: visible;
 }
 
 .cs-pp-control-shell .cs-pp-control-shell-inner{
@@ -134,8 +136,10 @@ full width available).*/
 .cs-pp-control-page,
 .cs-pp-control-column,
 .cs-pp-control-group,
-.cs-pp-control-tabs {
+.cs-pp-control-tabs,
+.cs-pp-control-row {
     position:relative;
+    overflow: visible;
 }
  
 
@@ -258,4 +262,11 @@ full width available).*/
 
 .cs-dnd-handle:active {
     cursor: grabbing;
+}
+
+/* react-smooth-dnd wrappers can clip absolute-positioned tool buttons */
+.smooth-dnd-container,
+.smooth-dnd-draggable-wrapper,
+.smooth-dnd-draggable {
+    overflow: visible !important;
 }

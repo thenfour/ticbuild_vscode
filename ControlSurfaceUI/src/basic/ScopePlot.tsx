@@ -5,6 +5,7 @@ import { DEFAULT_SCOPE_HEIGHT, DEFAULT_SCOPE_WIDTH } from "../scopeConstants";
 export type ScopeRangeMode = "autoUnified" | "autoPerSeries";
 
 export type ScopeSeriesData = {
+    expression: string;
     values: number[];
     min?: number;
     max?: number;
@@ -68,6 +69,7 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const emptyLoggedRef = useRef(false);
+    const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
 
     const ranges = useMemo(() => {
         const computed = series.map((item) => ({
@@ -187,9 +189,56 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
         context.restore();
     }, [series, ranges, width, height]);
 
+    const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas) {
+            return;
+        }
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const ratio = rect.width > 0 ? x / rect.width : 0;
+        const clamped = Math.min(1, Math.max(0, ratio));
+        const maxLen = Math.max(...series.map((item) => item.values.length), 0);
+        if (maxLen <= 1) {
+            setHoverIndex(null);
+            return;
+        }
+        const index = Math.round(clamped * (maxLen - 1));
+        setHoverIndex(index);
+    };
+
+    const handlePointerLeave = () => {
+        setHoverIndex(null);
+    };
+
+    const formatLegendValue = (value: number | null | undefined) => {
+        if (value == null || !Number.isFinite(value)) {
+            return "—";
+        }
+        return value.toFixed(3);
+    };
+
     return (
         <div className="scope-plot">
-            <canvas ref={canvasRef} />
+            <canvas
+                ref={canvasRef}
+                onPointerMove={handlePointerMove}
+                onPointerLeave={handlePointerLeave}
+            />
+            <div className="scope-plot-legend">
+                {series.map((item, index) => {
+                    const value = hoverIndex != null ? item.values[hoverIndex] : null;
+                    const text = hoverIndex != null
+                        ? `${item.expression} = ${formatLegendValue(value)}`
+                        : item.expression;
+                    return (
+                        <div className="scope-plot-legend-row" key={`${item.expression}-${index}`}>
+                            <span className="scope-plot-legend-swatch" style={{ background: resolveCssColor(item.color, "#41a6f6") }} />
+                            <span className="scope-plot-legend-text">{text}</span>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 };

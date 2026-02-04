@@ -38,3 +38,31 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 );
 
 IconButton.displayName = "IconButton";
+
+export type SmallChipIconButtonProps = ButtonBaseProps & {
+    iconPath?: string;
+    size?: number;
+};
+
+export const SmallChipIconButton = React.forwardRef<HTMLButtonElement, SmallChipIconButtonProps>(
+    ({ className, iconPath, size = 14, ...props }, ref) => {
+        const style: React.CSSProperties = {};
+        if (size != null) {
+            (style as any)["--icon-size"] = `${size}px`;
+            style.width = "var(--icon-size)";
+            style.height = "var(--icon-size)";
+        }
+
+        return (
+            <ButtonBase ref={ref} className={`somatic-icon-button somatic-icon-button--chip ${className ?? ""}`} {...props}>
+                {iconPath && (
+                    <div className="somatic-icon-button__icon">
+                        <Icon path={iconPath} size={size == null ? 1 : undefined} style={style} />
+                    </div>
+                )}
+            </ButtonBase>
+        );
+    },
+);
+
+SmallChipIconButton.displayName = "SmallChipIconButton";

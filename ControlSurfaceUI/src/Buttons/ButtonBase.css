@@ -126,6 +126,19 @@
     line-height: 0;
 }
 
+.somatic-button-base.somatic-icon-button--chip {
+    padding: 2px 4px;
+    border-radius: 999px;
+    border-color: var(--vscode-panel-border);
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    font-size: 11px;
+}
+
+.somatic-button-base.somatic-icon-button--chip:hover:not(.somatic-button-base--disabled) {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
 .somatic-checkbox-button {
     display: inline-flex;
     align-items: center;

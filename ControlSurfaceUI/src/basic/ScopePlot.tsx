@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import "./ScopePlot.css";
 import { DEFAULT_SCOPE_HEIGHT, DEFAULT_SCOPE_WIDTH } from "../scopeConstants";
-import { Button, TextButton } from "../Buttons/PushButton";
-import { IconButton } from "../Buttons/IconButton";
+import { SmallChipIconButton } from "../Buttons/IconButton";
 import { mdiPause, mdiPlay } from "@mdi/js";
-import Icon from "@mdi/react";
 
 export type ScopeRangeMode = "autoUnified" | "autoPerSeries";
 
@@ -274,7 +272,7 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
                         </button>
                     );
                 })}
-                <SmallChipIconButton onClick={() => setPaused(!paused)} iconPath={paused ? mdiPlay : mdiPause} />
+                <SmallChipIconButton onClick={() => setPaused(!paused)} iconPath={paused ? mdiPlay : mdiPause} style={{ width: 40 }} />
             </div>
         </div>
     );

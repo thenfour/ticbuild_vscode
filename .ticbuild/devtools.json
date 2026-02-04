@@ -74,12 +74,13 @@
           "label": "Scope",
           "series": [
             {
-              "expression": "x"
+              "expression": "s"
             },
             {
-              "expression": "y"
+              "expression": "q"
             }
-          ]
+          ],
+          "rateHz": 1
         },
         {
           "type": "xy",

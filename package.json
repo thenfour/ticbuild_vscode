@@ -1,8 +1,8 @@
 {
   "name": "ticbuild-vs-code",
-  "description": "TIC-80 + ticbuild support: syntax highlighting and remote watches for VS Code",
-  "displayName": "TIC-80 ticbuild support",
-  "version": "0.0.3",
+  "description": "TIC-80 + ticbuild support: syntax highlighting and control surface for VS Code",
+  "displayName": "TIC-80 ticbuild platform",
+  "version": "0.0.4",
   "main": "./out/extension.js",
   "author": {
     "name": "Carl Corcoran"
@@ -26,9 +26,12 @@
     "TIC-80",
     "TIC80",
     "ticbuild",
+    "debugger",
+    "control surface",
     "fantasy console",
     "Lua",
     "watch",
+    "monitor",
     "remoting",
     "TIC"
   ],

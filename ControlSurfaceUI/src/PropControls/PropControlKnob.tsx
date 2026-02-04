@@ -11,6 +11,7 @@ export interface PropControlKnobProps {
     max?: number;
     step?: number;
     size?: ControlSurfaceKnobSizeSpec;
+    centerValue?: number;
 
     // PropControl Shell props
     designMode: boolean;
@@ -36,6 +37,7 @@ export const PropControlKnob: React.FC<PropControlKnobProps> = ({
     max = 1,
     step = 0.01,
     size = "medium",
+    centerValue,
     designMode,
     selected,
     disabled = false,
@@ -67,6 +69,7 @@ export const PropControlKnob: React.FC<PropControlKnobProps> = ({
                     min={min}
                     max={max}
                     step={step}
+                    centerValue={centerValue}
                     disabled={disabled || designMode}
                 />
             }

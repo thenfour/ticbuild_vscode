@@ -1,13 +1,12 @@
-# VS Code support for TIC-80 and ticbuild
+# TIC-80 ticbuild platform extensions for VS Code
 
 This is a VS Code extension adding support for
-[ticbuild](https://github.com/thenfour/ticbuild). [ticbuild](https://github.com/thenfour/ticbuild) is a build system for
-[TIC-80](https://tic80.com/).
+[ticbuild](https://github.com/thenfour/ticbuild). [ticbuild](https://github.com/thenfour/ticbuild) is a build system for [TIC-80](https://tic80.com/).
 
 This extension:
 
+- Adds monitoring and remote control of TIC-80 for debugging and development.
 - Adds syntax highlighting to Lua preprocessing done by ticbuild
-- Adds remote control and watch support to ticbuild's TIC-80 instances.
 
 ## Links
 

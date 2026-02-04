@@ -12,7 +12,7 @@ popd
 
 call code --uninstall-extension tridentloop.ticbuild-vs-code
 call vsce package || exit /b %errorlevel%
-call code --install-extension ./ticbuild-vs-code-0.0.3.vsix || exit /b %errorlevel%
+call code --install-extension ./ticbuild-vs-code-0.0.4.vsix || exit /b %errorlevel%
 
 popd
 

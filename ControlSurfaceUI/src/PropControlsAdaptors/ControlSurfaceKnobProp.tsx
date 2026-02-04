@@ -54,6 +54,7 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
             min={min}
             max={max}
             step={step}
+            centerValue={min}
             size={size}
             designMode={designMode}
             isConnected={isConnected}

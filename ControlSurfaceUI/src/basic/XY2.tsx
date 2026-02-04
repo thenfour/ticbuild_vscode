@@ -1,4 +1,4 @@
-import { clamp, clamp01 } from "../utils";
+import { clampRange, clamp01 } from "../utils";
 import "./XY2.css";
 import React, { PointerEvent, useCallback, useMemo, useRef, useState } from "react";
 
@@ -34,12 +34,12 @@ export interface XY2Props {
 }
 
 const snapValue = (value: number, min: number, max: number, step?: number): number => {
-    const clamped = clamp(value, min, max);
+    const clamped = clampRange(value, min, max);
     if (!step || step <= 0) {
         return clamped;
     }
     const snapped = Math.round((clamped - min) / step) * step + min;
-    return clamp(snapped, min, max);
+    return clampRange(snapped, min, max);
 };
 
 export const XY2: React.FC<XY2Props> = ({

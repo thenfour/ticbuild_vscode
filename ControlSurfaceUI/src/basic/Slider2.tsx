@@ -28,7 +28,7 @@
 // width: 100% to fill container
 // height: fixed
 
-import { clamp, clamp01 } from "../utils";
+import { clampRange, clamp01 } from "../utils";
 import "./Slider2.css";
 import React, {
     useCallback,
@@ -162,12 +162,12 @@ export const Slider2: React.FC<Slider2Props> = ({
                 : minMaxFixed.min + clamped * (minMaxFixed.max - minMaxFixed.min);
 
             if (!step || step <= 0) {
-                return clamp(raw, minMaxFixed.min, minMaxFixed.max);
+                return clampRange(raw, minMaxFixed.min, minMaxFixed.max);
             }
 
             const snapped =
                 Math.round((raw - minMaxFixed.min) / step) * step + minMaxFixed.min;
-            return clamp(snapped, minMaxFixed.min, minMaxFixed.max);
+            return clampRange(snapped, minMaxFixed.min, minMaxFixed.max);
         },
         [fromUnit, minMaxFixed, step],
     );

@@ -54,6 +54,12 @@ export function invLerp(a: number, b: number, v: number): number {
 
 export const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
 
+export const clampRange = (v: number, min: number, max: number) => {
+    const low = Math.min(min, max);
+    const high = Math.max(min, max);
+    return clamp(v, low, high);
+};
+
 export const clamp01 = (v: number) => clamp(v, 0, 1);
 
 

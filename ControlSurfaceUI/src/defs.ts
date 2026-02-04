@@ -93,6 +93,7 @@ export type ControlSurfaceAxisSpec = {
     max?: number;
     step?: number;
     center?: number;
+    size?: number;
 };
 
 export type ControlSurfaceXYSpec = {

@@ -161,6 +161,9 @@ export const XYPropertiesPanel: React.FC<{ node: ControlSurfaceXYSpec; onChange:
             <FieldRow label="Center">
                 <NumberInput value={node.x.center} onChange={(center) => onChange({ ...node, x: { ...node.x, center } })} />
             </FieldRow>
+            <FieldRow label="Width">
+                <NumberInput value={node.x.size} onChange={(size) => onChange({ ...node, x: { ...node.x, size } })} />
+            </FieldRow>
         </fieldset>
         <fieldset>
             <legend>Y Axis</legend>
@@ -184,6 +187,9 @@ export const XYPropertiesPanel: React.FC<{ node: ControlSurfaceXYSpec; onChange:
             </FieldRow>
             <FieldRow label="Center">
                 <NumberInput value={node.y.center} onChange={(center) => onChange({ ...node, y: { ...node.y, center } })} />
+            </FieldRow>
+            <FieldRow label="Height">
+                <NumberInput value={node.y.size} onChange={(size) => onChange({ ...node, y: { ...node.y, size } })} />
             </FieldRow>
         </fieldset>
     </div>

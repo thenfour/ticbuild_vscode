@@ -46,6 +46,7 @@ export type DevtoolsControlNode =
             max?: number;
             step?: number;
             center?: number;
+            size?: number;
             [key: string]: unknown;
         };
         y: {
@@ -54,6 +55,7 @@ export type DevtoolsControlNode =
             max?: number;
             step?: number;
             center?: number;
+            size?: number;
             [key: string]: unknown;
         };
         [key: string]: unknown;
@@ -240,6 +242,7 @@ const devtoolsSchema = {
                                 max: { type: 'number' },
                                 step: { type: 'number' },
                                 center: { type: 'number' },
+                                size: { type: 'number' },
                             },
                             required: ['symbol'],
                             additionalProperties: true,
@@ -252,6 +255,7 @@ const devtoolsSchema = {
                                 max: { type: 'number' },
                                 step: { type: 'number' },
                                 center: { type: 'number' },
+                                size: { type: 'number' },
                             },
                             required: ['symbol'],
                             additionalProperties: true,

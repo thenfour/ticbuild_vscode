@@ -21,6 +21,9 @@ export interface XY2Props {
     defaultX?: number;
     defaultY?: number;
 
+    sizeX?: number;
+    sizeY?: number;
+
     label?: string;
 
     formatValueX?: (value: number) => string;
@@ -31,6 +34,13 @@ export interface XY2Props {
     style?: React.CSSProperties;
 
     showValue?: boolean;
+
+    /** Approximate pixels of drag for a full sweep from min to max. */
+    dragSensitivity?: number;
+    /** Scale applied to drag delta when Shift is held. */
+    fineTuneScale?: number;
+    /** Scale applied to drag delta normally. */
+    normalDeltaScale?: number;
 }
 
 const snapValue = (value: number, min: number, max: number, step?: number): number => {
@@ -56,6 +66,8 @@ export const XY2: React.FC<XY2Props> = ({
     centerY,
     defaultX,
     defaultY,
+    sizeX,
+    sizeY,
     label,
     formatValueX,
     formatValueY,
@@ -63,9 +75,19 @@ export const XY2: React.FC<XY2Props> = ({
     className,
     style,
     showValue = true,
+    dragSensitivity = 150,
+    fineTuneScale = 0.025,
+    normalDeltaScale = 0.4,
 }) => {
     const surfaceRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const dragStateRef = useRef<{
+        startX: number;
+        startY: number;
+        startUnitX: number;
+        startUnitY: number;
+        lastShiftKey: boolean;
+    } | null>(null);
 
     const minMaxX = useMemo(() => {
         if (maxX === minX) {
@@ -169,14 +191,61 @@ export const XY2: React.FC<XY2Props> = ({
 
         event.currentTarget.setPointerCapture(event.pointerId);
         event.preventDefault();
-        setIsDragging(true);
+
         updateFromEvent(event);
+
+        const rect = surfaceRef.current?.getBoundingClientRect();
+        if (!rect) {
+            return;
+        }
+
+        const rawX = (event.clientX - rect.left) / rect.width;
+        const rawY = 1 - (event.clientY - rect.top) / rect.height;
+
+        dragStateRef.current = {
+            startX: event.clientX,
+            startY: event.clientY,
+            startUnitX: clamp01(rawX),
+            startUnitY: clamp01(rawY),
+            lastShiftKey: event.shiftKey,
+        };
+        setIsDragging(true);
     }, [disabled, defaultXValue, defaultYValue, onChange, updateFromEvent]);
 
     const handlePointerMove = useCallback((event: PointerEvent<HTMLDivElement>) => {
-        if (!isDragging || disabled) return;
-        updateFromEvent(event);
-    }, [disabled, isDragging, updateFromEvent]);
+        if (!isDragging || disabled || !dragStateRef.current) return;
+
+        const state = dragStateRef.current;
+        const dx = event.clientX - state.startX;
+        const dy = event.clientY - state.startY;
+
+        if (state.lastShiftKey !== event.shiftKey) {
+            const prevScale = state.lastShiftKey ? fineTuneScale : normalDeltaScale;
+            const prevDeltaUnitX = (dx / dragSensitivity) * prevScale;
+            const prevDeltaUnitY = (-dy / dragSensitivity) * prevScale;
+
+            const unitAtTransitionX = clamp01(state.startUnitX + prevDeltaUnitX);
+            const unitAtTransitionY = clamp01(state.startUnitY + prevDeltaUnitY);
+
+            state.startX = event.clientX;
+            state.startY = event.clientY;
+            state.startUnitX = unitAtTransitionX;
+            state.startUnitY = unitAtTransitionY;
+            state.lastShiftKey = event.shiftKey;
+
+            onChange(externalFromUnitX(unitAtTransitionX), externalFromUnitY(unitAtTransitionY));
+            return;
+        }
+
+        const scale = event.shiftKey ? fineTuneScale : normalDeltaScale;
+        const deltaUnitX = (dx / dragSensitivity) * scale;
+        const deltaUnitY = (-dy / dragSensitivity) * scale;
+
+        const nextUnitX = clamp01(state.startUnitX + deltaUnitX);
+        const nextUnitY = clamp01(state.startUnitY + deltaUnitY);
+
+        onChange(externalFromUnitX(nextUnitX), externalFromUnitY(nextUnitY));
+    }, [disabled, isDragging, dragSensitivity, fineTuneScale, normalDeltaScale, externalFromUnitX, externalFromUnitY, onChange]);
 
     const handlePointerUp = useCallback((event: PointerEvent<HTMLDivElement>) => {
         if (!isDragging) return;
@@ -185,13 +254,20 @@ export const XY2: React.FC<XY2Props> = ({
         } catch {
             // ignore
         }
+        dragStateRef.current = null;
         setIsDragging(false);
     }, [isDragging]);
 
     const ariaLabel = label ?? "XY";
 
+    const sizeStyle: React.CSSProperties = {
+        ...(style ?? {}),
+        ...(sizeX != null ? ({ ["--somatic-xy-width" as any]: `${sizeX}px` } as React.CSSProperties) : {}),
+        ...(sizeY != null ? ({ ["--somatic-xy-height" as any]: `${sizeY}px` } as React.CSSProperties) : {}),
+    };
+
     return (
-        <div className={`somatic-xy ${className ?? ""}`} style={style}>
+        <div className={`somatic-xy ${className ?? ""}`} style={sizeStyle}>
             <div
                 ref={surfaceRef}
                 className="somatic-xy-surface"

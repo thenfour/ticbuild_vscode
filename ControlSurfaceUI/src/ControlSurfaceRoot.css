@@ -129,7 +129,7 @@ fieldset:disabled legend {
 }
 
 .control-surface-app {
---control-surface-properties-panel-height: 200px;
+--control-surface-properties-panel-height: 400px;
   padding-bottom: calc(var(--control-surface-properties-panel-height) + 16px);
 }
 

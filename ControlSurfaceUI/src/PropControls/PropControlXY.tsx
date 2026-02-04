@@ -12,11 +12,13 @@ export interface PropControlXYProps {
     maxX?: number;
     stepX?: number;
     centerX?: number;
+    sizeX?: number;
 
     minY?: number;
     maxY?: number;
     stepY?: number;
     centerY?: number;
+    sizeY?: number;
 
     // PropControl Shell props
     designMode: boolean;
@@ -43,10 +45,12 @@ export const PropControlXY: React.FC<PropControlXYProps> = ({
     maxX = 100,
     stepX = 1,
     centerX,
+    sizeX,
     minY = 0,
     maxY = 100,
     stepY = 1,
     centerY,
+    sizeY,
     designMode,
     selected,
     disabled = false,
@@ -78,11 +82,13 @@ export const PropControlXY: React.FC<PropControlXYProps> = ({
                     stepX={stepX}
                     centerX={centerX}
                     defaultX={centerX}
+                    sizeX={sizeX}
                     minY={minY}
                     maxY={maxY}
                     stepY={stepY}
                     centerY={centerY}
                     defaultY={centerY}
+                    sizeY={sizeY}
                     disabled={disabled || designMode}
                 />
             }

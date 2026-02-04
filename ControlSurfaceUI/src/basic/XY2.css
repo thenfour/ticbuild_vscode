@@ -5,15 +5,17 @@
     flex-direction: column;
     gap: 6px;
     user-select: none;
+    --somatic-xy-height: 136px;
+    --somatic-xy-width: 240px;
 }
 
 .somatic-xy-surface {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: var(--somatic-xy-width);
+    height: var(--somatic-xy-height);
     background: var(--vscode-input-background);
     border: 1px solid var(--vscode-input-border);
-    border-radius: 6px;
+    border-radius: 2.5px;
     box-sizing: border-box;
     cursor: crosshair;
 }

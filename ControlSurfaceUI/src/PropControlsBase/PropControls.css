@@ -43,13 +43,13 @@ full width available).*/
     flex-direction: column;
     gap: 12px;
     width: auto;
+    position:relative;
 }
 .pp-root .cs-pp-control-row .cs-pp-control-row-content {
     display:flex;
     flex-direction: row;
     gap: 8px;
     width: auto;
-    position:relative;
 }
 
 .cs-pp-control-shell {

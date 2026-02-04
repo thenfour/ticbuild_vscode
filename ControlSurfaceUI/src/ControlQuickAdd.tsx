@@ -19,6 +19,9 @@ export const ControlQuickAdd: React.FC<ControlQuickAddProps> = ({
   const api = useControlSurfaceApi();
   const [selectedType, setSelectedType] = React.useState<string>("");
   const [quickAddData, setQuickAddData] = React.useState<Record<string, any>>({});
+  const handleQuickAddSubmit = React.useCallback((data: Record<string, any>) => {
+    setQuickAddData(data);
+  }, []);
 
   const byCategory = ControlRegistry.getByCategory();
   const selectedEntry = selectedType ? ControlRegistry.getByType(selectedType) : undefined;
@@ -113,9 +116,7 @@ export const ControlQuickAdd: React.FC<ControlQuickAddProps> = ({
       {QuickAddComponent && (
         <div style={{ marginBottom: "12px" }}>
           <QuickAddComponent
-            onSubmit={(data) => {
-              setQuickAddData(data);
-            }}
+            onSubmit={handleQuickAddSubmit}
             onCancel={onCancel}
           />
         </div>

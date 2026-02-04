@@ -177,7 +177,7 @@ fieldset:disabled legend {
 }
 
 .control-surface-properties-input {
-  width: 100%;
+  /* width: 100%; */
   padding: 4px 8px;
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);

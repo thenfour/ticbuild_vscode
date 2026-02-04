@@ -38,7 +38,7 @@ export const AddControlControl: React.FC<AddControlControlProps> = ({ parentPath
 
   return (
     <div className="control-surface-interactive" style={{ padding: "8px" }}>
-      <TextButton onClick={() => setIsAdding(true)} style={{ width: "100%" }}>
+      <TextButton onClick={() => setIsAdding(true)}>
         + Add Control {parentPath}
       </TextButton>
     </div>

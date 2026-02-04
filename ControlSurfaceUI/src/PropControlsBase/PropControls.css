@@ -1,14 +1,19 @@
 .pp-root {
     /* establish variables at controls root */
     --cs-pp-control-label-width: 150px;
-    --cs-pp-control-column-width: 400px;
+    --cs-pp-control-column-width: calc(min(90vw, 500px));
+}
+
+.cs-pp-control {
+    border: 1px solid transparent;
+    box-sizing: border-box; /* include border in width */
 }
 
 .pp-root .cs-pp-control-column {
     display:flex;
     flex-direction: column;
     gap: 12px;
-    width: var(--cs-pp-control-column-width);
+    width: calc(min(100%, var(--cs-pp-control-column-width)));
 }
 
 .pp-root .cs-pp-control-column .cs-pp-control-column-content {
@@ -32,7 +37,6 @@
     display: flex;
     padding:3px; /* we will use the background as a fake "border"; padding indicates the border thickness */
     box-sizing: border-box; /* include padding in width */
-    border: 1px solid transparent; /* var(--vscode-panel-border); */
     background-color: transparent;
     position:relative; /* allow floating tool controls */
 }
@@ -44,9 +48,10 @@
     background-color: var(--vscode-editor-background); /* cancel out the outer background to create border effect */
 }
 
-.cs-pp-control-shell:hover {
+.cs-pp-control:hover {
     /* border-color: var(--vscode-focusBorder); */
-    border-color: var(--vscode-panel-border);
+    /* border-color: var(--vscode-panel-border); */
+    /* border-color: #f0f; */
     
 }
 
@@ -153,23 +158,27 @@
 .cs-pp-control:hover:not(:has(.cs-pp-control:hover))
  {
   background-color: var(--vscode-settings-rowHoverBackground);
+      border-color: var(--vscode-panel-border);
+
 }
 
 /* 2) but don't cross a nested .cs-pp-control-column boundary */
 .cs-pp-control:hover:not(:has(.cs-pp-control:hover))
   .cs-pp-control{
     background-color: transparent;
+        border-color: transparent;
+
 }
 
 
 .cs-pp-control-divider {
-    margin: 12px 0;
+    padding: 12px 0; /* makes sure this control is big enough to make it easy to hovero ver it.*/
     position: relative;
 }
 
 .cs-pp-control-divider .cs-pp-control-divider-line {
     border-top: 1px solid var(--vscode-panel-border);
-    margin: 12px 0;
+    /* margin: 12px 0; */
 }
 
 .cs-pp-control.cs-pp-control-group {

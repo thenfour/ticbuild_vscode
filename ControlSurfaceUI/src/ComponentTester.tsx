@@ -1,15 +1,13 @@
 import React from "react";
+import { Divider } from "./basic/Divider";
+import { Dropdown } from "./basic/Dropdown";
+import { EnumButtons } from "./basic/EnumButtons";
 import { KeyValueTable } from "./basic/KeyValueTable";
 import { Knob } from "./basic/Knob2";
 import { Tab, TabPanel } from "./basic/Tabs";
 import { ButtonGroup } from "./Buttons/ButtonGroup";
 import { CheckboxButton } from "./Buttons/CheckboxButton";
 import { Button } from "./Buttons/PushButton";
-import { IntegerUpDown, NumericUpDown } from "./basic/NumericUpDown";
-import { EnumButtons } from "./basic/EnumButtons";
-import { Dropdown } from "./basic/Dropdown";
-import { Divider } from "./basic/Divider";
-import { ControlSurfaceGroup, ControlSurfaceGroupBase } from "./ControlSurfaceControls/ControlSurfaceGroup";
 import { PropControlTextBoxDemo } from "./PropControlsBase/PropControlTextBox";
 
 
@@ -75,26 +73,6 @@ export const ComponentTester: React.FC = () => {
                             centerValue={0.5}
                             label="Volume"
                         />
-                    </section>
-
-                    <Divider />
-
-                    <section>
-                        <ControlSurfaceGroupBase label="Up/Down Controls" designMode={true} orientation="vertical" selected={false}>
-                            <IntegerUpDown
-                                min={3}
-                                max={10}
-                                value={integerValue}
-                                onChange={setIntegerValue}
-                            />
-                            <NumericUpDown
-                                min={3}
-                                max={10}
-                                step={0.25}
-                                value={numericValue}
-                                onChange={setNumericValue}
-                            />
-                        </ControlSurfaceGroupBase>
                     </section>
 
                     <Divider />

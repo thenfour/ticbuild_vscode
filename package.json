@@ -114,22 +114,6 @@
       {
         "command": "tic80.detach",
         "title": "TIC-80: Detach"
-      },
-      {
-        "command": "tic80.addWatch",
-        "title": "TIC-80: Add Watch..."
-      },
-      {
-        "command": "tic80.removeWatch",
-        "title": "TIC-80: Remove Watch"
-      },
-      {
-        "command": "tic80.clearWatches",
-        "title": "TIC-80: Clear Watches"
-      },
-      {
-        "command": "tic80.copyWatchValue",
-        "title": "TIC-80: Copy Watch Value"
       }
     ],
     "grammars": [
@@ -156,11 +140,6 @@
     "views": {
       "tic80": [
         {
-          "id": "tic80Watches",
-          "name": "TIC-80 Watches",
-          "icon": "resources/desktop-classic.svg"
-        },
-        {
           "id": "tic80ControlSurfaceActivity",
           "name": "Control Surface",
           "type": "webview",
@@ -184,54 +163,6 @@
         },
         {
           "command": "tic80.detach"
-        },
-        {
-          "command": "tic80.addWatch"
-        },
-        {
-          "command": "tic80.clearWatches"
-        }
-      ],
-      "view/item/context": [
-        {
-          "command": "tic80.attach",
-          "when": "view == tic80Watches && viewItem == tic80SessionNode",
-          "group": "inline"
-        },
-        {
-          "command": "tic80.detach",
-          "when": "view == tic80Watches && viewItem == tic80SessionNode && tic80.remote.connected",
-          "group": "inline"
-        },
-        {
-          "command": "tic80.addWatch",
-          "when": "view == tic80Watches && viewItem == tic80WatchesGroup",
-          "group": "inline"
-        },
-        {
-          "command": "tic80.clearWatches",
-          "when": "view == tic80Watches && viewItem == tic80WatchesGroup",
-          "group": "inline"
-        },
-        {
-          "command": "tic80.addPanel",
-          "when": "view == tic80Watches && viewItem == tic80ControlSurfacesGroup",
-          "group": "inline"
-        },
-        {
-          "command": "tic80.removePanel",
-          "when": "view == tic80Watches && viewItem == tic80ControlSurfacePanelItem",
-          "group": "inline"
-        },
-        {
-          "command": "tic80.removeWatch",
-          "when": "view == tic80Watches && viewItem == tic80WatchItem",
-          "group": "inline"
-        },
-        {
-          "command": "tic80.copyWatchValue",
-          "when": "view == tic80Watches && viewItem == tic80WatchItem",
-          "group": "inline"
         }
       ]
     }

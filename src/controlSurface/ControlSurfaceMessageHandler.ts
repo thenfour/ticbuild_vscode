@@ -102,15 +102,6 @@ export class ControlSurfaceMessageHandler {
                 }
                 break;
             }
-            case 'addWatch':
-                void vscode.commands.executeCommand('tic80.addWatch');
-                break;
-            case 'removeWatch':
-                void vscode.commands.executeCommand('tic80.removeWatch');
-                break;
-            case 'clearWatches':
-                void vscode.commands.executeCommand('tic80.clearWatches');
-                break;
             case 'evalExpression': {
                 if (!this.session.isConnected()) {
                     const payload = message as { requestId?: string; expression?: string };

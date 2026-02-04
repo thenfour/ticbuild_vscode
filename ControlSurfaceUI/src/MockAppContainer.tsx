@@ -3,7 +3,7 @@ import React from "react";
 import {
   ControlSurfaceApp,
 } from "./ControlSurfaceApp";
-import { ControlSurfaceDiscoveredInstance, ControlSurfaceGroupSpec, ControlSurfaceNode } from "./defs";
+import { ControlSurfaceDiscoveredInstance, ControlSurfaceNode } from "./defs";
 import { VsCodeApiProvider } from "./hooks/VsCodeApiContext";
 import { ControlSurfaceStateProvider } from "./hooks/ControlSurfaceState";
 import { useLocalStorage } from "./hooks/useLocalStorage";
@@ -14,58 +14,6 @@ import { Button } from "./Buttons/PushButton";
 import { Divider } from "./basic/Divider";
 import { ComponentTester } from "./ComponentTester";
 
-type MockValueKind = "auto" | "string" | "number" | "boolean";
-
-type MockWatch = {
-  id: string;
-  label: string;
-  kind: MockValueKind;
-  value: string;
-  autoValue?: number;
-};
-
-// const createMockWatch = (index: number, kind: MockValueKind): MockWatch => {
-//   const id = `w${index}`;
-//   const label = `watch${index}`;
-//   switch (kind) {
-//     case "auto":
-//       return {
-//         id,
-//         label,
-//         kind,
-//         autoValue: 1000,
-//         value: "1000",
-//       };
-//     case "string":
-//       return {
-//         id,
-//         label,
-//         kind,
-//         value: "mock-string",
-//       };
-//     case "number":
-//       return {
-//         id,
-//         label,
-//         kind,
-//         value: "42",
-//       };
-//     case "boolean":
-//       return {
-//         id,
-//         label,
-//         kind,
-//         value: "true",
-//       };
-//     default:
-//       return {
-//         id,
-//         label,
-//         kind,
-//         value: "",
-//       };
-//   }
-// };
 
 // create 5 mock instances for testing
 const mockInstances: ControlSurfaceDiscoveredInstance[] = [
@@ -98,7 +46,6 @@ const mockInstances: ControlSurfaceDiscoveredInstance[] = [
 
 export function MockAppContainer(): JSX.Element {
   const [connected, setConnected] = React.useState(false);
-  const [watches, setWatches] = React.useState<MockWatch[]>([]);
   const [expressionResults, setExpressionResults] = React.useState<Record<string, { value?: string; error?: string }>>({});
   const expressionSubscriptionsRef = React.useRef(new Map<string, number>());
   const [controlSurfaceRoot, setControlSurfaceRoot] = useLocalStorage<ControlSurfaceNode[]>(
@@ -106,8 +53,6 @@ export function MockAppContainer(): JSX.Element {
     []
   );
   const [selectedPageId, setSelectedPageId] = React.useState("root");
-  const [nextId, setNextId] = React.useState(1);
-  const [addKind, setAddKind] = React.useState<MockValueKind>("auto");
   const [clipboardNotice, setClipboardNotice] = React.useState<string>("");
   const [discoveredInstances, setDiscoveredInstances] = React.useState<ControlSurfaceDiscoveredInstance[]>([]);
 
@@ -345,53 +290,15 @@ export function MockAppContainer(): JSX.Element {
     }
   }, []);
 
-  React.useEffect(() => {
-    const interval = window.setInterval(() => {
-      setWatches((current) =>
-        current.map((watch) => {
-          if (watch.kind !== "auto") {
-            return watch;
-          }
-          const nextValue = (watch.autoValue ?? 0) + 1;
-          return {
-            ...watch,
-            autoValue: nextValue,
-            value: String(nextValue),
-          };
-        }),
-      );
-    }, 1000);
-    return () => window.clearInterval(interval);
-  }, []);
-
   const dataSource = useMockControlSurfaceDataSource({
     connected,
-    watches,
+    watches: [],
     controlSurfaceRoot,
     expressionResults,
     discoveredInstances,
     selectedPageId,
     symbolValues,
   });
-
-  // const api = React.useMemo<{ postMessage: (message: unknown) => void }>(
-  //   () => ({
-  //     postMessage: (message: unknown) => {
-  //       console.log("[mock] postMessage (via api object)", message);
-  //     },
-  //   }),
-  //   [],
-  // );
-
-  // const handleAddWatch = () => {
-  //   const id = nextId;
-  //   setWatches((current) => [...current, createMockWatch(id, addKind)]);
-  //   setNextId((current) => current + 1);
-  // };
-
-  // const handleRemoveWatch = () => {
-  //   setWatches((current) => current.slice(0, -1));
-  // };
 
   const handleCopyControlSurfaceRoot = async () => {
     setClipboardNotice("");

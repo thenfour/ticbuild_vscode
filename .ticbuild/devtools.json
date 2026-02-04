@@ -113,6 +113,11 @@
                   "type": "toggle",
                   "label": "Toggle",
                   "symbol": "enabled"
+                },
+                {
+                  "type": "string",
+                  "label": "A string",
+                  "symbol": "str"
                 }
               ]
             },

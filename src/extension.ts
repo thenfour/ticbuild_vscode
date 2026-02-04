@@ -2,7 +2,6 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 
 import { RemoteSessionManager } from './session/RemoteSessionManager';
-import { WatchNode, ControlSurfaceNode } from './views/Tic80WatchesProvider';
 import { WatchSystem } from './watches/WatchSystem';
 
 import {
@@ -140,7 +139,6 @@ export function activate(context: vscode.ExtensionContext): void {
     session,
     workspaceRoot,
     output,
-    controlSurfaceRegistry,
     scheduleUiRefresh,
   );
 
@@ -249,9 +247,6 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   context.subscriptions.push(
-    vscode.window.registerTreeDataProvider('tic80Watches', watchSystem.provider),
-  );
-  context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       'tic80ControlSurfaceActivity',
       activityProvider,
@@ -306,7 +301,6 @@ export function activate(context: vscode.ExtensionContext): void {
     refreshTimer = setInterval(() => {
       if (refreshPending) {
         refreshPending = false;
-        watchSystem.provider.refresh();
         updateControlSurfaceViews();
       }
     }, intervalMs);
@@ -476,7 +470,6 @@ export function activate(context: vscode.ExtensionContext): void {
       'tic80.reloadDevtools',
       async () => {
         await watchSystem.store.reloadFromDisk();
-        watchSystem.provider.refresh();
         updateControlSurfaceViews();
         void vscode.window.showInformationMessage(
           'Reloaded devtools.json.');
@@ -559,27 +552,24 @@ export function activate(context: vscode.ExtensionContext): void {
 
     vscode.commands.registerCommand(
       'tic80.removePanel',
-      async (node?: ControlSurfaceNode) => {
+      async () => {
         const panels = controlSurfaceRegistry.getPanels();
         if (panels.length === 0) {
           void vscode.window.showInformationMessage('No control surface panels to remove.');
           return;
         }
-        let targetId = node?.kind === 'panel' ? node.viewId : undefined;
-        if (!targetId) {
-          const panelItems: vscode.QuickPickItem[] = panels.map((panel) => ({
-            label: panel.title,
-            description: panel.id,
-          }));
-          const pick = await vscode.window.showQuickPick(
-            panelItems,
-            { title: 'Remove Control Surface Panel' },
-          );
-          if (!pick?.description) {
-            return;
-          }
-          targetId = pick.description;
+        const panelItems: vscode.QuickPickItem[] = panels.map((panel) => ({
+          label: panel.title,
+          description: panel.id,
+        }));
+        const pick = await vscode.window.showQuickPick(
+          panelItems,
+          { title: 'Remove Control Surface Panel' },
+        );
+        if (!pick?.description) {
+          return;
         }
+        const targetId = pick.description;
         const target = controlSurfaceRegistry.getById(targetId);
         if (!target || target.kind !== 'panel') {
           return;
@@ -596,127 +586,6 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         output.appendLine('[session] Detaching from TIC-80');
         session.disconnect('User detached');
-      }),
-
-    vscode.commands.registerCommand(
-      'tic80.addWatch',
-      async () => {
-        const pick = await vscode.window.showQuickPick(
-          [
-            { label: 'Lua Global', description: 'Watch a global variable' },
-            { label: 'Lua Expr', description: 'Watch a Lua expression' },
-          ],
-          { title: 'Add TIC-80 Watch' },
-        );
-
-        if (!pick) {
-          return;
-        }
-
-        if (pick.label === 'Lua Global') {
-          if (!session.isConnected()) {
-            void vscode.window.showWarningMessage(
-              'Connect to TIC-80 before listing globals.');
-            return;
-          }
-          try {
-            const globals = await session.listGlobals();
-            if (globals.length === 0) {
-              void vscode.window.showInformationMessage(
-                'No globals reported by TIC-80.');
-              return;
-            }
-            const selected = await vscode.window.showQuickPick(globals, {
-              title: 'Select Lua Global',
-              matchOnDetail: true,
-            });
-            if (!selected) {
-              return;
-            }
-            watchSystem.store.addGlobal(selected);
-            output.appendLine(`[watch] Added global: ${selected}`);
-          } catch (error) {
-            const message =
-              error instanceof Error ? error.message : String(error);
-            void vscode.window.showErrorMessage(
-              `Failed to list globals: ${message}`);
-          }
-        } else {
-          const expr = await vscode.window.showInputBox({
-            title: 'Lua Expression',
-            prompt: 'Enter Lua expression to watch',
-            ignoreFocusOut: true,
-            validateInput: (value) =>
-            (value.trim().length === 0 ? 'Expression is required' :
-              undefined),
-          });
-          if (!expr) {
-            return;
-          }
-          watchSystem.store.addExpr(expr);
-          output.appendLine(`[watch] Added expression: ${expr}`);
-        }
-      }),
-
-    vscode.commands.registerCommand(
-      'tic80.removeWatch',
-      async (node?: WatchNode) => {
-        let watchId = node?.watchId;
-        if (!watchId) {
-          const watches = watchSystem.store.getAll();
-          const pick = await vscode.window.showQuickPick(
-            watches.map(
-              (watch) => ({ label: watch.label, description: watch.id })),
-            { title: 'Remove Watch' },
-          );
-          if (!pick) {
-            return;
-          }
-          watchId = pick.description;
-        }
-        if (!watchId) {
-          return;
-        }
-        const watch =
-          watchSystem.store.getAll().find((item) => item.id === watchId);
-        if (!watch) {
-          return;
-        }
-        watchSystem.store.remove(watchId);
-        output.appendLine(`[watch] Removed: ${watch.label}`);
-      }),
-
-    vscode.commands.registerCommand(
-      'tic80.clearWatches',
-      async () => {
-        const response = await vscode.window.showWarningMessage(
-          'Clear all TIC-80 watches?',
-          { modal: true },
-          'Clear',
-        );
-        if (response !== 'Clear') {
-          return;
-        }
-        watchSystem.store.clear();
-        output.appendLine('[watch] Cleared all watches');
-      }),
-
-    vscode.commands.registerCommand(
-      'tic80.copyWatchValue',
-      async (node?: WatchNode) => {
-        const watchId = node?.watchId;
-        if (!watchId) {
-          return;
-        }
-        const watch =
-          watchSystem.store.getAll().find((item) => item.id === watchId);
-        if (!watch) {
-          return;
-        }
-        const value = watch.lastValueText ?? '';
-        await vscode.env.clipboard.writeText(value);
-        void vscode.window.showInformationMessage(
-          'Watch value copied to clipboard.');
       }),
   );
 } // activate

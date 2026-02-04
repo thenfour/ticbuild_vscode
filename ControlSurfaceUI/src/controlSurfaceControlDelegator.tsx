@@ -210,6 +210,7 @@ export const renderControlSurfaceControl = (
                     renderControl={renderControlSurfaceControl}
                     parentPath={currentPath}
                     onSelectPath={options.onSelectPath}
+                    onDeletePath={options.onDeletePath}
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
                     onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
                     onDelete={() => handleDelete?.(currentPath)}
@@ -223,6 +224,7 @@ export const renderControlSurfaceControl = (
                     renderControl={renderControlSurfaceControl}
                     parentPath={currentPath}
                     onSelectPath={options.onSelectPath}
+                    onDeletePath={options.onDeletePath}
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
                     onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
                     onDelete={() => handleDelete?.(currentPath)}

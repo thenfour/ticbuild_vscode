@@ -90,6 +90,7 @@ export interface ControlSurfaceGroupProps extends Spec {
   ) => JSX.Element;
   parentPath?: string[];
   onSelectPath?: (path: string[], node: any) => void;
+  onDeletePath?: (path: string[], node: any) => void;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onDelete?: () => void;
@@ -109,6 +110,7 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   //designMode,
   //selectedPath,
   onSelectPath,
+  onDeletePath,
   onMoveUp,
   onMoveDown,
   onDelete,
@@ -190,6 +192,7 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
             {renderControl(child, index, api, stateApi, {
               parentPath,
               onSelectPath,
+              onDeletePath,
             })}
           </DndDraggable>
         ))}

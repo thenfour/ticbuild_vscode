@@ -43,6 +43,7 @@ export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     // designMode: boolean;
     // selectedPath?: string[] | null;
     onSelectPath?: (path: string[], node: any) => void;
+    onDeletePath?: (path: string[], node: any) => void;
     onMoveUp?: () => void;
     onMoveDown?: () => void;
     onDelete?: () => void;
@@ -58,6 +59,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     // designMode,
     // selectedPath,
     onSelectPath,
+    onDeletePath,
     onMoveUp,
     onMoveDown,
     onDelete,
@@ -167,6 +169,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                                             // designMode,
                                             // selectedPath,
                                             onSelectPath,
+                                            onDeletePath,
                                         })}
                                     </DndDraggable>
                                 ))}

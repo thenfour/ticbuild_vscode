@@ -4,6 +4,9 @@ import { ControlSurfaceLabelSpec } from "../defs";
 import { useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { useLuaExpressionResult } from "../hooks/useLuaExpressionResult";
 import { createDesignTools } from "../utils/designTools";
+import { PropControl } from "../PropControlsBase/PropControlShell";
+import { copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceLabelPropProps {
     spec: ControlSurfaceLabelSpec;
@@ -26,6 +29,7 @@ export const ControlSurfaceLabelProp: React.FC<ControlSurfaceLabelPropProps> = (
     onDelete,
     onSettings,
 }) => {
+    const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
 
     // Evaluate the expression
@@ -39,6 +43,18 @@ export const ControlSurfaceLabelProp: React.FC<ControlSurfaceLabelPropProps> = (
         onSettings,
     });
 
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            [spec.expression],
+            stateApi.state.expressionResults ?? {},
+            api?.showWarningMessage,
+        );
+    }, [api?.showWarningMessage, spec.expression, stateApi.state.expressionResults]);
+
+    const copyTools = !stateApi.state.designMode
+        ? <PropControl.CopyButton onClick={handleCopy} />
+        : null;
+
     return (
         <PropControlLabel
             isConnected={stateApi.state.connectionState === "connected"}
@@ -48,6 +64,7 @@ export const ControlSurfaceLabelProp: React.FC<ControlSurfaceLabelPropProps> = (
             designMode={stateApi.state.designMode}
             selected={JSON.stringify(stateApi.state.selectedControlPath) === path}
             designTools={designTools}
+            copyTools={copyTools}
         />
     );
 };

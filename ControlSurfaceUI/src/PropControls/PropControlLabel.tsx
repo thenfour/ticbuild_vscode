@@ -15,6 +15,7 @@ export interface PropControlLabelProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    copyTools?: React.ReactNode;
     isConnected: boolean;
 }
 
@@ -34,6 +35,7 @@ export const PropControlLabel: React.FC<PropControlLabelProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    copyTools,
     isConnected,
 }) => {
     return (
@@ -47,6 +49,7 @@ export const PropControlLabel: React.FC<PropControlLabelProps> = ({
             bindingStatus={bindingStatus ?? (error || null)}
             bindingStatusSeverity={bindingStatusSeverity ?? "error"}
             label={label}
+            copyTools={copyTools}
             value={
                 <span style={{
                     color: error ? 'var(--vscode-errorForeground)' : undefined,

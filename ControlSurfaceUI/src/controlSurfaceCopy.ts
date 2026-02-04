@@ -29,6 +29,9 @@ export const collectSymbolsForNodes = (nodes: ControlSurfaceNode[]): string[] =>
 
     const visit = (current: ControlSurfaceNode) => {
         switch (current.type) {
+            case "label":
+                pushUnique(list, seen, current.expression);
+                return;
             case "knob":
             case "slider":
             case "toggle":

@@ -3,6 +3,7 @@ import { Button, TextButton } from "./Buttons/PushButton";
 import { ControlQuickAdd } from "./ControlQuickAdd";
 import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 import { useControlSurfaceState } from "./hooks/ControlSurfaceState";
+import { GetControlHierarchicalLabel } from "./controlPathUtils";
 
 export interface AddControlControlProps {
   parentPath: string[]; // Path to the parent container (for targeting where to add)
@@ -36,10 +37,13 @@ export const AddControlControl: React.FC<AddControlControlProps> = ({ parentPath
     );
   }
 
+  const pathLabel = GetControlHierarchicalLabel(stateApi.state.controlSurfaceRoot, parentPath);
+  const labelSuffix = pathLabel ? ` to ${pathLabel}` : "";
+
   return (
     <div className="control-surface-interactive" style={{ padding: "8px" }}>
       <TextButton onClick={() => setIsAdding(true)}>
-        + Add Control {parentPath}
+        + Add Control{labelSuffix}
       </TextButton>
     </div>
   );

@@ -169,3 +169,76 @@ export const buildPageOptions = (
   visit(controlSurfaceRoot, [], ["root"]);
   return pages;
 };
+
+export function GetControlNodeLabel(node: ControlSurfaceNode): string {
+  const maxLength = 10;
+  const normalize = (value: string): string => {
+    const trimmed = value.trim();
+    if (trimmed.length <= maxLength) {
+      return trimmed;
+    }
+    return `${trimmed.slice(0, maxLength - 1)}…`;
+  };
+
+  const label = "label" in node && typeof (node as any).label === "string"
+    ? (node as any).label as string
+    : "";
+
+  if (label.trim().length > 0) {
+    return normalize(label);
+  }
+
+  return node.type;
+};
+
+export function GetControlHierarchicalLabel(
+  controlSurfaceRoot: ControlSurfaceNode[], path: string[] | null | undefined
+): string | null {
+  if (!path || path.length === 0) {
+    return null;
+  }
+
+  let current: any = { controls: controlSurfaceRoot };
+  const parts: string[] = [];
+
+  for (const segment of path) {
+    const parsed = parseControlPathSegment(segment);
+    if (!parsed) {
+      return null;
+    }
+
+    if (parsed.kind === "root") {
+      parts.push("");
+      continue;
+    }
+
+    if (parsed.kind === "control") {
+      if (!Array.isArray(current.controls) || parsed.index < 0 || parsed.index >= current.controls.length) {
+        return null;
+      }
+      const node = current.controls[parsed.index] as ControlSurfaceNode;
+      parts.push(GetControlNodeLabel(node));
+      current = node;
+      continue;
+    }
+
+    if (parsed.kind === "tab") {
+      if (!Array.isArray(current.tabs) || parsed.index < 0 || parsed.index >= current.tabs.length) {
+        return null;
+      }
+      const tab = current.tabs[parsed.index] as { label?: string; controls?: ControlSurfaceNode[] };
+      const tabLabel = typeof tab.label === "string" && tab.label.trim().length > 0
+        ? tab.label.trim()
+        : `Tab ${parsed.index + 1}`;
+      parts.push(tabLabel);
+      current = tab;
+      continue;
+    }
+  }
+
+  if (parts.length === 0) {
+    return null;
+  }
+
+  return `${parts.join("/")}`;
+}

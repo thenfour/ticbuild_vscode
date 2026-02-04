@@ -1,4 +1,5 @@
 import React from "react";
+import { GlobalSymbolDropdown } from "./GlobalSymbolDropdown";
 import {
     ControlSurfaceNode,
     ControlSurfaceKnobSpec,
@@ -13,6 +14,15 @@ import {
     ControlSurfaceTabsSpec,
     ControlSurfacePageSpec,
 } from "./defs";
+
+const insertSymbol = (currentValue: string | undefined, symbol: string): string => {
+    const base = currentValue ?? "";
+    if (!base) {
+        return symbol;
+    }
+    const needsSpace = /[\w\]]$/.test(base);
+    return needsSpace ? `${base} ${symbol}` : `${base}${symbol}`;
+};
 
 const FieldRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
     <div className="control-surface-properties-field">
@@ -67,6 +77,12 @@ export const KnobPropertiesPanel: React.FC<{ node: ControlSurfaceKnobSpec; onCha
         <FieldRow label="Symbol">
             <TextInput value={node.symbol} onChange={(symbol) => onChange({ ...node, symbol })} />
         </FieldRow>
+        <FieldRow label="Insert global symbol">
+            <GlobalSymbolDropdown
+                placeholderLabel="Insert global symbol"
+                onSelect={(symbol) => onChange({ ...node, symbol: insertSymbol(node.symbol, symbol) })}
+            />
+        </FieldRow>
         <FieldRow label="Min">
             <NumberInput value={node.min} onChange={(min) => onChange({ ...node, min })} />
         </FieldRow>
@@ -98,6 +114,12 @@ export const SliderPropertiesPanel: React.FC<{ node: ControlSurfaceSliderSpec; o
         <FieldRow label="Symbol">
             <TextInput value={node.symbol} onChange={(symbol) => onChange({ ...node, symbol })} />
         </FieldRow>
+        <FieldRow label="Insert global symbol">
+            <GlobalSymbolDropdown
+                placeholderLabel="Insert global symbol"
+                onSelect={(symbol) => onChange({ ...node, symbol: insertSymbol(node.symbol, symbol) })}
+            />
+        </FieldRow>
         <FieldRow label="Min">
             <NumberInput value={node.min} onChange={(min) => onChange({ ...node, min })} />
         </FieldRow>
@@ -118,6 +140,12 @@ export const TogglePropertiesPanel: React.FC<{ node: ControlSurfaceToggleSpec; o
         <FieldRow label="Symbol">
             <TextInput value={node.symbol} onChange={(symbol) => onChange({ ...node, symbol })} />
         </FieldRow>
+        <FieldRow label="Insert global symbol">
+            <GlobalSymbolDropdown
+                placeholderLabel="Insert global symbol"
+                onSelect={(symbol) => onChange({ ...node, symbol: insertSymbol(node.symbol, symbol) })}
+            />
+        </FieldRow>
     </div>
 );
 
@@ -128,6 +156,12 @@ export const NumberPropertiesPanel: React.FC<{ node: ControlSurfaceNumberSpec; o
         </FieldRow>
         <FieldRow label="Symbol">
             <TextInput value={node.symbol} onChange={(symbol) => onChange({ ...node, symbol })} />
+        </FieldRow>
+        <FieldRow label="Insert global symbol">
+            <GlobalSymbolDropdown
+                placeholderLabel="Insert global symbol"
+                onSelect={(symbol) => onChange({ ...node, symbol: insertSymbol(node.symbol, symbol) })}
+            />
         </FieldRow>
         <FieldRow label="Min">
             <NumberInput value={node.min} onChange={(min) => onChange({ ...node, min })} />
@@ -148,6 +182,12 @@ export const StringPropertiesPanel: React.FC<{ node: ControlSurfaceStringSpec; o
         </FieldRow>
         <FieldRow label="Symbol">
             <TextInput value={node.symbol} onChange={(symbol) => onChange({ ...node, symbol })} />
+        </FieldRow>
+        <FieldRow label="Insert global symbol">
+            <GlobalSymbolDropdown
+                placeholderLabel="Insert global symbol"
+                onSelect={(symbol) => onChange({ ...node, symbol: insertSymbol(node.symbol, symbol) })}
+            />
         </FieldRow>
     </div>
 );
@@ -182,6 +222,12 @@ export const EnumButtonsPropertiesPanel: React.FC<{ node: ControlSurfaceEnumButt
             <FieldRow label="Symbol">
                 <TextInput value={node.symbol} onChange={(symbol) => onChange({ ...node, symbol })} />
             </FieldRow>
+            <FieldRow label="Insert global symbol">
+                <GlobalSymbolDropdown
+                    placeholderLabel="Insert global symbol"
+                    onSelect={(symbol) => onChange({ ...node, symbol: insertSymbol(node.symbol, symbol) })}
+                />
+            </FieldRow>
             <FieldRow label="Options (JSON)">
                 <TextArea value={optionsText} onChange={setOptionsText} onBlur={handleOptionsBlur} />
             </FieldRow>
@@ -200,6 +246,12 @@ export const LabelPropertiesPanel: React.FC<{ node: ControlSurfaceLabelSpec; onC
         <FieldRow label="Expression">
             <TextInput value={node.expression} onChange={(expression) => onChange({ ...node, expression })} />
         </FieldRow>
+        <FieldRow label="Insert global symbol">
+            <GlobalSymbolDropdown
+                placeholderLabel="Insert global symbol"
+                onSelect={(symbol) => onChange({ ...node, expression: insertSymbol(node.expression, symbol) })}
+            />
+        </FieldRow>
     </div>
 );
 
@@ -210,6 +262,12 @@ export const TriggerButtonPropertiesPanel: React.FC<{ node: ControlSurfaceTrigge
         </FieldRow>
         <FieldRow label="Eval">
             <TextInput value={node.eval} onChange={(evalExpr) => onChange({ ...node, eval: evalExpr })} />
+        </FieldRow>
+        <FieldRow label="Insert global symbol">
+            <GlobalSymbolDropdown
+                placeholderLabel="Insert global symbol"
+                onSelect={(symbol) => onChange({ ...node, eval: insertSymbol(node.eval, symbol) })}
+            />
         </FieldRow>
     </div>
 );

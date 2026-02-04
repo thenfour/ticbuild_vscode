@@ -118,6 +118,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
     setDraftPathKey(selectedPathKey);
   }, [resolvedSelection, selectedPathKey, draftDirty, draftPathKey]);
 
+  React.useEffect(() => {
+    if (!designMode && stateApi.state.selectedControlPath) {
+      setSelectedControlPath(null);
+    }
+  }, [designMode, stateApi.state.selectedControlPath, setSelectedControlPath]);
+
   const handleApplyDraft = React.useCallback(() => {
     if (!draftNode || !stateApi.state.selectedControlPath) {
       return;

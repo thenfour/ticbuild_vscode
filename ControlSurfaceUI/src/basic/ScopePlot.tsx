@@ -186,6 +186,23 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
             if (started) {
                 context.stroke();
             }
+
+            if (hoverIndex != null && hoverIndex >= 0 && hoverIndex < values.length) {
+                const hoverValue = values[hoverIndex];
+                if (Number.isFinite(hoverValue)) {
+                    const hoverX = (hoverIndex / lastIndex) * (width - 1);
+                    const hoverT = (hoverValue - range.min) / span;
+                    const hoverY = height - 1 - hoverT * (height - 1);
+                    context.fillStyle = resolveCssColor(item.color, "#41a6f6");
+                    //context.strokeStyle = resolveCssColor("var(--vscode-editor-background)", "#1a1c2c");
+                    //context.lineWidth = 1.25;
+                    //context.beginPath();
+                    //context.arc(hoverX, hoverY, 5, 0, Math.PI * 2);
+                    //context.fill();
+                    context.fillRect(hoverX - 3, hoverY - 3, 6, 6);
+                    context.stroke();
+                }
+            }
         });
 
         if (!emptyLoggedRef.current) {
@@ -197,7 +214,7 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
         }
 
         context.restore();
-    }, [series, ranges, width, height, hiddenIndices]);
+    }, [series, ranges, width, height, hiddenIndices, hoverIndex]);
 
     const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;

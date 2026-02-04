@@ -61,6 +61,8 @@ type PlotSeriesState = {
     busy: boolean;
     paused: boolean;
     pausedAt: number | null;
+    pauseStartedAt: number | null;
+    timeOffsetMs: number;
 };
 
 export class PlotSubscriptionManager implements vscode.Disposable {
@@ -112,6 +114,8 @@ export class PlotSubscriptionManager implements vscode.Disposable {
             busy: false,
             paused: false,
             pausedAt: null,
+            pauseStartedAt: null,
+            timeOffsetMs: 0,
         });
         //this.output.appendLine(`[controlSurface] plot subscribe ${expression} @ ${normalized}Hz`);
     }
@@ -162,6 +166,15 @@ export class PlotSubscriptionManager implements vscode.Disposable {
         existing.pausedAt = paused
             ? (existing.lastSampleAt > 0 ? existing.lastSampleAt : Date.now())
             : null;
+        if (paused) {
+            existing.pauseStartedAt = Date.now();
+        } else if (existing.pauseStartedAt) {
+            const delta = Date.now() - existing.pauseStartedAt;
+            if (delta > 0) {
+                existing.timeOffsetMs += delta;
+            }
+            existing.pauseStartedAt = null;
+        }
         this.output.appendLine(`[controlSurface] plot ${paused ? "paused" : "resumed"} ${expression} @ ${normalized}Hz`);
     }
 
@@ -170,8 +183,8 @@ export class PlotSubscriptionManager implements vscode.Disposable {
 
         for (const [key, state] of this.subscriptions.entries()) {
             const endTime = state.paused
-                ? (state.pausedAt ?? (state.lastSampleAt > 0 ? state.lastSampleAt : Date.now()))
-                : (state.lastSampleAt > 0 ? state.lastSampleAt : Date.now());
+                ? (state.pausedAt ?? (state.lastSampleAt > 0 ? state.lastSampleAt : Date.now() - state.timeOffsetMs))
+                : (state.lastSampleAt > 0 ? state.lastSampleAt : Date.now() - state.timeOffsetMs);
             const rate = state.rateHz > 0 ? state.rateHz : DEFAULT_RATE_HZ;
             const spanMs = Math.max(((state.sampleCount - 1) / rate) * 1000, 1);
             const startTime = endTime - spanMs;
@@ -244,7 +257,8 @@ export class PlotSubscriptionManager implements vscode.Disposable {
                 continue;
             }
             const intervalMs = Math.max(Math.floor(1000 / state.rateHz), 1);
-            if (now - state.lastSampleAt < intervalMs) {
+            const adjustedNow = now - state.timeOffsetMs;
+            if (adjustedNow - state.lastSampleAt < intervalMs) {
                 continue;
             }
 
@@ -253,10 +267,10 @@ export class PlotSubscriptionManager implements vscode.Disposable {
                 const valueText = await this.session.evalExpr(state.expression);
                 const numeric = parseNumericValue(valueText);
                 if (numeric != null) {
-                    state.samples.push({ t: now, v: numeric });
+                    state.samples.push({ t: adjustedNow, v: numeric });
                     const retainAfter = now - PLOT_WINDOW_MS * 2;
                     if (state.samples.length > 0) {
-                        state.samples = state.samples.filter((sample) => sample.t >= retainAfter);
+                        state.samples = state.samples.filter((sample) => sample.t >= retainAfter - state.timeOffsetMs);
                     }
                     if (state.samples.length > MAX_SAMPLES) {
                         state.samples.splice(0, state.samples.length - MAX_SAMPLES);
@@ -267,7 +281,7 @@ export class PlotSubscriptionManager implements vscode.Disposable {
                 const message = error instanceof Error ? error.message : String(error);
                 this.output.appendLine(`[controlSurface] plot eval error: ${message}`);
             } finally {
-                state.lastSampleAt = now;
+                state.lastSampleAt = adjustedNow;
                 state.busy = false;
             }
         }

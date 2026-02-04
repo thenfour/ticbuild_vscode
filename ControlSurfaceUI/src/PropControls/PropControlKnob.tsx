@@ -21,6 +21,7 @@ export interface PropControlKnobProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    isConnected: boolean;
 }
 
 /**
@@ -43,6 +44,7 @@ export const PropControlKnob: React.FC<PropControlKnobProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    isConnected,
 }) => {
     // Note: size is in the spec but Knob component doesn't currently support it
     // const sizePixels = size === "small" ? 40 : size === "large" ? 80 : 60;
@@ -50,6 +52,7 @@ export const PropControlKnob: React.FC<PropControlKnobProps> = ({
     return (
         <PropControl.Shell
             designMode={designMode}
+            isConnected={isConnected}
             selected={selected}
             disabled={disabled}
             validationStatus={validationStatus ?? null}

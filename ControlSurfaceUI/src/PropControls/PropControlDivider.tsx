@@ -8,6 +8,7 @@ export interface PropControlDividerProps {
     selected: boolean;
     disabled?: boolean;
     designTools?: React.ReactNode;
+    isConnected: boolean;
 }
 
 /**
@@ -19,10 +20,12 @@ export const PropControlDivider: React.FC<PropControlDividerProps> = ({
     selected,
     disabled = false,
     designTools,
+    isConnected,
 }) => {
     return (
         <PropControl.Shell
             designMode={designMode}
+            isConnected={isConnected}
             selected={selected}
             disabled={disabled}
             validationStatus={null}

@@ -19,6 +19,7 @@ export interface PropControlSliderProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    isConnected: boolean;
 }
 
 /**
@@ -40,10 +41,12 @@ export const PropControlSlider: React.FC<PropControlSliderProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    isConnected
 }) => {
     return (
         <PropControl.Shell
             designMode={designMode}
+            isConnected={isConnected}
             selected={selected}
             disabled={disabled}
             validationStatus={validationStatus ?? null}

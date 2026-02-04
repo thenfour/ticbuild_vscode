@@ -91,13 +91,15 @@ interface PropControlShellProps {
     label: React.ReactNode; // can be null; empty label
     value: React.ReactNode; // can be null and the value is not shown.
     designTools?: React.ReactNode; // only show in design mode, on hover, or when selected.
+
+    isConnected: boolean; // if not connected, don't show errors.
 }
 
 const PropControlShell: React.FC<PropControlShellProps> = (props) => {
 
     // treat empty string as null so we can Boolean check them.
-    const validationStatus = emptyStringToNull(props.validationStatus);
-    const bindingStatus = emptyStringToNull(props.bindingStatus);
+    const validationStatus = props.isConnected ? emptyStringToNull(props.validationStatus) : null;
+    const bindingStatus = props.isConnected ? emptyStringToNull(props.bindingStatus) : null;
     const value = emptyStringToNull(props.value);
     const label = emptyStringToNull(props.label);
 

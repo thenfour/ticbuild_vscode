@@ -12,6 +12,7 @@ import { resolveControlByPath, resolveControlsByPath } from "./controlPathUtils"
 import { ButtonGroup } from "./Buttons/ButtonGroup";
 import { Button } from "./Buttons/PushButton";
 import { Divider } from "./basic/Divider";
+import { ComponentTester } from "./ComponentTester";
 
 type MockValueKind = "auto" | "string" | "number" | "boolean";
 
@@ -23,48 +24,48 @@ type MockWatch = {
   autoValue?: number;
 };
 
-const createMockWatch = (index: number, kind: MockValueKind): MockWatch => {
-  const id = `w${index}`;
-  const label = `watch${index}`;
-  switch (kind) {
-    case "auto":
-      return {
-        id,
-        label,
-        kind,
-        autoValue: 1000,
-        value: "1000",
-      };
-    case "string":
-      return {
-        id,
-        label,
-        kind,
-        value: "mock-string",
-      };
-    case "number":
-      return {
-        id,
-        label,
-        kind,
-        value: "42",
-      };
-    case "boolean":
-      return {
-        id,
-        label,
-        kind,
-        value: "true",
-      };
-    default:
-      return {
-        id,
-        label,
-        kind,
-        value: "",
-      };
-  }
-};
+// const createMockWatch = (index: number, kind: MockValueKind): MockWatch => {
+//   const id = `w${index}`;
+//   const label = `watch${index}`;
+//   switch (kind) {
+//     case "auto":
+//       return {
+//         id,
+//         label,
+//         kind,
+//         autoValue: 1000,
+//         value: "1000",
+//       };
+//     case "string":
+//       return {
+//         id,
+//         label,
+//         kind,
+//         value: "mock-string",
+//       };
+//     case "number":
+//       return {
+//         id,
+//         label,
+//         kind,
+//         value: "42",
+//       };
+//     case "boolean":
+//       return {
+//         id,
+//         label,
+//         kind,
+//         value: "true",
+//       };
+//     default:
+//       return {
+//         id,
+//         label,
+//         kind,
+//         value: "",
+//       };
+//   }
+// };
 
 // create 5 mock instances for testing
 const mockInstances: ControlSurfaceDiscoveredInstance[] = [
@@ -723,6 +724,8 @@ export function MockAppContainer(): JSX.Element {
               ))}
             </div>
           </div>
+
+          <ComponentTester />
 
           <ControlSurfaceApp
             dataSource={dataSource}

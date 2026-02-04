@@ -3,8 +3,8 @@ import * as path from 'node:path';
 
 // takes tic80 instance info and formats a label
 export function formatInstanceLabel(
-    args: { title: string; version: string; cartPath: string; }): string {
-    const { title, version, cartPath } = args;
+    args: { host: string; port: number; title: string; version: string; cartPath: string; }): string {
+    const { host, port, title, version, cartPath } = args;
     const cartLeaf = cartPath.length > 0 ? path.basename(cartPath) : '';
 
     if (title.length > 0) {
@@ -13,6 +13,10 @@ export function formatInstanceLabel(
 
     if (cartLeaf.length > 0) {
         return cartLeaf;
+    }
+
+    if (!IsNullOrWhitespace(host)) {
+        return `${host}:${port}`;
     }
 
     return '(empty)';

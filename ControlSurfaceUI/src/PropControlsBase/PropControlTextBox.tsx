@@ -24,12 +24,15 @@ interface PropControlTextBoxProps {
     designTools: React.ReactNode; // only show in design mode, on hover, or when selected.
 
     onChange: (newValue: string) => void;
+
+    isConnected: boolean;
 }
 
 export const PropControlTextBox: React.FC<PropControlTextBoxProps> = (props) => {
     return <PropControl.Shell
         designMode={props.designMode}
         selected={props.selected}
+        isConnected={props.isConnected}
         disabled={props.disabled}
         validationStatus={props.validationStatus}
         validationSeverity={props.validationSeverity}
@@ -49,6 +52,7 @@ const PlaceholderControl: React.FC<{ designMode: boolean }> = ({ designMode }) =
         designMode={designMode}
         selected={false}
         validationStatus={""}
+        isConnected={true}
         bindingStatus={""}
         label="Example Label"
         value={"some text"}
@@ -96,6 +100,7 @@ export const PropControlTextBoxDemo: React.FC = () => {
                             selected={selected}
                             validationStatus={validationStatus}
                             validationSeverity={validationSeverity}
+                            isConnected={true}
                             bindingStatus={bindingStatus}
                             bindingStatusSeverity={bindingStatusSeverity}
                             label="Example Label"

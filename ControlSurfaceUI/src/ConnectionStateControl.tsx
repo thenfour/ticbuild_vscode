@@ -3,6 +3,7 @@ import { Button } from "./Buttons/PushButton";
 import { ButtonGroup } from "./Buttons/ButtonGroup";
 import { ControlSurfaceDiscoveredInstance } from "./defs";
 import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
+import { Divider } from "./basic/Divider";
 
 export type ConnectionStateControlProps = {
     status: string;
@@ -17,6 +18,23 @@ export const ConnectionStateControl: React.FC<ConnectionStateControlProps> = ({
     const isConnected = status.includes("Connected");
     const instances = discoveredInstances ?? [];
 
+    const connectedMatch = status.match(/Connected\s+([^:\s]+):(\d+)/i);
+    const connectedHost = connectedMatch?.[1];
+    const connectedPort = connectedMatch ? Number(connectedMatch[2]) : undefined;
+
+    const isConnectedTo = (instance: ControlSurfaceDiscoveredInstance) => {
+        if (!isConnected || !connectedHost || connectedPort == null) {
+            return false;
+        }
+        return instance.host === connectedHost && instance.port === connectedPort;
+    };
+
+    const filteredInstances = instances.filter((instance) => !isConnectedTo(instance));
+
+
+    const statusColor = isConnected ? "var(--vscode-testing-iconPassed)"
+        : "var(--vscode-testing-iconErrored)";
+
     return (
         <div
             style={{
@@ -27,7 +45,11 @@ export const ConnectionStateControl: React.FC<ConnectionStateControlProps> = ({
                 gap: 8,
             }}
         >
-            <div>{status}</div>
+            <div
+                style={{ color: statusColor }}
+            >
+                {status}
+            </div>
             <ButtonGroup>
                 {isConnected ? (
                     <Button
@@ -39,19 +61,20 @@ export const ConnectionStateControl: React.FC<ConnectionStateControlProps> = ({
                     <Button
                         onClick={() => api?.postMessage({ type: "attach" })}
                     >
-                        Connect
+                        Connect...
                     </Button>
                 )}
-                {instances.map((instance) => (
+                <Divider />
+                {filteredInstances.map((instance, index) => (
                     <Button
-                        key={`${instance.host}:${instance.port}`}
+                        key={index} // host/port is not unique enough because there can be dummy/stale items.
                         onClick={() => api?.postMessage({
                             type: "connectInstance",
                             host: instance.host,
                             port: instance.port,
                         })}
                     >
-                        {instance.label ?? `${instance.host}:${instance.port}`}
+                        {instance.label || "?"}
                     </Button>
                 ))}
             </ButtonGroup>

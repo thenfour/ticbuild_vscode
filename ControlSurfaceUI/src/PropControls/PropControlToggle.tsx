@@ -16,6 +16,7 @@ export interface PropControlToggleProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    isConnected: boolean;
 }
 
 /**
@@ -34,11 +35,13 @@ export const PropControlToggle: React.FC<PropControlToggleProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    isConnected,
 }) => {
     return (
         <PropControl.Shell
             designMode={designMode}
             selected={selected}
+            isConnected={isConnected}
             disabled={disabled}
             validationStatus={validationStatus ?? null}
             validationSeverity={validationSeverity}

@@ -19,6 +19,7 @@ export interface PropControlNumberProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    isConnected: boolean;
 }
 
 /**
@@ -40,6 +41,7 @@ export const PropControlNumber: React.FC<PropControlNumberProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    isConnected,
 }) => {
 
     // if the input is not a number, or out of range, show validation error
@@ -58,6 +60,7 @@ export const PropControlNumber: React.FC<PropControlNumberProps> = ({
     return (
         <PropControl.Shell
             designMode={designMode}
+            isConnected={isConnected}
             selected={selected}
             disabled={disabled}
             validationStatus={validationError}

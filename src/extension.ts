@@ -118,10 +118,6 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
   );
 
-  const savePanelsState = async () => {
-    // No longer needed - VS Code handles this through serializer
-  };
-
   let refreshTimer: NodeJS.Timeout | undefined;
   let refreshPending = false;
 
@@ -166,6 +162,8 @@ export function activate(context: vscode.ExtensionContext): void {
     const instances = await discoverRunningInstancesBase(timeoutMs);
     discoveredInstances = instances.map((instance) => {
       const label = formatInstanceLabel({
+        host: instance.host,
+        port: instance.port,
         title: instance.metaTitle ?? '',
         version: instance.metaVersion ?? '',
         cartPath: instance.cartPath ?? '',
@@ -719,15 +717,6 @@ async function getAttachTargets(
   const discovered = await discoverRunningInstances(timeoutMs);
   const targets: AttachPickItem[] = [...discovered];
 
-  // const fallback = `${defaultHost}:${defaultPort}`;
-  // if (!targets.some((item) => item.value === fallback)) {
-  //   targets.push({
-  //     label: '(manual)',
-  //     description: fallback,
-  //     value: fallback,
-  //   });
-  // }
-
   return targets;
 }
 
@@ -739,6 +728,8 @@ async function discoverRunningInstances(
 
   const items: AttachPickItem[] = instances.map((instance) => {
     const label = formatInstanceLabel({
+      host: instance.host,
+      port: instance.port,
       title: instance.metaTitle ?? '',
       version: instance.metaVersion ?? '',
       cartPath: instance.cartPath ?? '',
@@ -753,6 +744,8 @@ async function discoverRunningInstances(
       description,
       detail: instance.cartPath,
       value: `${instance.host}:${instance.port}`,
+      host: instance.host,
+      port: instance.port,
     };
   });
 

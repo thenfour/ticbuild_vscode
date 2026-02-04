@@ -33,12 +33,6 @@ const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
         }
         return;
       }
-      // console.debug("[ControlSurfaceApp] Received payload", {
-      //   status: payload.status,
-      //   controlCount: payload.controlSurfaceRoot?.length ?? 0,
-      //   selectedPageId: payload.selectedPageId,
-      //   viewId: payload.viewId,
-      // });
       listener(payload);
     };
 
@@ -161,37 +155,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   return (
     <div
       className="control-surface-app"
-    // style={{
-    //   padding: 12,
-    //   fontFamily: "var(--vscode-font-family)",
-    //   color: "var(--vscode-foreground)",
-    // }}
     >
-      {/* <h1 style={{ fontSize: 14, margin: "0 0 12px 0" }}>
-        TIC-80 Control Surfaces
-      </h1>
- */}
-      {/* control gallery for testing / dev */}
-      <ComponentTester />
-
-      {/* view kind */}
-      {/* 
-      {viewKind ? (
-        <div
-          style={{
-            marginBottom: 8,
-            color: "var(--vscode-descriptionForeground)",
-            fontSize: 11,
-          }}
-        >
-          View:{" "}
-          {viewKind === "panel"
-            ? "Panel"
-            : viewKind === "explorer"
-              ? "Explorer Sidebar"
-              : "Activity Bar"}
-        </div>
-      ) : null} */}
 
       <ConnectionStateControl
         status={stateApi.state.status}
@@ -270,20 +234,6 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             Delete Page
           </Button>
         ) : null}
-        {/* <Divider />
-        <Button onClick={() => resolvedApi?.postMessage({ type: "addWatch" })}>
-          Add Watch
-        </Button>
-        <Button
-          onClick={() => resolvedApi?.postMessage({ type: "removeWatch" })}
-        >
-          Remove Watch
-        </Button>
-        <Button
-          onClick={() => resolvedApi?.postMessage({ type: "clearWatches" })}
-        >
-          Clear Watches
-        </Button> */}
       </ButtonGroup>
 
 
@@ -310,27 +260,6 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
                 }
               }
             }}
-          // path={stateApi.activePagePath.join("/")}
-          //   spec={stateApi.activePage}
-          //   api={api}
-          //   stateApi={stateApi}
-          //   options={{ parentPath: CONTROL_PATH_ROOT }}
-          //   currentPath={stateApi.activePagePath}
-          //   path={stateApi.activePagePath.join("/")}
-          //   renderControl={stateApi.renderControl}
-
-          // page={stateApi.activePage}
-          // pagePath={stateApi.activePagePath}
-          // onSelectPath={(path) => setSelectedControlPath(path)}
-          // onDeletePath={(path) => {
-          //   api?.postMessage({
-          //     type: "deleteControl",
-          //     path,
-          //   });
-          //   if (stateApi.state.selectedControlPath && path.join("/") === stateApi.state.selectedControlPath.join("/")) {
-          //     setSelectedControlPath(null);
-          //   }
-          // }}
           />
         ) : (
           <>No active page or API not available.</>
@@ -349,47 +278,6 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         stateApi={stateApi}
         setSelectedControlPath={setSelectedControlPath}
       />
-
-      {/* watches (maybe remove later?) */}
-      {/* 
-      <div style={{ marginTop: 16 }}>
-        <h2 style={{ fontSize: 12, margin: "0 0 6px 0" }}>Watches</h2>
-        {state.watches.length === 0 ? (
-          <div
-            style={{
-              color: "var(--vscode-descriptionForeground)",
-              fontStyle: "italic",
-            }}
-          >
-            No watches.
-          </div>
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <tbody>
-              {state.watches.map((watch) => (
-                <tr key={watch.id}>
-                  <td style={{ padding: "4px 6px", fontWeight: 600 }}>
-                    {watch.label}
-                  </td>
-                  <td
-                    style={{
-                      padding: "4px 6px",
-                      textAlign: "right",
-                      color: "var(--vscode-descriptionForeground)",
-                    }}
-                  >
-                    {watch.error
-                      ? "(error)"
-                      : watch.stale
-                        ? "(stale)"
-                        : watch.value}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div> */}
 
     </div>
   );

@@ -15,6 +15,7 @@ export interface PropControlTriggerButtonProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    isConnected: boolean;
 }
 
 /**
@@ -32,10 +33,12 @@ export const PropControlTriggerButton: React.FC<PropControlTriggerButtonProps> =
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    isConnected,
 }) => {
     return (
         <PropControl.Shell
             designMode={designMode}
+            isConnected={isConnected}
             selected={selected}
             disabled={disabled}
             validationStatus={validationStatus ?? null}

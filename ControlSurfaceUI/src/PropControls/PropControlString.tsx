@@ -16,6 +16,7 @@ export interface PropControlStringProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    isConnected: boolean;
 }
 
 /**
@@ -34,12 +35,14 @@ export const PropControlString: React.FC<PropControlStringProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    isConnected,
 }) => {
     return (
         <PropControl.Shell
             designMode={designMode}
             selected={selected}
             disabled={disabled}
+            isConnected={isConnected}
             validationStatus={validationStatus ?? null}
             validationSeverity={validationSeverity}
             bindingStatus={bindingStatus ?? null}

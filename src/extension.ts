@@ -24,6 +24,7 @@ import { setupAutoConnectWatcher } from './session/autoConnect';
 import { formatDateDiff, formatInstanceLabel, parseHostPort } from './utils';
 import { buildControlSurfaceWebviewHtml, buildControlSurfaceWebviewPayloadWithSymbols } from './views/ControlSurfaceWebview';
 import { ExpressionSubscriptionMonitor } from './controlSurface/ExpressionSubscriptionMonitor';
+import { PlotSubscriptionManager } from './controlSurface/PlotSubscriptionManager';
 import { ControlSurfaceRegistry } from './views/ControlSurfaceRegistry';
 import { ControlSurfaceSidebarProvider } from './views/ControlSurfaceSidebarProvider';
 import { ensureDevtoolsSchemaForWorkspace } from './devtoolsModel';
@@ -135,6 +136,12 @@ export function activate(context: vscode.ExtensionContext): void {
     output,
   );
 
+  const plotSubscriptionManager = new PlotSubscriptionManager(
+    session,
+    scheduleUiRefresh,
+    output,
+  );
+
   const watchSystem = new WatchSystem(
     session,
     workspaceRoot,
@@ -149,6 +156,7 @@ export function activate(context: vscode.ExtensionContext): void {
     watchSystem.store,
     controlSurfaceRegistry,
     expressionMonitor,
+    plotSubscriptionManager,
     STATE_KEY_SELECTED_PAGE,
   );
 
@@ -209,6 +217,7 @@ export function activate(context: vscode.ExtensionContext): void {
     return {
       ...payload,
       expressionResults: expressionMonitor.getResultsSnapshot(),
+      plotData: plotSubscriptionManager.getSnapshot(),
       discoveredInstances,
     };
   };
@@ -339,6 +348,7 @@ export function activate(context: vscode.ExtensionContext): void {
   updateUiRefreshTimer();
   updateDiscoveryRefreshTimer();
   expressionMonitor.start();
+  plotSubscriptionManager.start();
   void refreshDiscoveredInstances().then(() => scheduleUiRefresh());
 
   setupAutoConnectWatcher({
@@ -354,6 +364,7 @@ export function activate(context: vscode.ExtensionContext): void {
     updatePoller();
     scheduleUiRefresh();
     expressionMonitor.handleSessionStateChange();
+    plotSubscriptionManager.handleSessionStateChange();
   });
 
   context.subscriptions.push(
@@ -384,6 +395,7 @@ export function activate(context: vscode.ExtensionContext): void {
         clearInterval(discoveryTimer);
       }
       expressionMonitor.dispose();
+      plotSubscriptionManager.dispose();
     }),
   );
 

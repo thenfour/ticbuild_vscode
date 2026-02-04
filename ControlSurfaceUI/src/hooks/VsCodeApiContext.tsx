@@ -124,6 +124,20 @@ export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
                     expression,
                 });
             },
+            subscribePlotSeries: (expression: string, rateHz: number) => {
+                rawApi.postMessage({
+                    type: "subscribePlotSeries",
+                    expression,
+                    rateHz,
+                });
+            },
+            unsubscribePlotSeries: (expression: string, rateHz: number) => {
+                rawApi.postMessage({
+                    type: "unsubscribePlotSeries",
+                    expression,
+                    rateHz,
+                });
+            },
             showWarningMessage: async <T extends string>(message: string, ...items: T[]): Promise<T | undefined> => {
                 const requestId = `warning_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 

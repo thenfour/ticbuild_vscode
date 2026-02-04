@@ -27,6 +27,7 @@ export type ControlSurfaceState = {
     controlSurfaceRoot: ControlSurfaceNode[];
     symbolValues: Record<string, any>; // map of symbol names to their current values
     expressionResults?: Record<string, { value?: string; error?: string }>;
+    plotData?: ControlSurfacePlotData;
     discoveredInstances?: ControlSurfaceDiscoveredInstance[];
     pollIntervalMs: number; // interval for polling expressions in ms
     uiRefreshMs: number; // UI refresh interval in ms
@@ -104,6 +105,24 @@ export type ControlSurfaceXYSpec = {
     y: ControlSurfaceAxisSpec;
 };
 
+export type ControlSurfaceScopeRangeMode = "autoUnified" | "autoPerSeries";
+
+export type ControlSurfaceScopeSeriesSpec = {
+    expression: string;
+    min?: number;
+    max?: number;
+};
+
+export type ControlSurfaceScopeSpec = {
+    type: "scope";
+    label?: string;
+    rateHz?: number;
+    range?: ControlSurfaceScopeRangeMode;
+    width?: number;
+    height?: number;
+    series: ControlSurfaceScopeSeriesSpec[];
+};
+
 export type ControlSurfaceGroupSpec = {
     type: "group";
     label?: string;
@@ -161,6 +180,7 @@ export type ControlSurfaceNode =
     | ControlSurfaceTriggerButtonSpec
     | ControlSurfaceSliderSpec
     | ControlSurfaceXYSpec
+    | ControlSurfaceScopeSpec
     | ControlSurfaceToggleSpec
     | ControlSurfacePageSpec
     | ControlSurfaceGroupSpec
@@ -180,8 +200,20 @@ export type ControlSurfaceApi = {
     showWarningMessage: <T extends string>(message: string, ...items: T[]) => Promise<T | undefined>;
     subscribeExpression: (expression: string) => void;
     unsubscribeExpression: (expression: string) => void;
+    subscribePlotSeries: (expression: string, rateHz: number) => void;
+    unsubscribePlotSeries: (expression: string, rateHz: number) => void;
     listGlobals: () => Promise<string[]>;
 };
+
+export type ControlSurfacePlotSeriesPayload = {
+    expression: string;
+    rateHz: number;
+    values: number[];
+    startTime: number;
+    endTime: number;
+};
+
+export type ControlSurfacePlotData = Record<string, ControlSurfacePlotSeriesPayload>;
 
 export type ControlSurfaceDataSource = {
     subscribe: (listener: (payload: ControlSurfaceState) => void) => () => void;

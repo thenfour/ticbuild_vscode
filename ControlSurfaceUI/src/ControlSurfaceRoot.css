@@ -198,6 +198,8 @@ fieldset:disabled legend {
 
 .cs-dnd-container {
   min-height: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
 .cs-dnd-drop-placeholder {

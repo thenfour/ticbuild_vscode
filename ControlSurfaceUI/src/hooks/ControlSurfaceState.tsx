@@ -30,6 +30,7 @@ const makeState = (overrides?: Partial<ControlSurfaceState>, prev?: ControlSurfa
     controlSurfaceRoot: overrides?.controlSurfaceRoot ?? prev?.controlSurfaceRoot ?? [],
     symbolValues: overrides?.symbolValues ?? prev?.symbolValues ?? {},
     expressionResults: overrides?.expressionResults ?? prev?.expressionResults ?? {},
+    plotData: overrides?.plotData ?? prev?.plotData ?? {},
     discoveredInstances: overrides?.discoveredInstances ?? prev?.discoveredInstances ?? [],
     pollIntervalMs: overrides?.pollIntervalMs ?? prev?.pollIntervalMs ?? DEFAULT_POLL_MS,
     uiRefreshMs: overrides?.uiRefreshMs ?? prev?.uiRefreshMs ?? DEFAULT_UI_MS,

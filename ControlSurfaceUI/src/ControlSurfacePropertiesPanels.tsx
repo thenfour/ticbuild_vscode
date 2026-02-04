@@ -5,6 +5,7 @@ import {
     ControlSurfaceKnobSpec,
     ControlSurfaceSliderSpec,
     ControlSurfaceXYSpec,
+    ControlSurfaceScopeSpec,
     ControlSurfaceToggleSpec,
     ControlSurfaceNumberSpec,
     ControlSurfaceStringSpec,
@@ -15,6 +16,7 @@ import {
     ControlSurfaceTabsSpec,
     ControlSurfacePageSpec,
 } from "./defs";
+import { DEFAULT_SCOPE_HEIGHT, DEFAULT_SCOPE_RATE_HZ, DEFAULT_SCOPE_RANGE, DEFAULT_SCOPE_WIDTH, MAX_SCOPE_SERIES } from "./scopeConstants";
 
 const insertSymbol = (currentValue: string | undefined, symbol: string): string => {
     const base = currentValue ?? "";
@@ -194,6 +196,91 @@ export const XYPropertiesPanel: React.FC<{ node: ControlSurfaceXYSpec; onChange:
         </fieldset>
     </div>
 );
+
+const ScopeSeriesRow: React.FC<{
+    index: number;
+    series: ControlSurfaceScopeSpec["series"][number];
+    onChange: (next: ControlSurfaceScopeSpec["series"][number]) => void;
+}> = ({ index, series, onChange }) => (
+    <div className="control-surface-properties-field">
+        <label className="control-surface-properties-label">Series {index + 1}</label>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px", gap: 6 }}>
+            <TextInput value={series.expression} onChange={(expression) => onChange({ ...series, expression })} />
+            <NumberInput value={series.min} onChange={(min) => onChange({ ...series, min })} />
+            <NumberInput value={series.max} onChange={(max) => onChange({ ...series, max })} />
+        </div>
+    </div>
+);
+
+export const ScopePropertiesPanel: React.FC<{ node: ControlSurfaceScopeSpec; onChange: (node: ControlSurfaceNode) => void }> = ({ node, onChange }) => {
+    const series = node.series ?? [];
+    const seriesCount = Math.min(Math.max(series.length, 1), MAX_SCOPE_SERIES);
+
+    const updateSeriesCount = (count: number) => {
+        const nextCount = Math.max(1, Math.min(MAX_SCOPE_SERIES, count));
+        const nextSeries = [...series];
+        while (nextSeries.length < nextCount) {
+            nextSeries.push({ expression: "" });
+        }
+        while (nextSeries.length > nextCount) {
+            nextSeries.pop();
+        }
+        onChange({ ...node, series: nextSeries });
+    };
+
+    return (
+        <div>
+            <FieldRow label="Label">
+                <TextInput value={node.label ?? ""} onChange={(label) => onChange({ ...node, label })} />
+            </FieldRow>
+            <FieldRow label="Rate (Hz)">
+                <NumberInput value={node.rateHz ?? DEFAULT_SCOPE_RATE_HZ} onChange={(rateHz) => onChange({ ...node, rateHz })} />
+            </FieldRow>
+            <FieldRow label="Range">
+                <select
+                    className="control-surface-properties-input"
+                    value={node.range ?? DEFAULT_SCOPE_RANGE}
+                    onChange={(event) => onChange({ ...node, range: event.target.value as ControlSurfaceScopeSpec["range"] })}
+                >
+                    <option value="autoUnified">Auto (Unified)</option>
+                    <option value="autoPerSeries">Auto (Per Series)</option>
+                </select>
+            </FieldRow>
+            <FieldRow label="Width">
+                <NumberInput value={node.width ?? DEFAULT_SCOPE_WIDTH} onChange={(width) => onChange({ ...node, width })} />
+            </FieldRow>
+            <FieldRow label="Height">
+                <NumberInput value={node.height ?? DEFAULT_SCOPE_HEIGHT} onChange={(height) => onChange({ ...node, height })} />
+            </FieldRow>
+            <FieldRow label="Series Count">
+                <select
+                    className="control-surface-properties-input"
+                    value={seriesCount}
+                    onChange={(event) => updateSeriesCount(Number(event.target.value))}
+                >
+                    {Array.from({ length: MAX_SCOPE_SERIES }, (_, index) => index + 1).map((count) => (
+                        <option key={count} value={count}>{count}</option>
+                    ))}
+                </select>
+            </FieldRow>
+            <div className="control-surface-properties-hint">
+                Series rows: Expression, Min, Max.
+            </div>
+            {Array.from({ length: seriesCount }, (_, index) => (
+                <ScopeSeriesRow
+                    key={index}
+                    index={index}
+                    series={series[index] ?? { expression: "" }}
+                    onChange={(nextSeries) => {
+                        const next = [...series];
+                        next[index] = nextSeries;
+                        onChange({ ...node, series: next });
+                    }}
+                />
+            ))}
+        </div>
+    );
+};
 
 export const TogglePropertiesPanel: React.FC<{ node: ControlSurfaceToggleSpec; onChange: (node: ControlSurfaceNode) => void }> = ({ node, onChange }) => (
     <div>

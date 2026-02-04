@@ -81,6 +81,7 @@ export function buildControlSurfaceWebviewPayload(
     watches: Array<{ id: string; label: string; value: string; stale?: boolean; error?: string }>;
     controlSurfaceRoot: DevtoolsControlNode[];
     symbolValues?: Record<string, any>;
+    plotData?: Record<string, { expression: string; rateHz: number; values: number[]; startTime: number; endTime: number }>;
     pollIntervalMs: number;
     uiRefreshMs?: number;
     activeSidebarId?: string;
@@ -151,6 +152,7 @@ export async function buildControlSurfaceWebviewPayloadWithSymbols(
     controlSurfaceRoot: DevtoolsControlNode[];
     symbolValues?: Record<string, any>;
     expressionResults?: Record<string, { value?: string; error?: string }>;
+    plotData?: Record<string, { expression: string; rateHz: number; values: number[]; startTime: number; endTime: number }>;
     discoveredInstances?: Array<{ host: string; port: number; label?: string; description?: string; detail?: string; cartPath?: string; metaTitle?: string; metaVersion?: string; startedAt?: string }>;
     pollIntervalMs: number;
     uiRefreshMs?: number;

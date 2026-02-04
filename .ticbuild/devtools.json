@@ -70,6 +70,18 @@
           "expression": "t"
         },
         {
+          "type": "scope",
+          "label": "Scope",
+          "series": [
+            {
+              "expression": "x"
+            },
+            {
+              "expression": "y"
+            }
+          ]
+        },
+        {
           "type": "xy",
           "label": "XY",
           "x": {

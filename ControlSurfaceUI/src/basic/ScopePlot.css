@@ -1,0 +1,10 @@
+.scope-plot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scope-plot canvas {
+    display: block;
+    border-radius: 2px;
+}

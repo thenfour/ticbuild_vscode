@@ -11,6 +11,7 @@ import {
   NumberPropertiesPanel,
   PagePropertiesPanel,
   SliderPropertiesPanel,
+  ScopePropertiesPanel,
   StringPropertiesPanel,
   TabsPropertiesPanel,
   TogglePropertiesPanel,
@@ -24,12 +25,15 @@ import { ControlSurfaceLabelProp } from "../PropControlsAdaptors/ControlSurfaceL
 import { ControlSurfaceNumberProp } from "../PropControlsAdaptors/ControlSurfaceNumberProp";
 import { ControlSurfacePageProp } from "../PropControlsAdaptors/ControlSurfacePageProp";
 import { ControlSurfaceSliderProp } from "../PropControlsAdaptors/ControlSurfaceSliderProp";
+import { ControlSurfaceScopeProp } from "../PropControlsAdaptors/ControlSurfaceScopeProp";
 import { ControlSurfaceStringProp } from "../PropControlsAdaptors/ControlSurfaceStringProp";
 import { ControlSurfaceToggleProp } from "../PropControlsAdaptors/ControlSurfaceToggleProp";
 import { ControlSurfaceTriggerButtonProp } from "../PropControlsAdaptors/ControlSurfaceTriggerButtonProp";
 import { ControlSurfaceXYProp } from "../PropControlsAdaptors/ControlSurfaceXYProp";
 import { SymbolQuickAdd } from "./SymbolQuickAdd";
+import { ScopeQuickAdd } from "./ScopeQuickAdd";
 import { XYQuickAdd } from "./XYQuickAdd";
+import { DEFAULT_SCOPE_HEIGHT, DEFAULT_SCOPE_RATE_HZ, DEFAULT_SCOPE_RANGE, DEFAULT_SCOPE_WIDTH, MAX_SCOPE_SERIES } from "../scopeConstants";
 
 export function registerBuiltInControls() {
 
@@ -93,6 +97,31 @@ export function registerBuiltInControls() {
         step: 1,
       },
     }),
+  });
+
+  ControlRegistry.register({
+    type: "scope",
+    displayName: "Scope",
+    category: "display",
+    description: "Plot values over time",
+    quickAddComponent: ScopeQuickAdd,
+    renderComponent: ControlSurfaceScopeProp,
+    propertiesPanelComponent: ScopePropertiesPanel,
+    createDefaultSpec: (data) => {
+      const rawSeries = String(data.seriesText ?? "").split(",").map((entry) => entry.trim()).filter(Boolean);
+      const series = rawSeries.length > 0
+        ? rawSeries.slice(0, MAX_SCOPE_SERIES).map((expression) => ({ expression }))
+        : [{ expression: "" }];
+      return {
+        type: "scope",
+        label: data.label || "Scope",
+        rateHz: DEFAULT_SCOPE_RATE_HZ,
+        range: DEFAULT_SCOPE_RANGE,
+        width: DEFAULT_SCOPE_WIDTH,
+        height: DEFAULT_SCOPE_HEIGHT,
+        series,
+      };
+    },
   });
 
   ControlRegistry.register({

@@ -10,6 +10,7 @@ import { ControlSurfaceLabelProp } from "./PropControlsAdaptors/ControlSurfaceLa
 import { ControlSurfaceNumberProp } from "./PropControlsAdaptors/ControlSurfaceNumberProp";
 import { ControlSurfacePageProp } from "./PropControlsAdaptors/ControlSurfacePageProp";
 import { ControlSurfaceSliderProp } from "./PropControlsAdaptors/ControlSurfaceSliderProp";
+import { ControlSurfaceScopeProp } from "./PropControlsAdaptors/ControlSurfaceScopeProp";
 import { ControlSurfaceStringProp } from "./PropControlsAdaptors/ControlSurfaceStringProp";
 import { ControlSurfaceToggleProp } from "./PropControlsAdaptors/ControlSurfaceToggleProp";
 import { ControlSurfaceTriggerButtonProp } from "./PropControlsAdaptors/ControlSurfaceTriggerButtonProp";
@@ -147,6 +148,19 @@ export const renderControlSurfaceControl = (
             return (
                 <ControlSurfaceXYProp
                     key={`xy-${index}`}
+                    {...node}
+                    path={currentPath}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                />
+            );
+
+        case "scope":
+            return (
+                <ControlSurfaceScopeProp
+                    key={`scope-${index}`}
                     {...node}
                     path={currentPath}
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}

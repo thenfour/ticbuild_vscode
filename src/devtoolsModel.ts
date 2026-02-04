@@ -61,6 +61,21 @@ export type DevtoolsControlNode =
         [key: string]: unknown;
     }
     | {
+        type: 'scope';
+        label?: string;
+        rateHz?: number;
+        range?: 'autoUnified' | 'autoPerSeries';
+        width?: number;
+        height?: number;
+        series: {
+            expression: string;
+            min?: number;
+            max?: number;
+            [key: string]: unknown;
+        }[];
+        [key: string]: unknown;
+    }
+    | {
         type: 'toggle';
         label?: string;
         symbol: string;
@@ -410,6 +425,32 @@ const devtoolsSchema = {
                         },
                     },
                     required: ['type', 'tabs'],
+                },
+                {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                        type: { const: 'scope' },
+                        label: { type: 'string' },
+                        rateHz: { type: 'number' },
+                        range: { type: 'string', enum: ['autoUnified', 'autoPerSeries'] },
+                        width: { type: 'number' },
+                        height: { type: 'number' },
+                        series: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    expression: { type: 'string', minLength: 1 },
+                                    min: { type: 'number' },
+                                    max: { type: 'number' },
+                                },
+                                required: ['expression'],
+                                additionalProperties: true,
+                            },
+                        },
+                    },
+                    required: ['type', 'series'],
                 },
             ],
         },

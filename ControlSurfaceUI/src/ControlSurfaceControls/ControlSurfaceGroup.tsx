@@ -143,7 +143,8 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
     });
   }, [api, parentPath, stateApi.state.designMode]);
 
-  const dndOrientation = (layout === "row" || orientation === "horizontal") ? "horizontal" : "vertical";
+  //const dndOrientation = (layout === "row" || orientation === "horizontal") ? "horizontal" : "vertical";
+  const dndOrientation = "vertical";
 
   //console.log(`group label:${label} withparentpath:`, parentPath, " selected:", selected, " state selected:", stateApi.state.selectedControlPath);
 

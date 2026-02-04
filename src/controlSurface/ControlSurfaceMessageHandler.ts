@@ -4,6 +4,7 @@ import { RemoteSessionManager } from '../session/RemoteSessionManager';
 import { WatchStore } from '../watches/watchStore';
 import { ControlSurfaceRegistry } from '../views/ControlSurfaceRegistry';
 import { ExpressionSubscriptionMonitor } from './ExpressionSubscriptionMonitor';
+import { PlotSubscriptionManager } from './PlotSubscriptionManager';
 import { CONFIG_CONNECT_TIMEOUT_MS, DEFAULT_CONNECT_TIMEOUT_MS } from '../baseDefs';
 
 export class ControlSurfaceMessageHandler {
@@ -14,6 +15,7 @@ export class ControlSurfaceMessageHandler {
         private readonly watchStore: WatchStore,
         private readonly controlSurfaceRegistry: ControlSurfaceRegistry,
         private readonly expressionMonitor: ExpressionSubscriptionMonitor,
+        private readonly plotSubscriptionManager: PlotSubscriptionManager,
         private readonly stateKeySelectedPage: string,
     ) { }
 
@@ -248,6 +250,22 @@ export class ControlSurfaceMessageHandler {
                     break;
                 }
                 this.expressionMonitor.unsubscribe(payload.expression);
+                break;
+            }
+            case 'subscribePlotSeries': {
+                const payload = message as { expression?: string; rateHz?: number };
+                if (!payload.expression) {
+                    break;
+                }
+                this.plotSubscriptionManager.subscribe(payload.expression, payload.rateHz);
+                break;
+            }
+            case 'unsubscribePlotSeries': {
+                const payload = message as { expression?: string; rateHz?: number };
+                if (!payload.expression) {
+                    break;
+                }
+                this.plotSubscriptionManager.unsubscribe(payload.expression, payload.rateHz);
                 break;
             }
             case 'attach':

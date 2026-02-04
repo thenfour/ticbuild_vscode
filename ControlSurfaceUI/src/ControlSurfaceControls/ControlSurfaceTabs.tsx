@@ -123,7 +123,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
             designMode: stateApi.state.designMode,
             selected: false,
             disabled: false,
-            additionalClasses: "control-surface-tabs-wrapper cs-pp-control-tabs"
+            additionalClasses: "control-surface-tabs-wrapper cs-pp-control-tabs  cs-pp-control-container"
         })}>
             {stateApi.state.designMode && designTools ? (
                 <ButtonGroup className="cs-pp-design-tools">

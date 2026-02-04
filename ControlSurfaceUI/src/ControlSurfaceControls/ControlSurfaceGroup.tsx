@@ -24,7 +24,7 @@ import { collectSymbolsForNodes, copyLuaAssignmentsToClipboard } from "../contro
 
 export interface ControlSurfaceGroupBaseProps {
   label?: string;
-  orientation?: "horizontal" | "vertical";
+  //orientation?: "horizontal" | "vertical";
   designMode: boolean;
   selected: boolean;
   designTools?: React.ReactNode;
@@ -35,7 +35,7 @@ export interface ControlSurfaceGroupBaseProps {
 
 export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = ({
   label,
-  orientation = "horizontal",
+  //orientation = "horizontal",
   designMode,
   selected,
   designTools,
@@ -51,7 +51,7 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
       designMode: !!designMode,
       selected: selected,
       disabled: false,
-      additionalClasses: "cs-pp-control-group"
+      additionalClasses: "cs-pp-control-group cs-pp-control-container"
     })}>
 
       {/* <legend className="control-surface-group-label">{label}</legend> */}
@@ -98,7 +98,7 @@ export interface ControlSurfaceGroupProps extends Spec {
 
 export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   label,
-  orientation,
+  //orientation,
   layout,
   controls,
   renderControl,
@@ -166,38 +166,72 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
     });
   }, [api, parentPath, stateApi.state.designMode]);
 
-  //const dndOrientation = (layout === "row" || orientation === "horizontal") ? "horizontal" : "vertical";
-  const dndOrientation = "vertical";
+  const dndOrientation = layout === "row" ? "horizontal" : "vertical";
 
   //console.log(`group label:${label} withparentpath:`, parentPath, " selected:", selected, " state selected:", stateApi.state.selectedControlPath);
 
-  return <ControlSurfaceGroupBase
-    label={label}
-    orientation={orientation}
-    designMode={stateApi.state.designMode}
-    selected={selected}
-    designTools={designTools}
-    copyTools={copyTools}
-  >
-    <DndContainer
-      groupName="control-surface-controls"
-      orientation={dndOrientation}
-      disabled={!stateApi.state.designMode}
-      dragHandleSelector=".cs-dnd-handle"
-      onDrop={handleDrop}
-      getChildPayload={(index: number) => ({ sourcePath: buildControlPath(parentPath, index) })}
-      dropPlaceholder={{ animationDuration: 150, showOnTop: true, className: "cs-dnd-drop-placeholder" }}
-      className="cs-dnd-container"
+  const content = (
+    <>
+      <DndContainer
+        groupName="control-surface-controls"
+        orientation={dndOrientation}
+        disabled={!stateApi.state.designMode}
+        dragHandleSelector=".cs-dnd-handle"
+        onDrop={handleDrop}
+        getChildPayload={(index: number) => ({ sourcePath: buildControlPath(parentPath, index) })}
+        dropPlaceholder={{ animationDuration: 150, showOnTop: true, className: "cs-dnd-drop-placeholder" }}
+        className="cs-dnd-container"
+      >
+        {controls.map((child, index) => (
+          <DndDraggable key={`${layout}-${index}`}>
+            {renderControl(child, index, api, stateApi, {
+              parentPath,
+              onSelectPath,
+            })}
+          </DndDraggable>
+        ))}
+      </DndContainer>
+      <AddControlControl parentPath={parentPath} />
+    </>
+  );
+
+  if (layout === "row") {
+    return (
+      <PropControl.Row
+        label={label}
+        designMode={stateApi.state.designMode}
+        selected={selected}
+        designTools={designTools}
+        copyTools={copyTools}
+      >
+        {content}
+      </PropControl.Row>
+    );
+  }
+
+  if (layout === "column") {
+    return (
+      <PropControl.Column
+        label={label}
+        designMode={stateApi.state.designMode}
+        selected={selected}
+        designTools={designTools}
+        copyTools={copyTools}
+      >
+        {content}
+      </PropControl.Column>
+    );
+  }
+
+  return (
+    <ControlSurfaceGroupBase
+      label={label}
+      designMode={stateApi.state.designMode}
+      selected={selected}
+      designTools={designTools}
+      copyTools={copyTools}
     >
-      {controls.map((child, index) => (
-        <DndDraggable key={`${layout}-${index}`}>
-          {renderControl(child, index, api, stateApi, {
-            parentPath,
-            onSelectPath,
-          })}
-        </DndDraggable>
-      ))}
-    </DndContainer>
-    <AddControlControl parentPath={parentPath} />
-  </ControlSurfaceGroupBase>;
+      {content}
+    </ControlSurfaceGroupBase>
+  );
 };

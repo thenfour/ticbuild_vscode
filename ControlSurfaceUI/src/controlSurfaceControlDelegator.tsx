@@ -1,5 +1,4 @@
 import { buildControlPath, isPathEqual } from "./controlPathBase";
-import { ControlSurfaceGroup } from "./ControlSurfaceControls/ControlSurfaceGroup";
 import { ControlSurfaceTabs } from "./ControlSurfaceControls/ControlSurfaceTabs";
 import { ControlSurfaceApi, ControlSurfaceNode } from "./defs";
 import { ControlSurfaceStateApi } from "./hooks/ControlSurfaceState";
@@ -15,6 +14,7 @@ import { ControlSurfaceStringProp } from "./PropControlsAdaptors/ControlSurfaceS
 import { ControlSurfaceToggleProp } from "./PropControlsAdaptors/ControlSurfaceToggleProp";
 import { ControlSurfaceTriggerButtonProp } from "./PropControlsAdaptors/ControlSurfaceTriggerButtonProp";
 import { ControlSurfaceXYProp } from "./PropControlsAdaptors/ControlSurfaceXYProp";
+import { ControlSurfaceGroup } from "./ControlSurfaceControls/ControlSurfaceGroup";
 
 export type ControlSurfaceRenderOptions = {
     parentPath: string[] | undefined; // the "root page" has no parent path.
@@ -45,19 +45,6 @@ export const renderControlSurfaceControl = (
     const handleDelete = options.onDeletePath
         ? (path: string[]) => options.onDeletePath?.(path, node)
         : undefined;
-
-    // const wrapSelectable = (content: JSX.Element, key: string) => (
-    //     <ControlSurfaceSelectable
-    //         key={key}
-    //         path={currentPath}
-    //         designMode={stateApi.state.designMode}
-    //         isSelected={isSelected}
-    //         onSelect={handleSelect}
-    //         onDelete={handleDelete}
-    //     >
-    //         {content}
-    //     </ControlSurfaceSelectable>
-    // );
 
     switch (node.type) {
         case "divider":
@@ -221,11 +208,7 @@ export const renderControlSurfaceControl = (
                     {...node}
                     layout={node.type}
                     renderControl={renderControlSurfaceControl}
-                    //symbolValues={stateApi.state.symbolValues}
-                    //pollIntervalMs={stateApi.state.pollIntervalMs}
                     parentPath={currentPath}
-                    //designMode={stateApi.state.designMode}
-                    //selectedPath={stateApi.state.selectedControlPath}
                     onSelectPath={options.onSelectPath}
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
                     onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
@@ -238,11 +221,7 @@ export const renderControlSurfaceControl = (
                     key={`${node.type}-${index}`}
                     {...node}
                     renderControl={renderControlSurfaceControl}
-                    //symbolValues={stateApi.state.symbolValues}
-                    //pollIntervalMs={stateApi.state.pollIntervalMs}
                     parentPath={currentPath}
-                    //designMode={stateApi.state.designMode}
-                    //selectedPath={stateApi.state.selectedControlPath}
                     onSelectPath={options.onSelectPath}
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
                     onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}

@@ -1,7 +1,7 @@
 .pp-root {
     /* establish variables at controls root */
     --cs-pp-control-label-width: 150px;
-    --cs-pp-control-column-width: calc(min(90vw, 500px));
+    --cs-pp-control-default-width: calc(min(90vw, 500px));
 }
 
 .cs-pp-control {
@@ -9,12 +9,19 @@
     box-sizing: border-box; /* include border in width */
 }
 
+/* any container controls should be able to expand to children. */
+.cs-pp-control:not(.cs-pp-control-container) {
+    width: var(--cs-pp-control-default-width);
+}
+
 .pp-root .cs-pp-control-column {
     display:flex;
     flex-direction: column;
     gap: 12px;
-    width: calc(min(100%, var(--cs-pp-control-column-width)));
+    width: auto;
+    max-width: none;
 }
+
 
 .pp-root .cs-pp-control-column .cs-pp-control-column-content {
     display:flex;
@@ -26,11 +33,14 @@
     display:flex;
     flex-direction: column;
     gap: 12px;
+    width: auto;
 }
 .pp-root .cs-pp-control-row .cs-pp-control-row-content {
     display:flex;
     flex-direction: row;
     gap: 8px;
+    width: auto;
+    position:relative;
 }
 
 .cs-pp-control-shell {

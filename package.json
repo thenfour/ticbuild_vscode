@@ -82,6 +82,11 @@
           "default": 217,
           "description": "UI refresh interval (ms) for TIC-80 watch tree updates."
         },
+        "tic80.discoveryRefreshMs": {
+          "type": "number",
+          "default": 2500,
+          "description": "Polling interval (ms) for refreshing discovered TIC-80 instances. Set to 0 to disable polling."
+        },
         "tic80.connectTimeoutMs": {
           "type": "number",
           "default": 3000,

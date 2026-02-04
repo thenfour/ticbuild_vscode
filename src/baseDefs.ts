@@ -4,6 +4,7 @@ export const DEFAULT_REMOTE_PORT = 9977;
 export const DEFAULT_POLL_HZ = 10;
 export const DEFAULT_CONNECT_TIMEOUT_MS = 3000;
 export const DEFAULT_UI_REFRESH_MS = 217;
+export const DEFAULT_DISCOVERY_REFRESH_MS = 2500;
 
 export const POLLER_MIN_INTERVAL_MS = 50;
 export const POLLER_LOG_THROTTLE_MS = 1000;
@@ -13,6 +14,7 @@ export const CONFIG_REMOTE_PORT = 'remote.port';
 export const CONFIG_POLL_HZ = 'pollHz';
 export const CONFIG_CONNECT_TIMEOUT_MS = 'connectTimeoutMs';
 export const CONFIG_UI_REFRESH_MS = 'uiRefreshMs';
+export const CONFIG_DISCOVERY_REFRESH_MS = 'discoveryRefreshMs';
 
 export const REMOTING_HELLO_V1 = 'tic-80 remoting v1';
 

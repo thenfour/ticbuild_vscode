@@ -7,11 +7,13 @@ import { WatchSystem } from './watches/WatchSystem';
 
 import {
   CONFIG_CONNECT_TIMEOUT_MS,
+  CONFIG_DISCOVERY_REFRESH_MS,
   CONFIG_POLL_HZ,
   CONFIG_REMOTE_HOST,
   CONFIG_REMOTE_PORT,
   CONFIG_UI_REFRESH_MS,
   DEFAULT_CONNECT_TIMEOUT_MS,
+  DEFAULT_DISCOVERY_REFRESH_MS,
   DEFAULT_POLL_HZ,
   DEFAULT_REMOTE_HOST,
   DEFAULT_REMOTE_PORT,
@@ -120,6 +122,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
   let refreshTimer: NodeJS.Timeout | undefined;
   let refreshPending = false;
+  let discoveryTimer: NodeJS.Timeout | undefined;
+  let discoveryRefreshInFlight = false;
 
   const scheduleUiRefresh = () => {
     refreshPending = true;
@@ -308,10 +312,38 @@ export function activate(context: vscode.ExtensionContext): void {
     }, intervalMs);
   };
 
+  const updateDiscoveryRefreshTimer = () => {
+    if (discoveryTimer) {
+      clearInterval(discoveryTimer);
+      discoveryTimer = undefined;
+    }
+
+    const intervalMs = getDiscoveryRefreshMs();
+    if (!Number.isFinite(intervalMs) || intervalMs <= 0) {
+      return;
+    }
+
+    discoveryTimer = setInterval(() => {
+      if (discoveryRefreshInFlight) {
+        return;
+      }
+      discoveryRefreshInFlight = true;
+      void refreshDiscoveredInstances()
+        .then(() => scheduleUiRefresh())
+        .catch((error) => {
+          output.appendLine(`[discovery] refresh failed: ${String(error)}`);
+        })
+        .finally(() => {
+          discoveryRefreshInFlight = false;
+        });
+    }, intervalMs);
+  };
+
   updateStatus();
   updateContextKeys();
   updatePoller();
   updateUiRefreshTimer();
+  updateDiscoveryRefreshTimer();
   expressionMonitor.start();
   void refreshDiscoveredInstances().then(() => scheduleUiRefresh());
 
@@ -354,6 +386,9 @@ export function activate(context: vscode.ExtensionContext): void {
       if (refreshTimer) {
         clearInterval(refreshTimer);
       }
+      if (discoveryTimer) {
+        clearInterval(discoveryTimer);
+      }
       expressionMonitor.dispose();
     }),
   );
@@ -365,6 +400,9 @@ export function activate(context: vscode.ExtensionContext): void {
       }
       if (event.affectsConfiguration(`tic80.${CONFIG_UI_REFRESH_MS}`)) {
         updateUiRefreshTimer();
+      }
+      if (event.affectsConfiguration(`tic80.${CONFIG_DISCOVERY_REFRESH_MS}`)) {
+        updateDiscoveryRefreshTimer();
       }
     }),
   );
@@ -698,6 +736,15 @@ function getUiRefreshMs(): number {
   const refreshMs = config.get<number>(CONFIG_UI_REFRESH_MS, DEFAULT_UI_REFRESH_MS);
   if (!Number.isFinite(refreshMs) || refreshMs <= 0) {
     return DEFAULT_UI_REFRESH_MS;
+  }
+  return refreshMs;
+}
+
+function getDiscoveryRefreshMs(): number {
+  const config = vscode.workspace.getConfiguration('tic80');
+  const refreshMs = config.get<number>(CONFIG_DISCOVERY_REFRESH_MS, DEFAULT_DISCOVERY_REFRESH_MS);
+  if (!Number.isFinite(refreshMs) || refreshMs < 0) {
+    return DEFAULT_DISCOVERY_REFRESH_MS;
   }
   return refreshMs;
 }

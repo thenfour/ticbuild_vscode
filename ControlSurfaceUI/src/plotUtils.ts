@@ -1,4 +1,7 @@
-export const makePlotSeriesKey = (expression: string, rateHz: number) => `${rateHz}:${expression}`;
+export const makePlotSeriesKey = (expression: string, rateHz: number, sampleCount?: number) => {
+    const count = Number.isFinite(sampleCount) && (sampleCount ?? 0) > 0 ? (sampleCount as number) : 0;
+    return `${rateHz}:${count}:${expression}`;
+};
 
 export const SCOPE_SERIES_COLORS = [
     "var(--vscode-charts-blue, #41a6f6)",

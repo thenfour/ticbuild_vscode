@@ -44,13 +44,17 @@ export const interpolateSignal = (before: number | null, after: number | null, t
     return t01 < 0.5 ? before : after;
 };
 
-const makeKey = (expression: string, rateHz: number) => `${rateHz}:${expression}`;
+const makeKey = (expression: string, rateHz: number, sampleCount?: number) => {
+    const count = Number.isFinite(sampleCount) && (sampleCount ?? 0) > 0 ? (sampleCount as number) : RESAMPLE_COUNT;
+    return `${rateHz}:${count}:${expression}`;
+};
 
 type PlotSample = { t: number; v: number };
 
 type PlotSeriesState = {
     expression: string;
     rateHz: number;
+    sampleCount: number;
     samples: PlotSample[];
     lastSampleAt: number;
     count: number;
@@ -86,12 +90,12 @@ export class PlotSubscriptionManager implements vscode.Disposable {
         }, 50);
     }
 
-    subscribe(expression: string, rateHz?: number): void {
+    subscribe(expression: string, rateHz?: number, sampleCount?: number): void {
         if (!expression) {
             return;
         }
         const normalized = Number.isFinite(rateHz) && (rateHz ?? 0) > 0 ? (rateHz as number) : DEFAULT_RATE_HZ;
-        const key = makeKey(expression, normalized);
+        const key = makeKey(expression, normalized, sampleCount);
         const existing = this.subscriptions.get(key);
         if (existing) {
             existing.count += 1;
@@ -101,6 +105,7 @@ export class PlotSubscriptionManager implements vscode.Disposable {
         this.subscriptions.set(key, {
             expression,
             rateHz: normalized,
+            sampleCount: Number.isFinite(sampleCount) && (sampleCount ?? 0) > 0 ? (sampleCount as number) : RESAMPLE_COUNT,
             samples: [],
             lastSampleAt: 0,
             count: 1,
@@ -111,12 +116,12 @@ export class PlotSubscriptionManager implements vscode.Disposable {
         //this.output.appendLine(`[controlSurface] plot subscribe ${expression} @ ${normalized}Hz`);
     }
 
-    unsubscribe(expression: string, rateHz?: number): void {
+    unsubscribe(expression: string, rateHz?: number, sampleCount?: number): void {
         if (!expression) {
             return;
         }
         const normalized = Number.isFinite(rateHz) && (rateHz ?? 0) > 0 ? (rateHz as number) : DEFAULT_RATE_HZ;
-        const key = makeKey(expression, normalized);
+        const key = makeKey(expression, normalized, sampleCount);
         const existing = this.subscriptions.get(key);
         if (!existing) {
             return;
@@ -143,18 +148,20 @@ export class PlotSubscriptionManager implements vscode.Disposable {
         }
     }
 
-    setPaused(expression: string, rateHz: number | undefined, paused: boolean): void {
+    setPaused(expression: string, rateHz: number | undefined, paused: boolean, sampleCount?: number): void {
         if (!expression) {
             return;
         }
         const normalized = Number.isFinite(rateHz) && (rateHz ?? 0) > 0 ? (rateHz as number) : DEFAULT_RATE_HZ;
-        const key = makeKey(expression, normalized);
+        const key = makeKey(expression, normalized, sampleCount);
         const existing = this.subscriptions.get(key);
         if (!existing) {
             return;
         }
         existing.paused = paused;
-        existing.pausedAt = paused ? Date.now() : null;
+        existing.pausedAt = paused
+            ? (existing.lastSampleAt > 0 ? existing.lastSampleAt : Date.now())
+            : null;
         this.output.appendLine(`[controlSurface] plot ${paused ? "paused" : "resumed"} ${expression} @ ${normalized}Hz`);
     }
 
@@ -162,9 +169,13 @@ export class PlotSubscriptionManager implements vscode.Disposable {
         const payload: Record<string, PlotSeriesPayload> = {};
 
         for (const [key, state] of this.subscriptions.entries()) {
-            const endTime = state.paused && state.pausedAt ? state.pausedAt : Date.now();
-            const startTime = endTime - PLOT_WINDOW_MS;
-            const values = this.resample(state.samples, startTime, endTime, RESAMPLE_COUNT);
+            const endTime = state.paused
+                ? (state.pausedAt ?? (state.lastSampleAt > 0 ? state.lastSampleAt : Date.now()))
+                : (state.lastSampleAt > 0 ? state.lastSampleAt : Date.now());
+            const rate = state.rateHz > 0 ? state.rateHz : DEFAULT_RATE_HZ;
+            const spanMs = Math.max(((state.sampleCount - 1) / rate) * 1000, 1);
+            const startTime = endTime - spanMs;
+            const values = this.resample(state.samples, startTime, endTime, state.sampleCount);
             payload[key] = {
                 expression: state.expression,
                 rateHz: state.rateHz,

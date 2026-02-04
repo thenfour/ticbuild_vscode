@@ -124,26 +124,29 @@ export const useControlSurfaceApi = (): ControlSurfaceApi | undefined => {
                     expression,
                 });
             },
-            subscribePlotSeries: (expression: string, rateHz: number) => {
+            subscribePlotSeries: (expression: string, rateHz: number, sampleCount?: number) => {
                 rawApi.postMessage({
                     type: "subscribePlotSeries",
                     expression,
                     rateHz,
+                    sampleCount,
                 });
             },
-            unsubscribePlotSeries: (expression: string, rateHz: number) => {
+            unsubscribePlotSeries: (expression: string, rateHz: number, sampleCount?: number) => {
                 rawApi.postMessage({
                     type: "unsubscribePlotSeries",
                     expression,
                     rateHz,
+                    sampleCount,
                 });
             },
-            setPlotPaused: (expression: string, rateHz: number, paused: boolean) => {
+            setPlotPaused: (expression: string, rateHz: number, paused: boolean, sampleCount?: number) => {
                 rawApi.postMessage({
                     type: "setPlotPaused",
                     expression,
                     rateHz,
                     paused,
+                    sampleCount,
                 });
             },
             showWarningMessage: async <T extends string>(message: string, ...items: T[]): Promise<T | undefined> => {

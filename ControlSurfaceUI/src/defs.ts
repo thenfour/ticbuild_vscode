@@ -200,9 +200,9 @@ export type ControlSurfaceApi = {
     showWarningMessage: <T extends string>(message: string, ...items: T[]) => Promise<T | undefined>;
     subscribeExpression: (expression: string) => void;
     unsubscribeExpression: (expression: string) => void;
-    subscribePlotSeries: (expression: string, rateHz: number) => void;
-    unsubscribePlotSeries: (expression: string, rateHz: number) => void;
-    setPlotPaused: (expression: string, rateHz: number, paused: boolean) => void;
+    subscribePlotSeries: (expression: string, rateHz: number, sampleCount?: number) => void;
+    unsubscribePlotSeries: (expression: string, rateHz: number, sampleCount?: number) => void;
+    setPlotPaused: (expression: string, rateHz: number, paused: boolean, sampleCount?: number) => void;
     listGlobals: () => Promise<string[]>;
 };
 

@@ -253,27 +253,27 @@ export class ControlSurfaceMessageHandler {
                 break;
             }
             case 'subscribePlotSeries': {
-                const payload = message as { expression?: string; rateHz?: number };
+                const payload = message as { expression?: string; rateHz?: number; sampleCount?: number };
                 if (!payload.expression) {
                     break;
                 }
-                this.plotSubscriptionManager.subscribe(payload.expression, payload.rateHz);
+                this.plotSubscriptionManager.subscribe(payload.expression, payload.rateHz, payload.sampleCount);
                 break;
             }
             case 'unsubscribePlotSeries': {
-                const payload = message as { expression?: string; rateHz?: number };
+                const payload = message as { expression?: string; rateHz?: number; sampleCount?: number };
                 if (!payload.expression) {
                     break;
                 }
-                this.plotSubscriptionManager.unsubscribe(payload.expression, payload.rateHz);
+                this.plotSubscriptionManager.unsubscribe(payload.expression, payload.rateHz, payload.sampleCount);
                 break;
             }
             case 'setPlotPaused': {
-                const payload = message as { expression?: string; rateHz?: number; paused?: boolean };
+                const payload = message as { expression?: string; rateHz?: number; paused?: boolean; sampleCount?: number };
                 if (!payload.expression) {
                     break;
                 }
-                this.plotSubscriptionManager.setPaused(payload.expression, payload.rateHz, !!payload.paused);
+                this.plotSubscriptionManager.setPaused(payload.expression, payload.rateHz, !!payload.paused, payload.sampleCount);
                 break;
             }
             case 'attach':

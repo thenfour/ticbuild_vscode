@@ -93,6 +93,7 @@ export class PlotSubscriptionManager implements vscode.Disposable {
         const existing = this.subscriptions.get(key);
         if (existing) {
             existing.count += 1;
+            //this.output.appendLine(`[controlSurface] plot subscribe +1 ${expression} @ ${normalized}Hz (count=${existing.count})`);
             return;
         }
         this.subscriptions.set(key, {
@@ -103,6 +104,7 @@ export class PlotSubscriptionManager implements vscode.Disposable {
             count: 1,
             busy: false,
         });
+        //this.output.appendLine(`[controlSurface] plot subscribe ${expression} @ ${normalized}Hz`);
     }
 
     unsubscribe(expression: string, rateHz?: number): void {
@@ -117,8 +119,10 @@ export class PlotSubscriptionManager implements vscode.Disposable {
         }
         if (existing.count <= 1) {
             this.subscriptions.delete(key);
+            //this.output.appendLine(`[controlSurface] plot unsubscribe ${expression} @ ${normalized}Hz`);
         } else {
             existing.count -= 1;
+            //this.output.appendLine(`[controlSurface] plot unsubscribe -1 ${expression} @ ${normalized}Hz (count=${existing.count})`);
         }
     }
 

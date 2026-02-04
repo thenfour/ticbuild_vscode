@@ -21,6 +21,26 @@ export interface ScopePlotProps {
 const DEFAULT_WIDTH = DEFAULT_SCOPE_WIDTH;
 const DEFAULT_HEIGHT = DEFAULT_SCOPE_HEIGHT;
 
+const resolveCssColor = (value: string, fallback: string) => {
+    if (!value) {
+        return fallback;
+    }
+    if (!value.startsWith("var(")) {
+        return value;
+    }
+    try {
+        const match = value.match(/var\(([^,\)]+)/);
+        const token = match?.[1]?.trim();
+        if (!token) {
+            return fallback;
+        }
+        const computed = getComputedStyle(document.documentElement).getPropertyValue(token);
+        return computed?.trim() || fallback;
+    } catch {
+        return fallback;
+    }
+};
+
 const finiteValues = (values: number[]) => values.filter((value) => Number.isFinite(value));
 
 const computeRange = (values: number[]): { min: number; max: number } | null => {
@@ -47,6 +67,7 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
     series,
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const emptyLoggedRef = useRef(false);
 
     const ranges = useMemo(() => {
         const computed = series.map((item) => ({
@@ -110,10 +131,10 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
         context.save();
         context.scale(pixelRatio, pixelRatio);
 
-        context.fillStyle = "var(--vscode-input-background)";
+        context.fillStyle = resolveCssColor("var(--vscode-input-background)", "#1a1c2c");
         context.fillRect(0, 0, width, height);
 
-        context.strokeStyle = "var(--vscode-panel-border)";
+        context.strokeStyle = resolveCssColor("var(--vscode-panel-border)", "#333c57");
         context.lineWidth = 1;
         context.strokeRect(0.5, 0.5, width - 1, height - 1);
 
@@ -128,11 +149,12 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
                 return;
             }
 
-            context.strokeStyle = item.color;
+            context.strokeStyle = resolveCssColor(item.color, "#41a6f6");
             context.lineWidth = 1.25;
             context.beginPath();
 
             const lastIndex = values.length - 1;
+            let started = false;
             for (let i = 0; i < values.length; i += 1) {
                 const value = values[i];
                 if (!Number.isFinite(value)) {
@@ -141,15 +163,26 @@ export const ScopePlot: React.FC<ScopePlotProps> = ({
                 const x = (i / lastIndex) * (width - 1);
                 const t = (value - range.min) / span;
                 const y = height - 1 - t * (height - 1);
-                if (i === 0) {
+                if (!started) {
                     context.moveTo(x, y);
+                    started = true;
                 } else {
                     context.lineTo(x, y);
                 }
             }
 
-            context.stroke();
+            if (started) {
+                context.stroke();
+            }
         });
+
+        if (!emptyLoggedRef.current) {
+            const finiteCount = series.reduce((count, item) => count + finiteValues(item.values).length, 0);
+            if (finiteCount === 0) {
+                console.debug("[scope] no finite samples to draw", { seriesCount: series.length });
+                emptyLoggedRef.current = true;
+            }
+        }
 
         context.restore();
     }, [series, ranges, width, height]);

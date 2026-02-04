@@ -315,7 +315,7 @@ export class ControlSurfaceMessageHandler {
                 }
                 const serialized = JSON.stringify(payload.value ?? null);
                 const expr = `${payload.symbol} = ${serialized}`;
-                this.output.appendLine(`[controlSurface] setSymbol: ${expr}`);
+                //this.output.appendLine(`[controlSurface] setSymbol: ${expr}`);
                 void this.session.eval(expr).catch((error) => {
                     this.output.appendLine(`[controlSurface] setSymbol error: ${String(error)}`);
                 });

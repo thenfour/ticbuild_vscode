@@ -51,20 +51,47 @@ export const ControlSurfaceScopeProp: React.FC<ControlSurfaceScopePropProps> = (
         });
     }, [series, resolvedRateHz, stateApi.state.plotData]);
 
+    const expressions = React.useMemo(() => (
+        (series ?? []).slice(0, MAX_SCOPE_SERIES)
+            .map((entry) => entry.expression)
+            .filter(Boolean)
+    ), [series]);
+
+    const expressionsKey = React.useMemo(
+        () => expressions.join("|"),
+        [expressions],
+    );
+
+    React.useEffect(() => {
+        if (!api || expressions.length === 0) {
+            return;
+        }
+
+        //api.log?.(`[scope] subscribe (${expressions.join(", ")}) @ ${resolvedRateHz}Hz`);
+        expressions.forEach((expression) => api.subscribePlotSeries(expression, resolvedRateHz));
+
+        return () => {
+            //api.log?.(`[scope] unsubscribe (${expressions.join(", ")}) @ ${resolvedRateHz}Hz`);
+            expressions.forEach((expression) => api.unsubscribePlotSeries(expression, resolvedRateHz));
+        };
+    }, [api, expressionsKey, resolvedRateHz]);
+
+    const lastLengthsRef = React.useRef<Record<string, number>>({});
+
     React.useEffect(() => {
         if (!api) {
             return;
         }
-        const expressions = (series ?? []).slice(0, MAX_SCOPE_SERIES)
-            .map((entry) => entry.expression)
-            .filter(Boolean);
-
-        expressions.forEach((expression) => api.subscribePlotSeries(expression, resolvedRateHz));
-
-        return () => {
-            expressions.forEach((expression) => api.unsubscribePlotSeries(expression, resolvedRateHz));
-        };
-    }, [api, series, resolvedRateHz]);
+        expressions.forEach((expression) => {
+            const key = makePlotSeriesKey(expression, resolvedRateHz);
+            const values = stateApi.state.plotData?.[key]?.values ?? [];
+            const prev = lastLengthsRef.current[key];
+            if (prev !== values.length) {
+                lastLengthsRef.current[key] = values.length;
+                //api.log?.(`[scope] data ${expression} @ ${resolvedRateHz}Hz -> ${values.length} samples`);
+            }
+        });
+    }, [api, expressionsKey, resolvedRateHz, stateApi.state.plotData]);
 
     const designTools = designMode
         ? createDesignTools({

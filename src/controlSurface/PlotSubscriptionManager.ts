@@ -56,6 +56,7 @@ type PlotSeriesState = {
     count: number;
     busy: boolean;
     paused: boolean;
+    pausedAt: number | null;
 };
 
 export class PlotSubscriptionManager implements vscode.Disposable {
@@ -105,6 +106,7 @@ export class PlotSubscriptionManager implements vscode.Disposable {
             count: 1,
             busy: false,
             paused: false,
+            pausedAt: null,
         });
         //this.output.appendLine(`[controlSurface] plot subscribe ${expression} @ ${normalized}Hz`);
     }
@@ -152,22 +154,23 @@ export class PlotSubscriptionManager implements vscode.Disposable {
             return;
         }
         existing.paused = paused;
+        existing.pausedAt = paused ? Date.now() : null;
         this.output.appendLine(`[controlSurface] plot ${paused ? "paused" : "resumed"} ${expression} @ ${normalized}Hz`);
     }
 
     getSnapshot(): Record<string, PlotSeriesPayload> {
-        const now = Date.now();
-        const startTime = now - PLOT_WINDOW_MS;
         const payload: Record<string, PlotSeriesPayload> = {};
 
         for (const [key, state] of this.subscriptions.entries()) {
-            const values = this.resample(state.samples, startTime, now, RESAMPLE_COUNT);
+            const endTime = state.paused && state.pausedAt ? state.pausedAt : Date.now();
+            const startTime = endTime - PLOT_WINDOW_MS;
+            const values = this.resample(state.samples, startTime, endTime, RESAMPLE_COUNT);
             payload[key] = {
                 expression: state.expression,
                 rateHz: state.rateHz,
                 values,
                 startTime,
-                endTime: now,
+                endTime,
             };
         }
 

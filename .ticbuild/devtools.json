@@ -74,13 +74,13 @@
           "label": "Scope",
           "series": [
             {
-              "expression": "s"
+              "expression": "math.sin(t*.02)"
             },
             {
-              "expression": "q"
+              "expression": "math.sin(t*.02)+1"
             }
           ],
-          "rateHz": 1
+          "rateHz": 10
         },
         {
           "type": "xy",

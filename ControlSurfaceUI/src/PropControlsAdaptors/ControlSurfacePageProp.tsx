@@ -89,6 +89,8 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
         });
     }, [api, currentPath, stateApi.state.designMode]);
 
+    const shouldAcceptDrop = React.useCallback(() => stateApi.state.designMode, [stateApi.state.designMode]);
+
     return (
         <PropControl.Page
             label={spec.label}
@@ -101,6 +103,7 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
                 groupName="control-surface-controls"
                 orientation="vertical"
                 disabled={!stateApi.state.designMode}
+                shouldAcceptDrop={shouldAcceptDrop}
                 dragHandleSelector=".cs-dnd-handle"
                 onDrop={handleDrop}
                 getChildPayload={(index: number) => ({ sourcePath: buildControlPath(currentPath, index) })}
@@ -181,6 +184,8 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
         });
     }, [api, currentPath, stateApi.state.designMode]);
 
+    const shouldAcceptDrop = React.useCallback(() => stateApi.state.designMode, [stateApi.state.designMode]);
+
     return (
         <PropControl.Page
             label={spec.label}
@@ -193,6 +198,7 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
                 groupName="control-surface-controls"
                 orientation="vertical"
                 disabled={!stateApi.state.designMode}
+                shouldAcceptDrop={shouldAcceptDrop}
                 dragHandleSelector=".cs-dnd-handle"
                 onDrop={handleDrop}
                 getChildPayload={(index: number) => ({ sourcePath: buildControlPath(currentPath, index) })}

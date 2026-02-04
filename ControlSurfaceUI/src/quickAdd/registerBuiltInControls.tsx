@@ -226,11 +226,11 @@ export function registerBuiltInControls() {
     displayName: "Group",
     category: "layout",
     description: "Container for grouping controls",
-    quickAddComponent: (props) => {
+    quickAddComponent: ({ onSubmit }) => {
       const [label, setLabel] = React.useState("");
       React.useEffect(() => {
-        props.onSubmit({ label });
-      }, [label, props]);
+        onSubmit({ label });
+      }, [label, onSubmit]);
       return (
         <div>
           <label style={{ display: "block", marginBottom: "4px" }}>Group Label</label>
@@ -265,11 +265,11 @@ export function registerBuiltInControls() {
     displayName: "Page",
     category: "layout",
     description: "Defines a control surface",
-    quickAddComponent: (props) => {
+    quickAddComponent: ({ onSubmit }) => {
       const [label, setLabel] = React.useState("");
       React.useEffect(() => {
-        props.onSubmit({ label });
-      }, [label, props]);
+        onSubmit({ label });
+      }, [label, onSubmit]);
       return (
         <div>
           <label style={{ display: "block", marginBottom: "4px" }}>Page title</label>
@@ -303,10 +303,10 @@ export function registerBuiltInControls() {
     displayName: "Row",
     category: "layout",
     description: "Horizontal layout container",
-    quickAddComponent: (props) => {
+    quickAddComponent: ({ onSubmit }) => {
       React.useEffect(() => {
-        props.onSubmit({});
-      }, [props]);
+        onSubmit({});
+      }, [onSubmit]);
       return null;
     },
     renderComponent: ControlSurfaceGroup,
@@ -321,10 +321,10 @@ export function registerBuiltInControls() {
     displayName: "Column",
     category: "layout",
     description: "Vertical layout container",
-    quickAddComponent: (props) => {
+    quickAddComponent: ({ onSubmit }) => {
       React.useEffect(() => {
-        props.onSubmit({});
-      }, [props]);
+        onSubmit({});
+      }, [onSubmit]);
       return null;
     },
     renderComponent: ControlSurfaceGroup,
@@ -339,11 +339,11 @@ export function registerBuiltInControls() {
     displayName: "Tabs",
     category: "layout",
     description: "Tabbed container of controls",
-    quickAddComponent: (props) => {
+    quickAddComponent: ({ onSubmit }) => {
       const [labels, setLabels] = React.useState("Tab 1, Tab 2");
       React.useEffect(() => {
-        props.onSubmit({ labels });
-      }, [labels, props]);
+        onSubmit({ labels });
+      }, [labels, onSubmit]);
       return (
         <div>
           <label style={{ display: "block", marginBottom: "4px" }}>Tab Labels</label>

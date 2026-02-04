@@ -118,6 +118,8 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
         });
     }, [api, stateApi.state.designMode]);
 
+    const shouldAcceptDrop = React.useCallback(() => stateApi.state.designMode, [stateApi.state.designMode]);
+
     return (
         <div className={createPropControlClasses({
             designMode: stateApi.state.designMode,
@@ -151,6 +153,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                                 groupName="control-surface-controls"
                                 orientation="vertical"
                                 disabled={!stateApi.state.designMode}
+                                shouldAcceptDrop={shouldAcceptDrop}
                                 dragHandleSelector=".cs-dnd-handle"
                                 onDrop={(dropResult: any) => handleDrop(buildTabPath(parentPath, index), dropResult)}
                                 getChildPayload={(childIndex: number) => ({ sourcePath: buildControlPath(buildTabPath(parentPath, index), childIndex) })}

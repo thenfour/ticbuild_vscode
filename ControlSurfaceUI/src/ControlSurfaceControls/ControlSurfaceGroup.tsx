@@ -166,6 +166,8 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
     });
   }, [api, parentPath, stateApi.state.designMode]);
 
+  const shouldAcceptDrop = React.useCallback(() => stateApi.state.designMode, [stateApi.state.designMode]);
+
   const dndOrientation = layout === "row" ? "horizontal" : "vertical";
 
   //console.log(`group label:${label} withparentpath:`, parentPath, " selected:", selected, " state selected:", stateApi.state.selectedControlPath);
@@ -176,6 +178,7 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
         groupName="control-surface-controls"
         orientation={dndOrientation}
         disabled={!stateApi.state.designMode}
+        shouldAcceptDrop={shouldAcceptDrop}
         dragHandleSelector=".cs-dnd-handle"
         onDrop={handleDrop}
         getChildPayload={(index: number) => ({ sourcePath: buildControlPath(parentPath, index) })}

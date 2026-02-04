@@ -247,6 +247,12 @@ full width available).*/
     flex-direction: column;
 }
 
+/* give empty groups a usable drop target size */
+.cs-pp-control.cs-pp-control-group .cs-pp-group-expanded-content .cs-dnd-container {
+    min-width: var(--cs-pp-control-default-width);
+    min-height: 24px;
+}
+
 .cs-pp-control.cs-pp-control-tabs {
     margin:16px 0;
 }
@@ -269,4 +275,5 @@ full width available).*/
 .smooth-dnd-draggable-wrapper,
 .smooth-dnd-draggable {
     overflow: visible !important;
+    pointer-events: auto !important;
 }

@@ -22,6 +22,7 @@ export interface PropControlKnobProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    copyTools?: React.ReactNode;
     isConnected: boolean;
 }
 
@@ -46,6 +47,7 @@ export const PropControlKnob: React.FC<PropControlKnobProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    copyTools,
     isConnected,
 }) => {
     // Note: size is in the spec but Knob component doesn't currently support it
@@ -62,6 +64,7 @@ export const PropControlKnob: React.FC<PropControlKnobProps> = ({
             bindingStatus={bindingStatus ?? null}
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
+            copyTools={copyTools}
             value={
                 <Knob
                     value={value}

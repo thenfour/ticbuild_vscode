@@ -7,6 +7,7 @@ import { createDesignTools } from "../utils/designTools";
 import { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
 import { AddControlControl } from "../AddControlControl";
 import { buildControlPath } from "../controlPathBase";
+import { collectSymbolsForNodes, copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
 
 export interface ControlSurfacePagePropProps {
     spec: ControlSurfacePageSpec;
@@ -54,6 +55,20 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
         onSettings,
     });
 
+    const symbols = React.useMemo(() => collectSymbolsForNodes(spec.controls), [spec.controls]);
+
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            symbols,
+            stateApi.state.expressionResults ?? {},
+            api.showWarningMessage,
+        );
+    }, [api.showWarningMessage, stateApi.state.expressionResults, symbols]);
+
+    const copyTools = !stateApi.state.designMode
+        ? <PropControl.CopyButton onClick={handleCopy} />
+        : null;
+
     const handleDrop = React.useCallback((dropResult: any) => {
         if (!stateApi.state.designMode) {
             return;
@@ -80,6 +95,7 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
             designMode={stateApi.state.designMode}
             selected={JSON.stringify(stateApi.state.selectedControlPath) === path}
             designTools={designTools}
+            copyTools={copyTools}
         >
             <DndContainer
                 groupName="control-surface-controls"
@@ -135,6 +151,16 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
     options,
     currentPath,
 }) => {
+    const symbols = React.useMemo(() => collectSymbolsForNodes(spec.controls), [spec.controls]);
+
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            symbols,
+            stateApi.state.expressionResults ?? {},
+            api.showWarningMessage,
+        );
+    }, [api.showWarningMessage, stateApi.state.expressionResults, symbols]);
+
     const handleDrop = React.useCallback((dropResult: any) => {
         if (!stateApi.state.designMode) {
             return;
@@ -161,6 +187,7 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
             designMode={stateApi.state.designMode}
             selected={false}
             designTools={null}
+            copyTools={!stateApi.state.designMode ? <PropControl.CopyButton onClick={handleCopy} /> : null}
         >
             <DndContainer
                 groupName="control-surface-controls"

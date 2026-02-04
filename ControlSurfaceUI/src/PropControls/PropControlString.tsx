@@ -16,6 +16,7 @@ export interface PropControlStringProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    copyTools?: React.ReactNode;
     isConnected: boolean;
 }
 
@@ -35,6 +36,7 @@ export const PropControlString: React.FC<PropControlStringProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    copyTools,
     isConnected,
 }) => {
     return (
@@ -48,6 +50,7 @@ export const PropControlString: React.FC<PropControlStringProps> = ({
             bindingStatus={bindingStatus ?? null}
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
+            copyTools={copyTools}
             value={
                 <TextInput
                     value={value}

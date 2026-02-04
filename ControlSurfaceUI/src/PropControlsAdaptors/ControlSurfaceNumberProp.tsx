@@ -1,9 +1,12 @@
 import React from "react";
 import { ControlSurfaceNumberSpec } from "../defs";
 import { PropControlNumber } from "../PropControls/PropControlNumber";
+import { PropControl } from "../PropControlsBase/PropControlShell";
 import { useSymbolBinding } from "../hooks/useSymbolBinding";
 import { useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { createDesignTools } from "../utils/designTools";
+import { copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceNumberPropProps extends ControlSurfaceNumberSpec {
     path: string[];
@@ -29,6 +32,7 @@ export const ControlSurfaceNumberProp: React.FC<ControlSurfaceNumberPropProps> =
     onDelete,
     onSettings,
 }) => {
+    const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
     const { value, onChange, bindingStatus } = useSymbolBinding<number>(symbol, min);
 
@@ -45,6 +49,18 @@ export const ControlSurfaceNumberProp: React.FC<ControlSurfaceNumberPropProps> =
         })
         : null;
 
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            [symbol],
+            stateApi.state.expressionResults ?? {},
+            api?.showWarningMessage,
+        );
+    }, [api?.showWarningMessage, stateApi.state.expressionResults, symbol]);
+
+    const copyTools = !designMode
+        ? <PropControl.CopyButton onClick={handleCopy} />
+        : null;
+
     return (
         <PropControlNumber
             label={label}
@@ -59,6 +75,7 @@ export const ControlSurfaceNumberProp: React.FC<ControlSurfaceNumberPropProps> =
             bindingStatus={bindingStatus}
             bindingStatusSeverity="error"
             designTools={designTools}
+            copyTools={copyTools}
         />
     );
 };

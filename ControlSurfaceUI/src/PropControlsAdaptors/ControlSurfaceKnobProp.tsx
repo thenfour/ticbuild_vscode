@@ -1,9 +1,12 @@
 import React from "react";
 import { ControlSurfaceKnobSpec } from "../defs";
 import { PropControlKnob } from "../PropControls/PropControlKnob";
+import { PropControl } from "../PropControlsBase/PropControlShell";
 import { useSymbolBinding } from "../hooks/useSymbolBinding";
 import { useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { createDesignTools } from "../utils/designTools";
+import { copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceKnobPropProps extends ControlSurfaceKnobSpec {
     path: string[];
@@ -30,6 +33,7 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
     onDelete,
     onSettings,
 }) => {
+    const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
     const { value, onChange, bindingStatus } = useSymbolBinding<number>(symbol, min);
 
@@ -44,6 +48,18 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
             onDelete,
             onSettings,
         })
+        : null;
+
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            [symbol],
+            stateApi.state.expressionResults ?? {},
+            api?.showWarningMessage,
+        );
+    }, [api?.showWarningMessage, stateApi.state.expressionResults, symbol]);
+
+    const copyTools = !designMode
+        ? <PropControl.CopyButton onClick={handleCopy} />
         : null;
 
     return (
@@ -62,6 +78,7 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
             bindingStatus={bindingStatus}
             bindingStatusSeverity="error"
             designTools={designTools}
+            copyTools={copyTools}
         />
     );
 };

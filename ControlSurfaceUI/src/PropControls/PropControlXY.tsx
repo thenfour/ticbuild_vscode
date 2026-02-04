@@ -29,6 +29,7 @@ export interface PropControlXYProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    copyTools?: React.ReactNode;
     isConnected: boolean;
 }
 
@@ -59,6 +60,7 @@ export const PropControlXY: React.FC<PropControlXYProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    copyTools,
     isConnected,
 }) => {
     return (
@@ -72,6 +74,7 @@ export const PropControlXY: React.FC<PropControlXYProps> = ({
             bindingStatus={bindingStatus ?? null}
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
+            copyTools={copyTools}
             value={
                 <XY2
                     valueX={valueX}

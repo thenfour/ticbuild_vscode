@@ -19,6 +19,7 @@ export interface PropControlNumberProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    copyTools?: React.ReactNode;
     isConnected: boolean;
 }
 
@@ -41,6 +42,7 @@ export const PropControlNumber: React.FC<PropControlNumberProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    copyTools,
     isConnected,
 }) => {
 
@@ -68,6 +70,7 @@ export const PropControlNumber: React.FC<PropControlNumberProps> = ({
             bindingStatus={bindingStatus ?? null}
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
+            copyTools={copyTools}
             value={
                 canRender &&
                 <NumericUpDown

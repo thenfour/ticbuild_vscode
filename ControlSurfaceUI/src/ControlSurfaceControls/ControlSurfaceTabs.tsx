@@ -24,6 +24,8 @@ import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 import { ControlSurfaceStateApi, useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { createDesignTools, createPropControlClasses } from "../utils/designTools";
+import { PropControl } from "../PropControlsBase/PropControlShell";
+import { collectSymbolsForTabs, copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
 
 export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     renderControl: (
@@ -82,6 +84,20 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
         })
         : null;
 
+    const symbols = React.useMemo(() => collectSymbolsForTabs(tabs), [tabs]);
+
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            symbols,
+            stateApi.state.expressionResults ?? {},
+            api?.showWarningMessage,
+        );
+    }, [api?.showWarningMessage, stateApi.state.expressionResults, symbols]);
+
+    const copyTools = !stateApi.state.designMode
+        ? <PropControl.CopyButton onClick={handleCopy} />
+        : null;
+
     const handleDrop = React.useCallback((tabPath: string[], dropResult: any) => {
         if (!api || !stateApi.state.designMode) {
             return;
@@ -112,6 +128,11 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
             {stateApi.state.designMode && designTools ? (
                 <ButtonGroup className="cs-pp-design-tools">
                     {designTools}
+                </ButtonGroup>
+            ) : null}
+            {!stateApi.state.designMode && copyTools ? (
+                <ButtonGroup className="cs-pp-copy-tools">
+                    {copyTools}
                 </ButtonGroup>
             ) : null}
             <TabPanel

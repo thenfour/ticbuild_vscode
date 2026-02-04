@@ -1,9 +1,12 @@
 import React from "react";
 import { ControlSurfaceStringSpec } from "../defs";
 import { PropControlString } from "../PropControls/PropControlString";
+import { PropControl } from "../PropControlsBase/PropControlShell";
 import { useSymbolBinding } from "../hooks/useSymbolBinding";
 import { useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { createDesignTools } from "../utils/designTools";
+import { copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceStringPropProps extends ControlSurfaceStringSpec {
     path: string[];
@@ -26,6 +29,7 @@ export const ControlSurfaceStringProp: React.FC<ControlSurfaceStringPropProps> =
     onDelete,
     onSettings,
 }) => {
+    const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
     const { value, onChange, bindingStatus } = useSymbolBinding<string>(symbol, "");
 
@@ -42,6 +46,18 @@ export const ControlSurfaceStringProp: React.FC<ControlSurfaceStringPropProps> =
         })
         : null;
 
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            [symbol],
+            stateApi.state.expressionResults ?? {},
+            api?.showWarningMessage,
+        );
+    }, [api?.showWarningMessage, stateApi.state.expressionResults, symbol]);
+
+    const copyTools = !designMode
+        ? <PropControl.CopyButton onClick={handleCopy} />
+        : null;
+
     return (
         <PropControlString
             label={label}
@@ -53,6 +69,7 @@ export const ControlSurfaceStringProp: React.FC<ControlSurfaceStringPropProps> =
             bindingStatus={bindingStatus}
             bindingStatusSeverity="error"
             designTools={designTools}
+            copyTools={copyTools}
         />
     );
 };

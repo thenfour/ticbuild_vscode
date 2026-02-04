@@ -17,6 +17,7 @@ export interface PropControlEnumButtonsProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    copyTools?: React.ReactNode;
     isConnected: boolean;
 }
 
@@ -37,6 +38,7 @@ export const PropControlEnumButtons: React.FC<PropControlEnumButtonsProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    copyTools,
     isConnected,
 }) => {
     return (
@@ -50,6 +52,7 @@ export const PropControlEnumButtons: React.FC<PropControlEnumButtonsProps> = ({
             bindingStatus={bindingStatus ?? null}
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
+            copyTools={copyTools}
             value={
                 <EnumButtons
                     options={options}

@@ -19,6 +19,7 @@ export interface PropControlSliderProps {
     bindingStatus?: React.ReactNode;
     bindingStatusSeverity?: PropControlSeverity;
     designTools?: React.ReactNode;
+    copyTools?: React.ReactNode;
     isConnected: boolean;
 }
 
@@ -41,6 +42,7 @@ export const PropControlSlider: React.FC<PropControlSliderProps> = ({
     bindingStatus,
     bindingStatusSeverity,
     designTools,
+    copyTools,
     isConnected
 }) => {
     return (
@@ -54,6 +56,7 @@ export const PropControlSlider: React.FC<PropControlSliderProps> = ({
             bindingStatus={bindingStatus ?? null}
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
+            copyTools={copyTools}
             value={
                 <Slider2
                     value={value}

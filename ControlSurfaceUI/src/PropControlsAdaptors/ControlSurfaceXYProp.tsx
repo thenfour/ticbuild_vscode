@@ -1,9 +1,12 @@
 import React from "react";
 import { ControlSurfaceXYSpec } from "../defs";
 import { PropControlXY } from "../PropControls/PropControlXY";
+import { PropControl } from "../PropControlsBase/PropControlShell";
 import { useSymbolBinding } from "../hooks/useSymbolBinding";
 import { useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { createDesignTools } from "../utils/designTools";
+import { copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceXYPropProps extends ControlSurfaceXYSpec {
     path: string[];
@@ -27,6 +30,7 @@ export const ControlSurfaceXYProp: React.FC<ControlSurfaceXYPropProps> = ({
     onDelete,
     onSettings,
 }) => {
+    const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
 
     const minX = x.min ?? 0;
@@ -67,6 +71,18 @@ export const ControlSurfaceXYProp: React.FC<ControlSurfaceXYPropProps> = ({
         }
     }, [xBinding, yBinding]);
 
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            [x.symbol, y.symbol],
+            stateApi.state.expressionResults ?? {},
+            api?.showWarningMessage,
+        );
+    }, [api?.showWarningMessage, stateApi.state.expressionResults, x.symbol, y.symbol]);
+
+    const copyTools = !designMode
+        ? <PropControl.CopyButton onClick={handleCopy} />
+        : null;
+
     return (
         <PropControlXY
             label={label}
@@ -89,6 +105,7 @@ export const ControlSurfaceXYProp: React.FC<ControlSurfaceXYPropProps> = ({
             bindingStatus={bindingStatus}
             bindingStatusSeverity="error"
             designTools={designTools}
+            copyTools={copyTools}
         />
     );
 };

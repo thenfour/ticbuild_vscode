@@ -1,9 +1,12 @@
 import React from "react";
 import { ControlSurfaceSliderSpec } from "../defs";
 import { PropControlSlider } from "../PropControls/PropControlSlider";
+import { PropControl } from "../PropControlsBase/PropControlShell";
 import { useSymbolBinding } from "../hooks/useSymbolBinding";
 import { useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { createDesignTools } from "../utils/designTools";
+import { copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceSliderPropProps extends ControlSurfaceSliderSpec {
     path: string[];
@@ -29,6 +32,7 @@ export const ControlSurfaceSliderProp: React.FC<ControlSurfaceSliderPropProps> =
     onDelete,
     onSettings,
 }) => {
+    const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
     const { value, onChange, bindingStatus } = useSymbolBinding<number>(symbol, min);
 
@@ -45,6 +49,18 @@ export const ControlSurfaceSliderProp: React.FC<ControlSurfaceSliderPropProps> =
         })
         : null;
 
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            [symbol],
+            stateApi.state.expressionResults ?? {},
+            api?.showWarningMessage,
+        );
+    }, [api?.showWarningMessage, stateApi.state.expressionResults, symbol]);
+
+    const copyTools = !designMode
+        ? <PropControl.CopyButton onClick={handleCopy} />
+        : null;
+
     return (
         <PropControlSlider
             label={label}
@@ -59,6 +75,7 @@ export const ControlSurfaceSliderProp: React.FC<ControlSurfaceSliderPropProps> =
             bindingStatus={bindingStatus}
             bindingStatusSeverity="error"
             designTools={designTools}
+            copyTools={copyTools}
         />
     );
 };

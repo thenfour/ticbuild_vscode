@@ -1,9 +1,12 @@
 import React from "react";
 import { ControlSurfaceToggleSpec } from "../defs";
 import { PropControlToggle } from "../PropControls/PropControlToggle";
+import { PropControl } from "../PropControlsBase/PropControlShell";
 import { useSymbolBinding } from "../hooks/useSymbolBinding";
 import { useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { createDesignTools } from "../utils/designTools";
+import { copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceTogglePropProps extends ControlSurfaceToggleSpec {
     path: string[];
@@ -26,6 +29,7 @@ export const ControlSurfaceToggleProp: React.FC<ControlSurfaceTogglePropProps> =
     onDelete,
     onSettings,
 }) => {
+    const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
     const { value, onChange, bindingStatus } = useSymbolBinding<boolean>(symbol, false);
 
@@ -42,6 +46,18 @@ export const ControlSurfaceToggleProp: React.FC<ControlSurfaceTogglePropProps> =
         })
         : null;
 
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            [symbol],
+            stateApi.state.expressionResults ?? {},
+            api?.showWarningMessage,
+        );
+    }, [api?.showWarningMessage, stateApi.state.expressionResults, symbol]);
+
+    const copyTools = !designMode
+        ? <PropControl.CopyButton onClick={handleCopy} />
+        : null;
+
     return (
         <PropControlToggle
             label={label}
@@ -53,6 +69,7 @@ export const ControlSurfaceToggleProp: React.FC<ControlSurfaceTogglePropProps> =
             bindingStatus={bindingStatus}
             bindingStatusSeverity="error"
             designTools={designTools}
+            copyTools={copyTools}
         />
     );
 };

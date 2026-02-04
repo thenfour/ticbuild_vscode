@@ -1,9 +1,12 @@
 import React from "react";
 import { ControlSurfaceEnumButtonsSpec } from "../defs";
 import { PropControlEnumButtons } from "../PropControls/PropControlEnumButtons";
+import { PropControl } from "../PropControlsBase/PropControlShell";
 import { useSymbolBinding } from "../hooks/useSymbolBinding";
 import { useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { createDesignTools } from "../utils/designTools";
+import { copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceEnumButtonsPropProps extends ControlSurfaceEnumButtonsSpec {
     path: string[];
@@ -27,6 +30,7 @@ export const ControlSurfaceEnumButtonsProp: React.FC<ControlSurfaceEnumButtonsPr
     onDelete,
     onSettings,
 }) => {
+    const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
     const defaultValue = options[0]?.value ?? "";
     const { value, onChange, bindingStatus } = useSymbolBinding<string | number>(symbol, defaultValue);
@@ -44,6 +48,18 @@ export const ControlSurfaceEnumButtonsProp: React.FC<ControlSurfaceEnumButtonsPr
         })
         : null;
 
+    const handleCopy = React.useCallback(() => {
+        void copyLuaAssignmentsToClipboard(
+            [symbol],
+            stateApi.state.expressionResults ?? {},
+            api?.showWarningMessage,
+        );
+    }, [api?.showWarningMessage, stateApi.state.expressionResults, symbol]);
+
+    const copyTools = !designMode
+        ? <PropControl.CopyButton onClick={handleCopy} />
+        : null;
+
     return (
         <PropControlEnumButtons
             label={label}
@@ -56,6 +72,7 @@ export const ControlSurfaceEnumButtonsProp: React.FC<ControlSurfaceEnumButtonsPr
             bindingStatus={bindingStatus}
             bindingStatusSeverity="error"
             designTools={designTools}
+            copyTools={copyTools}
         />
     );
 };

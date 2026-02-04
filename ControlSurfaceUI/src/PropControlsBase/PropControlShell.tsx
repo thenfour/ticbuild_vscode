@@ -32,7 +32,7 @@ it's not related to design mode.
 - We display design tools (move up/down, delete, settings) in design mode as an overlay.
 
 */
-import { mdiCog, mdiDelete, mdiMenuDown, mdiMenuUp, mdiDrag } from "@mdi/js";
+import { mdiCog, mdiDelete, mdiMenuDown, mdiMenuUp, mdiDrag, mdiContentCopy } from "@mdi/js";
 import React from "react";
 import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { IconButton } from "../Buttons/IconButton";
@@ -85,6 +85,19 @@ export const PropControlDesignToolButton: React.FC<PropControlDesignToolButtonPr
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
+interface PropControlCopyButtonProps {
+    onClick?: () => void;
+}
+
+export const PropControlCopyButton: React.FC<PropControlCopyButtonProps> = ({ onClick }) => (
+    <IconButton
+        className="cs-pp-design-tool-button cs-prop-control-copy-tool-button"
+        onClick={onClick}
+        iconPath={mdiContentCopy}
+    />
+);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 interface PropControlShellProps {
     designMode: boolean;
     selected: boolean; // in design mode
@@ -98,6 +111,7 @@ interface PropControlShellProps {
     label: React.ReactNode; // can be null; empty label
     value: React.ReactNode; // can be null and the value is not shown.
     designTools?: React.ReactNode; // only show in design mode, on hover, or when selected.
+    copyTools?: React.ReactNode; // only show when not in design mode, on hover.
 
     isConnected: boolean; // if not connected, don't show errors.
 }
@@ -143,9 +157,16 @@ const PropControlShell: React.FC<PropControlShellProps> = (props) => {
                     {bindingStatus}
                 </div>}
             </div>
-            {props.designMode && props.designTools && <ButtonGroup className="cs-pp-design-tools">
-                {props.designTools}
-            </ButtonGroup>}
+            {props.designMode && props.designTools && (
+                <ButtonGroup className="cs-pp-design-tools">
+                    {props.designTools}
+                </ButtonGroup>
+            )}
+            {!props.designMode && props.copyTools && (
+                <ButtonGroup className="cs-pp-copy-tools">
+                    {props.copyTools}
+                </ButtonGroup>
+            )}
         </div>
     );
 };
@@ -163,6 +184,7 @@ interface PropControlPageProps {
 
     label: React.ReactNode; // can be null; empty label
     designTools?: React.ReactNode; // only show in design mode, on hover, or when selected.
+    copyTools?: React.ReactNode; // only show when not in design mode, on hover.
 
     children?: React.ReactNode;
 }
@@ -186,6 +208,9 @@ const PropControlPage: React.FC<PropControlPageProps> = (props) => {
             {props.designMode && props.designTools && <ButtonGroup className="cs-pp-design-tools">
                 {props.designMode && props.designTools}
             </ButtonGroup>}
+            {!props.designMode && props.copyTools && <ButtonGroup className="cs-pp-copy-tools">
+                {props.copyTools}
+            </ButtonGroup>}
         </div>
         <div className="cs-pp-control-page-content cs-pp-control-column-content">
             {props.children}
@@ -201,6 +226,7 @@ interface PropControlColumnProps {
 
     label: React.ReactNode; // can be null; empty label
     designTools?: React.ReactNode; // only show in design mode, on hover, or when selected.
+    copyTools?: React.ReactNode; // only show when not in design mode, on hover.
 
     children?: React.ReactNode;
 }
@@ -223,6 +249,9 @@ const PropControlColumn: React.FC<PropControlColumnProps> = (props) => {
             <div className="cs-pp-control-column-label">{props.label}</div>
             {props.designMode && props.designTools && <ButtonGroup className="cs-pp-design-tools">
                 {props.designMode && props.designTools}
+            </ButtonGroup>}
+            {!props.designMode && props.copyTools && <ButtonGroup className="cs-pp-copy-tools">
+                {props.copyTools}
             </ButtonGroup>}
         </div>
         <div className="cs-pp-control-column-content">
@@ -249,6 +278,7 @@ interface PropControlRowProps {
 
     label: React.ReactNode; // can be null; empty label
     designTools?: React.ReactNode; // only show in design mode, on hover, or when selected.
+    copyTools?: React.ReactNode; // only show when not in design mode, on hover.
 
     children?: React.ReactNode;
 }
@@ -271,6 +301,9 @@ const PropControlRow: React.FC<PropControlRowProps> = (props) => {
             <div className="cs-pp-control-row-label">{props.label}</div>
             {props.designMode && props.designTools && <ButtonGroup className="cs-pp-design-tools">
                 {props.designMode && props.designTools}
+            </ButtonGroup>}
+            {!props.designMode && props.copyTools && <ButtonGroup className="cs-pp-copy-tools">
+                {props.copyTools}
             </ButtonGroup>}
         </div>
         <div className="cs-pp-control-row-content">
@@ -295,4 +328,5 @@ export const PropControl = {
     Page: PropControlPage,
     Root: PropControlRoot,
     DesignToolButton: PropControlDesignToolButton,
+    CopyButton: PropControlCopyButton,
 };

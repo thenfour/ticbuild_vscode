@@ -18,6 +18,8 @@ import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 import { ControlSurfaceStateApi, useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { createDesignTools, createPropControlClasses } from "../utils/designTools";
 import { buildControlPath } from "../controlPathBase";
+import { PropControl } from "../PropControlsBase/PropControlShell";
+import { collectSymbolsForNodes, copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
 
 
 export interface ControlSurfaceGroupBaseProps {
@@ -26,6 +28,7 @@ export interface ControlSurfaceGroupBaseProps {
   designMode: boolean;
   selected: boolean;
   designTools?: React.ReactNode;
+  copyTools?: React.ReactNode;
   children?: React.ReactNode;
 }
 
@@ -36,6 +39,7 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
   designMode,
   selected,
   designTools,
+  copyTools,
   children,
 }) => {
 
@@ -54,6 +58,11 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
       {designMode && designTools ? (
         <ButtonGroup className="cs-pp-design-tools">
           {designTools}
+        </ButtonGroup>
+      ) : null}
+      {!designMode && copyTools ? (
+        <ButtonGroup className="cs-pp-copy-tools">
+          {copyTools}
         </ButtonGroup>
       ) : null}
 
@@ -121,6 +130,20 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
     })
     : null;
 
+  const symbols = React.useMemo(() => collectSymbolsForNodes(controls), [controls]);
+
+  const handleCopy = React.useCallback(() => {
+    void copyLuaAssignmentsToClipboard(
+      symbols,
+      stateApi.state.expressionResults ?? {},
+      api?.showWarningMessage,
+    );
+  }, [api?.showWarningMessage, stateApi.state.expressionResults, symbols]);
+
+  const copyTools = !stateApi.state.designMode
+    ? <PropControl.CopyButton onClick={handleCopy} />
+    : null;
+
   const selected = JSON.stringify(stateApi.state.selectedControlPath) === JSON.stringify(parentPath);
 
   const handleDrop = React.useCallback((dropResult: any) => {
@@ -154,6 +177,7 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
     designMode={stateApi.state.designMode}
     selected={selected}
     designTools={designTools}
+    copyTools={copyTools}
   >
     <DndContainer
       groupName="control-surface-controls"

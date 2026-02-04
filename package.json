@@ -1,7 +1,7 @@
 {
   "name": "ticbuild-vs-code",
-  "description": "TIC-80 + ticbuild support: syntax highlighting and control surface for VS Code",
-  "displayName": "TIC-80 ticbuild platform",
+  "description": "ticbuild extension for VS Code - control surface and syntax highlighting for TIC-80 development & debugging",
+  "displayName": "TIC-80 ticbuild development & debugging control surface",
   "version": "0.0.4",
   "main": "./out/extension.js",
   "author": {

@@ -14,6 +14,15 @@
     width: var(--cs-pp-control-default-width);
 }
 
+/* control containers should allow expanding to fit children, but only
+the width of the children and nothing more (width:auto is expanding to the
+full width available).*/
+.cs-pp-control-container {
+    width: fit-content;
+    max-width: 100%;
+    align-self: flex-start;
+}
+
 .pp-root .cs-pp-control-column {
     display:flex;
     flex-direction: column;

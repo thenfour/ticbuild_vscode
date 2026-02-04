@@ -15,6 +15,7 @@ import {
   TabsPropertiesPanel,
   TogglePropertiesPanel,
   TriggerButtonPropertiesPanel,
+  XYPropertiesPanel,
 } from "../ControlSurfacePropertiesPanels";
 import { ControlSurfaceDividerProp } from "../PropControlsAdaptors/ControlSurfaceDividerProp";
 import { ControlSurfaceEnumButtonsProp } from "../PropControlsAdaptors/ControlSurfaceEnumButtonsProp";
@@ -26,7 +27,9 @@ import { ControlSurfaceSliderProp } from "../PropControlsAdaptors/ControlSurface
 import { ControlSurfaceStringProp } from "../PropControlsAdaptors/ControlSurfaceStringProp";
 import { ControlSurfaceToggleProp } from "../PropControlsAdaptors/ControlSurfaceToggleProp";
 import { ControlSurfaceTriggerButtonProp } from "../PropControlsAdaptors/ControlSurfaceTriggerButtonProp";
+import { ControlSurfaceXYProp } from "../PropControlsAdaptors/ControlSurfaceXYProp";
 import { SymbolQuickAdd } from "./SymbolQuickAdd";
+import { XYQuickAdd } from "./XYQuickAdd";
 
 export function registerBuiltInControls() {
 
@@ -63,6 +66,32 @@ export function registerBuiltInControls() {
       min: 0,
       max: 100,
       step: 1,
+    }),
+  });
+
+  ControlRegistry.register({
+    type: "xy",
+    displayName: "XY",
+    category: "input",
+    description: "2D control for paired numeric input",
+    quickAddComponent: XYQuickAdd,
+    renderComponent: ControlSurfaceXYProp,
+    propertiesPanelComponent: XYPropertiesPanel,
+    createDefaultSpec: (data) => ({
+      type: "xy",
+      label: data.label || "XY",
+      x: {
+        symbol: data.xSymbol || "x",
+        min: 0,
+        max: 100,
+        step: 1,
+      },
+      y: {
+        symbol: data.ySymbol || "y",
+        min: 0,
+        max: 100,
+        step: 1,
+      },
     }),
   });
 

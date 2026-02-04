@@ -46,6 +46,15 @@ function extractSymbols(nodes: DevtoolsControlNode[]): Set<string> {
             symbols.add(node.symbol);
         }
 
+        if (node.type === 'xy') {
+            if (node.x?.symbol) {
+                symbols.add(node.x.symbol);
+            }
+            if (node.y?.symbol) {
+                symbols.add(node.y.symbol);
+            }
+        }
+
         // Recursively visit children
         if ('controls' in node && Array.isArray(node.controls)) {
             node.controls.forEach(visit);

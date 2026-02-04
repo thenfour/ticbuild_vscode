@@ -1,0 +1,84 @@
+/* XY2 Component Styles */
+
+.somatic-xy {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    user-select: none;
+}
+
+.somatic-xy-surface {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    background: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 6px;
+    box-sizing: border-box;
+    cursor: crosshair;
+}
+
+.somatic-xy-center {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.somatic-xy-center-line {
+    position: absolute;
+    background: var(--vscode-foreground);
+    opacity: 0.6;
+}
+
+.somatic-xy-center-line--h {
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    transform: translateY(-50%);
+}
+
+.somatic-xy-center-line--v {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+}
+
+.somatic-xy-thumb {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--vscode-button-background);
+    border: 1px solid var(--vscode-button-background);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.somatic-xy-value {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--vscode-foreground);
+    font-variant-numeric: tabular-nums;
+}
+
+.somatic-xy-value-sep {
+    opacity: 0.5;
+}
+
+/* Disabled State */
+
+.somatic-xy:has([aria-disabled="true"]) {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.somatic-xy:has([aria-disabled="true"]) .somatic-xy-surface {
+    cursor: not-allowed;
+}

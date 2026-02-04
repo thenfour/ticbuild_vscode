@@ -13,6 +13,7 @@ import { ControlSurfaceSliderProp } from "./PropControlsAdaptors/ControlSurfaceS
 import { ControlSurfaceStringProp } from "./PropControlsAdaptors/ControlSurfaceStringProp";
 import { ControlSurfaceToggleProp } from "./PropControlsAdaptors/ControlSurfaceToggleProp";
 import { ControlSurfaceTriggerButtonProp } from "./PropControlsAdaptors/ControlSurfaceTriggerButtonProp";
+import { ControlSurfaceXYProp } from "./PropControlsAdaptors/ControlSurfaceXYProp";
 
 export type ControlSurfaceRenderOptions = {
     parentPath: string[] | undefined; // the "root page" has no parent path.
@@ -133,6 +134,19 @@ export const renderControlSurfaceControl = (
             return (
                 <ControlSurfaceSliderProp
                     key={`slider-${index}`}
+                    {...node}
+                    path={currentPath}
+                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
+                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
+                    onDelete={() => handleDelete?.(currentPath)}
+                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                />
+            );
+
+        case "xy":
+            return (
+                <ControlSurfaceXYProp
+                    key={`xy-${index}`}
                     {...node}
                     path={currentPath}
                     onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}

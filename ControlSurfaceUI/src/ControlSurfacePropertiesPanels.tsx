@@ -4,6 +4,7 @@ import {
     ControlSurfaceNode,
     ControlSurfaceKnobSpec,
     ControlSurfaceSliderSpec,
+    ControlSurfaceXYSpec,
     ControlSurfaceToggleSpec,
     ControlSurfaceNumberSpec,
     ControlSurfaceStringSpec,
@@ -129,6 +130,62 @@ export const SliderPropertiesPanel: React.FC<{ node: ControlSurfaceSliderSpec; o
         <FieldRow label="Step">
             <NumberInput value={node.step} onChange={(step) => onChange({ ...node, step })} />
         </FieldRow>
+    </div>
+);
+
+export const XYPropertiesPanel: React.FC<{ node: ControlSurfaceXYSpec; onChange: (node: ControlSurfaceNode) => void }> = ({ node, onChange }) => (
+    <div>
+        <FieldRow label="Label">
+            <TextInput value={node.label} onChange={(label) => onChange({ ...node, label })} />
+        </FieldRow>
+        <fieldset>
+            <legend>X Axis</legend>
+            <FieldRow label="Symbol">
+                <TextInput value={node.x.symbol} onChange={(symbol) => onChange({ ...node, x: { ...node.x, symbol } })} />
+            </FieldRow>
+            <FieldRow label="Insert global symbol">
+                <GlobalSymbolDropdown
+                    placeholderLabel="Insert global symbol"
+                    onSelect={(symbol) => onChange({ ...node, x: { ...node.x, symbol: insertSymbol(node.x.symbol, symbol) } })}
+                />
+            </FieldRow>
+            <FieldRow label="Min">
+                <NumberInput value={node.x.min} onChange={(min) => onChange({ ...node, x: { ...node.x, min } })} />
+            </FieldRow>
+            <FieldRow label="Max">
+                <NumberInput value={node.x.max} onChange={(max) => onChange({ ...node, x: { ...node.x, max } })} />
+            </FieldRow>
+            <FieldRow label="Step">
+                <NumberInput value={node.x.step} onChange={(step) => onChange({ ...node, x: { ...node.x, step } })} />
+            </FieldRow>
+            <FieldRow label="Center">
+                <NumberInput value={node.x.center} onChange={(center) => onChange({ ...node, x: { ...node.x, center } })} />
+            </FieldRow>
+        </fieldset>
+        <fieldset>
+            <legend>Y Axis</legend>
+            <FieldRow label="Symbol">
+                <TextInput value={node.y.symbol} onChange={(symbol) => onChange({ ...node, y: { ...node.y, symbol } })} />
+            </FieldRow>
+            <FieldRow label="Insert global symbol">
+                <GlobalSymbolDropdown
+                    placeholderLabel="Insert global symbol"
+                    onSelect={(symbol) => onChange({ ...node, y: { ...node.y, symbol: insertSymbol(node.y.symbol, symbol) } })}
+                />
+            </FieldRow>
+            <FieldRow label="Min">
+                <NumberInput value={node.y.min} onChange={(min) => onChange({ ...node, y: { ...node.y, min } })} />
+            </FieldRow>
+            <FieldRow label="Max">
+                <NumberInput value={node.y.max} onChange={(max) => onChange({ ...node, y: { ...node.y, max } })} />
+            </FieldRow>
+            <FieldRow label="Step">
+                <NumberInput value={node.y.step} onChange={(step) => onChange({ ...node, y: { ...node.y, step } })} />
+            </FieldRow>
+            <FieldRow label="Center">
+                <NumberInput value={node.y.center} onChange={(center) => onChange({ ...node, y: { ...node.y, center } })} />
+            </FieldRow>
+        </fieldset>
     </div>
 );
 

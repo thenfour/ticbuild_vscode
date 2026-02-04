@@ -87,6 +87,22 @@ export type ControlSurfaceSliderSpec = ControlSurfaceScalarCommonSpec & {
     type: "slider";
 };
 
+export type ControlSurfaceAxisSpec = {
+    symbol: string;
+    min?: number;
+    max?: number;
+    step?: number;
+    center?: number;
+};
+
+export type ControlSurfaceXYSpec = {
+    type: "xy";
+    label: string;
+    size?: ControlSurfaceKnobSizeSpec;
+    x: ControlSurfaceAxisSpec;
+    y: ControlSurfaceAxisSpec;
+};
+
 export type ControlSurfaceGroupSpec = {
     type: "group";
     label?: string;
@@ -143,6 +159,7 @@ export type ControlSurfaceNode =
     | ControlSurfaceKnobSpec
     | ControlSurfaceTriggerButtonSpec
     | ControlSurfaceSliderSpec
+    | ControlSurfaceXYSpec
     | ControlSurfaceToggleSpec
     | ControlSurfacePageSpec
     | ControlSurfaceGroupSpec

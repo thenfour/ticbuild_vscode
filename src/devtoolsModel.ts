@@ -37,6 +37,28 @@ export type DevtoolsControlNode =
         [key: string]: unknown;
     }
     | {
+        type: 'xy';
+        label?: string;
+        size?: 'small' | 'medium' | 'large';
+        x: {
+            symbol: string;
+            min?: number;
+            max?: number;
+            step?: number;
+            center?: number;
+            [key: string]: unknown;
+        };
+        y: {
+            symbol: string;
+            min?: number;
+            max?: number;
+            step?: number;
+            center?: number;
+            [key: string]: unknown;
+        };
+        [key: string]: unknown;
+    }
+    | {
         type: 'toggle';
         label?: string;
         symbol: string;
@@ -202,6 +224,40 @@ const devtoolsSchema = {
                         step: { type: 'number' },
                     },
                     required: ['type', 'symbol'],
+                },
+                {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                        type: { const: 'xy' },
+                        label: { type: 'string' },
+                        size: { type: 'string', enum: ['small', 'medium', 'large'] },
+                        x: {
+                            type: 'object',
+                            properties: {
+                                symbol: { type: 'string', minLength: 1 },
+                                min: { type: 'number' },
+                                max: { type: 'number' },
+                                step: { type: 'number' },
+                                center: { type: 'number' },
+                            },
+                            required: ['symbol'],
+                            additionalProperties: true,
+                        },
+                        y: {
+                            type: 'object',
+                            properties: {
+                                symbol: { type: 'string', minLength: 1 },
+                                min: { type: 'number' },
+                                max: { type: 'number' },
+                                step: { type: 'number' },
+                                center: { type: 'number' },
+                            },
+                            required: ['symbol'],
+                            additionalProperties: true,
+                        },
+                    },
+                    required: ['type', 'x', 'y'],
                 },
                 {
                     type: 'object',

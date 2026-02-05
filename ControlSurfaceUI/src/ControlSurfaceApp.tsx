@@ -116,10 +116,15 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   }, [resolvedSelection, selectedPathKey, draftDirty, draftPathKey]);
 
   React.useEffect(() => {
-    if (!designMode && stateApi.state.selectedControlPath) {
-      setSelectedControlPath(null);
+    if (!designMode) {
+      if (stateApi.state.selectedControlPath) {
+        setSelectedControlPath(null);
+      }
+      if (stateApi.state.moveDestinationPath) {
+        stateApi.setMoveDestinationPath(null);
+      }
     }
-  }, [designMode, stateApi.state.selectedControlPath, setSelectedControlPath]);
+  }, [designMode, stateApi.state.selectedControlPath, stateApi.state.moveDestinationPath, setSelectedControlPath, stateApi]);
 
   const handleApplyDraft = React.useCallback(() => {
     if (!draftNode || !stateApi.state.selectedControlPath) {
@@ -193,13 +198,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
         <CheckboxButton
           checked={designMode}
           onChange={() => {
-            setDesignMode((value) => {
-              const next = !value;
-              if (!next) {
-                setSelectedControlPath(null);
-              }
-              return next;
-            });
+            setDesignMode((value) => !value);
           }}
         >
           Design Mode
@@ -255,6 +254,13 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             currentPath={stateApi.activePagePath}
             renderControl={renderControlSurfaceControl}
             isMoveDestination={isMoveDestination}
+            onSetMoveDestination={() => {
+              if (isMoveDestination) {
+                stateApi.setMoveDestinationPath(null);
+              } else {
+                stateApi.setMoveDestinationPath(stateApi.activePagePath);
+              }
+            }}
             options={{
               parentPath: [CONTROL_PATH_ROOT], // hm i think this is not correct; pages can be ANYWHERE in the hierarchy.
               onSelectPath: (path) => setSelectedControlPath(path),

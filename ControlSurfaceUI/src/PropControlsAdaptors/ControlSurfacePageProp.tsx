@@ -148,6 +148,7 @@ export interface ControlSurfaceRootPagePropProps {
     options: ControlSurfaceRenderOptions;
     currentPath: string[];
     isMoveDestination: boolean;
+    onSetMoveDestination?: () => void;
 }
 
 export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProps> = ({
@@ -158,6 +159,7 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
     options,
     currentPath,
     isMoveDestination,
+    onSetMoveDestination,
 }) => {
     const symbols = React.useMemo(() => collectSymbolsForNodes(spec.controls), [spec.controls]);
 
@@ -168,6 +170,14 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
             api.showWarningMessage,
         );
     }, [api.showWarningMessage, stateApi.state.expressionResults, symbols]);
+
+    const designTools = createDesignTools({
+        onDelete: undefined,
+        onSettings: undefined,
+        onMoveToDestination: undefined,
+        onSetMoveDestination,
+        includeDragHandle: false,
+    });
 
     const handleDrop = React.useCallback((dropResult: any) => {
         if (!stateApi.state.designMode) {
@@ -196,7 +206,7 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
             label={spec.label}
             designMode={stateApi.state.designMode}
             selected={false}
-            designTools={null}
+            designTools={designTools}
             copyTools={!stateApi.state.designMode ? <PropControl.CopyButton onClick={handleCopy} /> : null}
             isMoveDestination={isMoveDestination}
         >

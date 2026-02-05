@@ -291,4 +291,7 @@ full width available).*/
 .smooth-dnd-draggable {
     overflow: visible !important;
     pointer-events: auto !important;
+
+    /* this is really the only place i can easily add gaps because smooth-dnd render in tree as table/tablecell*/
+    padding: 0 3px;
 }

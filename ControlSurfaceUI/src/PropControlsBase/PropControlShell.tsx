@@ -99,11 +99,13 @@ interface PropControlCopyButtonProps {
 }
 
 export const PropControlCopyButton: React.FC<PropControlCopyButtonProps> = ({ onClick }) => (
-    <IconButton
-        className="cs-pp-design-tool-button cs-prop-control-copy-tool-button"
-        onClick={onClick}
-        iconPath={mdiContentCopy}
-    />
+    <Tooltip title="Copy Lua values to Clipboard">
+        <IconButton
+            className="cs-pp-design-tool-button cs-prop-control-copy-tool-button"
+            onClick={onClick}
+            iconPath={mdiContentCopy}
+        />
+    </Tooltip>
 );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////

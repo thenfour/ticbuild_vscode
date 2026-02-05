@@ -261,13 +261,20 @@ full width available).*/
 }
 
 .cs-pp-control-selected {
-    border-color: var(--vscode-focusBorder);
-    box-shadow: 0 0 6px var(--vscode-focusBorder);
+    /* border-color: var(--vscode-focusBorder);
+    box-shadow: 0 0 6px var(--vscode-focusBorder); */
+    /* selection = border; movedest = outline*/
+    border: 1px dashed var(--vscode-focusBorder) !important;
 }
 
 .cs-pp-control-move-destination {
-    border-color: var(--vscode-inputValidation-infoBorder);
-    box-shadow: 0 0 6px var(--vscode-inputValidation-infoBorder);
+    /* // --vscode-diffEditor-moveActive-border
+    // --vscode-inputValidation-infoBorder */
+    /* border-color: var(--vscode-diffEditor-moveActive-border); */
+    /* selection = border; movedest = outline*/
+    outline: 1px dashed var(--vscode-diffEditor-moveActive-border);
+
+    /* box-shadow: 0 0 6px var(--vscode-diffEditor-moveActive-border); */
 }
 
 .cs-dnd-handle {

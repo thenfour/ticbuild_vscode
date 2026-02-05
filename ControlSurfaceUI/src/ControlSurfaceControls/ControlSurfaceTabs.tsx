@@ -201,8 +201,6 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                                     <DndDraggable key={`tab-${index}-${childIndex}`}>
                                         {renderControl(child, childIndex, api, stateApi, {
                                             parentPath: buildTabPath(parentPath, index),
-                                            // designMode,
-                                            // selectedPath,
                                             onSelectPath,
                                             onDeletePath,
                                         })}

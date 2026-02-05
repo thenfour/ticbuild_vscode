@@ -56,8 +56,12 @@ export const ControlSurfacePropertiesPanelContainer: React.FC<ControlSurfaceProp
             </ButtonGroup>
             <ButtonGroup>
                 <Button
-                    onClick={() => {
+                    onClick={async () => {
                         if (!stateApi.state.selectedControlPath) {
+                            return;
+                        }
+                        const userChoice = await api?.showWarningMessage("Are you sure you want to delete this control?", "Delete", "Cancel");
+                        if (userChoice !== "Delete") {
                             return;
                         }
                         api?.postMessage({

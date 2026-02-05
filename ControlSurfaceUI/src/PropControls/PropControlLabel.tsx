@@ -1,5 +1,6 @@
 import React from "react";
 import { PropControl, PropControlSeverity } from "../PropControlsBase/PropControlShell";
+import { IsNullOrWhitespace } from "../utils";
 
 export interface PropControlLabelProps {
     label: React.ReactNode;
@@ -57,7 +58,7 @@ export const PropControlLabel: React.FC<PropControlLabelProps> = ({
                     fontFamily: 'var(--vscode-font-family)',
                     fontSize: '12px',
                 }}>
-                    {displayValue}
+                    {IsNullOrWhitespace(displayValue) ? <i style={{ color: 'var(--vscode-descriptionForeground)' }}>Empty</i> : displayValue}
                 </span>
             }
             designTools={designTools}

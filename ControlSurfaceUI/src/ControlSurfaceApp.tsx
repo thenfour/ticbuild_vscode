@@ -139,7 +139,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
   }, [api, draftNode, stateApi.state.selectedControlPath]);
 
   const handleCancelDraft = React.useCallback(() => {
-    console.log("handleCancelDraft");
+    //console.log("handleCancelDraft");
     // if (!resolvedSelection) {
     //   return;
     // }
@@ -264,7 +264,11 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             options={{
               parentPath: [CONTROL_PATH_ROOT], // hm i think this is not correct; pages can be ANYWHERE in the hierarchy.
               onSelectPath: (path) => setSelectedControlPath(path),
-              onDeletePath: (path) => {
+              onDeletePath: async (path) => {
+                const userChoice = await api?.showWarningMessage("Are you sure you want to delete this control?", "Delete", "Cancel");
+                if (userChoice !== "Delete") {
+                  return;
+                }
                 api?.postMessage({
                   type: "deleteControl",
                   path,

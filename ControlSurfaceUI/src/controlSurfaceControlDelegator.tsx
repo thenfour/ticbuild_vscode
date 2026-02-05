@@ -21,8 +21,8 @@ export type ControlSurfaceRenderOptions = {
     parentPath: string[] | undefined; // the "root page" has no parent path.
     //designMode: boolean;
     //selectedPath?: string[] | null;
-    onSelectPath?: (path: string[], node: ControlSurfaceNode) => void;
-    onDeletePath?: (path: string[], node: ControlSurfaceNode) => void;
+    onSelectPath: (path: string[], node: ControlSurfaceNode) => void;
+    onDeletePath: (path: string[], node: ControlSurfaceNode) => void;
 };
 
 export const renderControlSurfaceControl = (
@@ -38,18 +38,18 @@ export const renderControlSurfaceControl = (
         throw new Error("parentPath is required in ControlSurfaceRenderOptions");
     }
     const currentPath = buildControlPath(options.parentPath, index);
-    // const isSelected = isPathEqual(stateApi.state.selectedControlPath, currentPath);
+    const isSelected = isPathEqual(stateApi.state.selectedControlPath, currentPath);
 
     // const handleSelect = options.onSelectPath
     //     ? (path: string[]) => options.onSelectPath?.(path, node)
     //     : undefined;
 
-    const handleDelete = options.onDeletePath
-        ? (path: string[]) => options.onDeletePath?.(path, node)
-        : undefined;
+    // const handleDelete = options.onDeletePath
+    //     ? (path: string[]) => options.onDeletePath(path, node)
+    //     : undefined;
 
-    const deleteProc = () => handleDelete?.(currentPath);
-    const settingsProc = () => options.onSelectPath?.(currentPath, node);
+    const deleteProc = () => options.onDeletePath(currentPath, node);
+    const settingsProc = () => options.onSelectPath(currentPath, node);
 
     const isMoveDestination = isPathEqual(stateApi.state.moveDestinationPath, currentPath);
     const setAsDestinationPath = (pathOverride?: string[]) => {
@@ -68,6 +68,8 @@ export const renderControlSurfaceControl = (
         onSetMoveDestination: setAsDestinationPath,
         renderControl: renderControlSurfaceControl,
         isMoveDestination,
+        onSelectPath: options.onSelectPath,
+        onDeletePath: options.onDeletePath,
     };
 
     // you can move to destination if:
@@ -215,8 +217,6 @@ export const renderControlSurfaceControl = (
                     key={`${node.type}-${index}`}
                     {...node}
                     layout={node.type}
-                    onSelectPath={options.onSelectPath}
-                    onDeletePath={options.onDeletePath}
                     parentPath={currentPath}
                     {...commonProps}
                     {...containerProps}
@@ -226,6 +226,7 @@ export const renderControlSurfaceControl = (
                 <ControlSurfaceTabs
                     key={`${node.type}-${index}`}
                     {...node}
+                    selected={isSelected}
                     parentPath={currentPath}
                     {...commonProps}
                     {...containerProps}

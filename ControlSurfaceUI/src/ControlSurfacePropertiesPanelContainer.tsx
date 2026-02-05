@@ -5,6 +5,7 @@ import { ControlSurfaceNode, ControlSurfaceApi } from "./defs";
 import { ControlRegistry } from "./controlRegistry";
 import { PagePropertiesPanel } from "./ControlSurfacePropertiesPanels";
 import { ControlSurfaceStateApi } from "./hooks/ControlSurfaceState";
+import { GetControlHierarchicalLabel, GetControlNodeLabel } from "./controlPathUtils";
 
 export type ControlSurfacePropertiesPanelContainerProps = {
     resolvedSelection: { node: ControlSurfaceNode; index: number; parentControls: ControlSurfaceNode[] } | null;
@@ -60,7 +61,8 @@ export const ControlSurfacePropertiesPanelContainer: React.FC<ControlSurfaceProp
                         if (!stateApi.state.selectedControlPath) {
                             return;
                         }
-                        const userChoice = await api?.showWarningMessage("Are you sure you want to delete this control?", "Delete", "Cancel");
+                        const nodeLabel = GetControlHierarchicalLabel(stateApi.state.controlSurfaceRoot, stateApi.state.selectedControlPath);
+                        const userChoice = await api?.showWarningMessage(`Are you sure you want to delete control "${nodeLabel}"?`, "Delete", "Cancel");
                         if (userChoice !== "Delete") {
                             return;
                         }

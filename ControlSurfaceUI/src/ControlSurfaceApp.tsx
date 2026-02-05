@@ -9,7 +9,7 @@ import { ControlSurfaceRootPageProp } from "./PropControlsAdaptors/ControlSurfac
 import { PropControl } from "./PropControlsBase/PropControlShell";
 import { Dropdown } from "./basic/Dropdown";
 import { CONTROL_PATH_ROOT, isPathEqual } from "./controlPathBase";
-import { resolveControlByPath } from "./controlPathUtils";
+import { GetControlHierarchicalLabel, GetControlNodeLabel, resolveControlByPath } from "./controlPathUtils";
 import { renderControlSurfaceControl } from "./controlSurfaceControlDelegator";
 import {
   ControlSurfaceDataSource,
@@ -214,7 +214,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
               const pageLabel = pages.find(p => p.id === selectedPageId)?.label ?? "this page";
 
               const result = await api.showWarningMessage?.(
-                `Are you sure you want to delete "${pageLabel}"?`,
+                `Are you sure you want to delete page "${pageLabel}" at ${GetControlHierarchicalLabel(stateApi.state.controlSurfaceRoot, stateApi.activePagePath)}?`,
                 "Delete",
                 "Cancel"
               );
@@ -263,9 +263,12 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             }}
             options={{
               parentPath: [CONTROL_PATH_ROOT], // hm i think this is not correct; pages can be ANYWHERE in the hierarchy.
-              onSelectPath: (path) => setSelectedControlPath(path),
+              onSelectPath: (path) => {
+                setSelectedControlPath(path);
+              },
               onDeletePath: async (path) => {
-                const userChoice = await api?.showWarningMessage("Are you sure you want to delete this control?", "Delete", "Cancel");
+                const nodeLabel = GetControlHierarchicalLabel(stateApi.state.controlSurfaceRoot, path);
+                const userChoice = await api?.showWarningMessage(`Are you sure you want to delete control "${nodeLabel}"?`, "Delete", "Cancel");
                 if (userChoice !== "Delete") {
                   return;
                 }
@@ -273,7 +276,7 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
                   type: "deleteControl",
                   path,
                 });
-                if (stateApi.state.selectedControlPath && path.join("/") === stateApi.state.selectedControlPath.join("/")) {
+                if (stateApi.state.selectedControlPath && isPathEqual(path, stateApi.state.selectedControlPath)) {
                   setSelectedControlPath(null);
                 }
               }

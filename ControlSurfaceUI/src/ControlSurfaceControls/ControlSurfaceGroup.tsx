@@ -94,9 +94,9 @@ export interface ControlSurfaceGroupProps extends Spec {
     stateApi: ControlSurfaceStateApi,
     options: ControlSurfaceRenderOptions,
   ) => JSX.Element;
-  parentPath?: string[];
-  onSelectPath?: (path: string[], node: any) => void;
-  onDeletePath?: (path: string[], node: any) => void;
+  parentPath: string[];
+  onSelectPath: (path: string[], node: any) => void;
+  onDeletePath: (path: string[], node: any) => void;
   onSetMoveDestination: (pathOverride?: string[]) => void;
   onMoveToDestination?: () => void;
   isMoveDestination: boolean;

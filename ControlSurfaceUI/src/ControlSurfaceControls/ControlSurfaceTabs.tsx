@@ -36,12 +36,13 @@ export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
         options: ControlSurfaceRenderOptions,
     ) => JSX.Element;
     parentPath: string[];
-    onSelectPath?: (path: string[], node: any) => void;
-    onDeletePath?: (path: string[], node: any) => void;
+    onSelectPath: (path: string[], node: any) => void;
+    onDeletePath: (path: string[], node: any) => void;
     onSetMoveDestination?: (pathOverride?: string[]) => void;
     onMoveToDestination?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
+    selected: boolean;
     isMoveDestination: boolean;
 }
 
@@ -51,6 +52,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     parentPath,
     onSelectPath,
     onDeletePath,
+    selected,
     onDelete,
     onSettings,
     isMoveDestination,
@@ -79,6 +81,22 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
             //console.log(`[TABS] wrappedSetMoveDestination: onSetMoveDestination is undefined`);
         }
     }, [onSetMoveDestination, parentPath, selectedTabId]);
+
+    // Wrap onSelectPath to include the tab path context
+    const selectPathForKids = React.useCallback((path: string[], node: any) => {
+        const tabPath = buildTabPath(parentPath, selectedTabId);
+        if (onSelectPath) {
+            onSelectPath(tabPath, node);
+        }
+    }, [onSelectPath, parentPath, selectedTabId]);
+
+    // Wrap onDeletePath to include the tab path context
+    const deletePathForKids = React.useCallback((path: string[], node: any) => {
+        const tabPath = buildTabPath(parentPath, selectedTabId);
+        if (onDeletePath) {
+            onDeletePath(tabPath, node);
+        }
+    }, [onDeletePath, parentPath, selectedTabId]);
 
     const designTools = stateApi.state.designMode
         ? createDesignTools({
@@ -145,10 +163,10 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     return (
         <div className={createPropControlClasses({
             designMode: stateApi.state.designMode,
-            selected: false,
+            selected,
             disabled: false,
             isMoveDestination: isRealMoveDestination,
-            additionalClasses: "control-surface-tabs-wrapper cs-pp-control-tabs  cs-pp-control-container"
+            additionalClasses: "control-surface-tabs-wrapper cs-pp-control-tabs cs-pp-control-container"
         })}>
             {stateApi.state.designMode && designTools ? (
                 <ButtonGroup className="cs-pp-design-tools">
@@ -187,8 +205,8 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                                     <DndDraggable key={`tab-${index}-${childIndex}`}>
                                         {renderControl(child, childIndex, api, stateApi, {
                                             parentPath: buildTabPath(parentPath, index),
-                                            onSelectPath,
-                                            onDeletePath,
+                                            onSelectPath: selectPathForKids,
+                                            onDeletePath: deletePathForKids,
                                         })}
                                     </DndDraggable>
                                 ))}

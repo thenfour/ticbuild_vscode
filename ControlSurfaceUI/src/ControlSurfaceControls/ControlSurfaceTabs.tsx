@@ -46,8 +46,8 @@ export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     onDeletePath?: (path: string[], node: any) => void;
     onSetMoveDestination?: (path: string[] | null) => void;
     onMoveToDestination?: () => void;
-    onMoveUp?: () => void;
-    onMoveDown?: () => void;
+    // onMoveUp?: () => void;
+    // onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
     isMoveDestination: boolean;
@@ -63,8 +63,8 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     // selectedPath,
     onSelectPath,
     onDeletePath,
-    onMoveUp,
-    onMoveDown,
+    // onMoveUp,
+    // onMoveDown,
     onDelete,
     onSettings,
     isMoveDestination,
@@ -83,13 +83,20 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
         return null;
     }
 
+    // Wrap onSetMoveDestination to include the currently selected tab path
+    const wrappedSetMoveDestination = React.useCallback(() => {
+        if (onSetMoveDestination) {
+            // Build path to the currently selected tab
+            const tabPath = buildTabPath(parentPath, selectedTabId);
+            onSetMoveDestination(tabPath);
+        }
+    }, [onSetMoveDestination, parentPath, selectedTabId]);
+
     const designTools = stateApi.state.designMode
         ? createDesignTools({
-            onMoveUp,
-            onMoveDown,
             onDelete,
             onSettings,
-            onSetMoveDestination,
+            onSetMoveDestination: wrappedSetMoveDestination,
             onMoveToDestination,
         })
         : null;

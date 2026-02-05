@@ -140,6 +140,8 @@ full width available).*/
 .cs-pp-control-row {
     position:relative;
     overflow: visible;
+    /* give min width so even when no children or collapsed, the width isn't weirdly small */
+    min-width: var(--cs-pp-control-default-width);
 }
  
 

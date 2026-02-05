@@ -3,14 +3,10 @@ import { PropControl } from "../PropControlsBase/PropControlShell";
 import { classes } from "../utils";
 
 export interface DesignToolsConfig {
-    onMoveUp?: () => void;
-    onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
     onSetMoveDestination?: (path: string[] | null) => void;
     onMoveToDestination?: () => void;
-    canMoveUp?: boolean;
-    canMoveDown?: boolean;
     includeDragHandle?: boolean;
 }
 
@@ -23,26 +19,6 @@ export interface DesignToolsConfig {
  */
 export const createDesignTools = (config: DesignToolsConfig): React.ReactNode => {
     const buttons: React.ReactNode[] = [];
-
-    // if (config.onMoveUp) {
-    //     buttons.push(
-    //         <PropControl.DesignToolButton
-    //             key="moveUp"
-    //             tool="moveUp"
-    //             onClick={config.onMoveUp}
-    //         />
-    //     );
-    // }
-
-    // if (config.onMoveDown) {
-    //     buttons.push(
-    //         <PropControl.DesignToolButton
-    //             key="moveDown"
-    //             tool="moveDown"
-    //             onClick={config.onMoveDown}
-    //         />
-    //     );
-    // }
 
     if (config.onDelete) {
         buttons.push(

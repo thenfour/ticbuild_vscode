@@ -83,6 +83,10 @@ export const renderControlSurfaceControl = (
             targetParentPath: stateApi.state.moveDestinationPath,
             targetIndex: -1, // -1 means append to end, will be clamped by backend
         });
+        // we have to clear the move destination path after moving,
+        // because the tree will have changed and the old move destination path might not be valid anymore.
+        // this is a justification for using control IDs instead of paths.
+        stateApi.setMoveDestinationPath(null);
     } : undefined;
 
     const commonProps = {

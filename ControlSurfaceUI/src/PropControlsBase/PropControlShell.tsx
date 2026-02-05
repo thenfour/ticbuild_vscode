@@ -32,7 +32,7 @@ it's not related to design mode.
 - We display design tools (move up/down, delete, settings) in design mode as an overlay.
 
 */
-import { mdiCog, mdiDelete, mdiMenuDown, mdiMenuUp, mdiDrag, mdiContentCopy, mdiFolderStar, mdiBookArrowRight } from "@mdi/js";
+import { mdiCog, mdiDelete, mdiMenuDown, mdiMenuUp, mdiDrag, mdiContentCopy, mdiBookArrowRight, mdiFolderMarker } from "@mdi/js";
 import React from "react";
 import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { IconButton } from "../Buttons/IconButton";
@@ -74,7 +74,7 @@ export const PropControlDesignToolButton: React.FC<PropControlDesignToolButtonPr
             labelPath = mdiCog;
             break;
         case "setMoveDestination":
-            labelPath = mdiFolderStar; // You might want to use a different icon here
+            labelPath = mdiFolderMarker; // You might want to use a different icon here
             break;
         case "moveToDestination":
             labelPath = mdiBookArrowRight; // You might want to use a different icon here

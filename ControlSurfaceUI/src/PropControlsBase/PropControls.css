@@ -230,6 +230,7 @@ full width available).*/
     margin:16px 0;
     border: 1px solid var(--vscode-panel-border);
     border-radius: 4px;
+    min-width: var(--cs-pp-control-default-width);
 }
 
 .cs-pp-control.cs-pp-control-group .cs-pp-group-label {

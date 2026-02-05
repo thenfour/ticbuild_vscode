@@ -31,6 +31,7 @@ export interface ControlSurfaceGroupBaseProps {
   copyTools?: React.ReactNode;
   children?: React.ReactNode;
   isMoveDestination: boolean;
+  open?: boolean;
 }
 
 
@@ -43,9 +44,11 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
   copyTools,
   children,
   isMoveDestination,
+  open: openProp,
 }) => {
 
   const [open, setOpen] = React.useState(true);
+  const isOpen = openProp !== undefined ? openProp : open;
 
 
   return (
@@ -63,14 +66,14 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
           {designTools}
         </ButtonGroup>
       ) : null}
-      {!designMode && copyTools ? (
+      {!designMode && isOpen && copyTools ? (
         <ButtonGroup className="cs-pp-copy-tools">
           {copyTools}
         </ButtonGroup>
       ) : null}
 
       <div onClick={() => setOpen(b => !b)} className="cs-pp-group-label">{label}</div>
-      {open && <div className="cs-pp-group-expanded-content">{/* shall hold controls like a column. */}
+      {isOpen && <div className="cs-pp-group-expanded-content">{/* shall hold controls like a column. */}
         {children}
       </div>
       }

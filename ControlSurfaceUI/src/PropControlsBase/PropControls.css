@@ -1,6 +1,6 @@
 .pp-root {
     /* establish variables at controls root */
-    --cs-pp-control-label-width: 150px;
+    --cs-pp-control-label-width: 135px;
     --cs-pp-control-default-width: calc(min(90vw, 500px));
 }
 

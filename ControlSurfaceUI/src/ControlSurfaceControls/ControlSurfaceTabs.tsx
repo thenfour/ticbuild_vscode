@@ -82,22 +82,6 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
         }
     }, [onSetMoveDestination, parentPath, selectedTabId]);
 
-    // Wrap onSelectPath to include the tab path context
-    const selectPathForKids = React.useCallback((path: string[], node: any) => {
-        const tabPath = buildTabPath(parentPath, selectedTabId);
-        if (onSelectPath) {
-            onSelectPath(tabPath, node);
-        }
-    }, [onSelectPath, parentPath, selectedTabId]);
-
-    // Wrap onDeletePath to include the tab path context
-    const deletePathForKids = React.useCallback((path: string[], node: any) => {
-        const tabPath = buildTabPath(parentPath, selectedTabId);
-        if (onDeletePath) {
-            onDeletePath(tabPath, node);
-        }
-    }, [onDeletePath, parentPath, selectedTabId]);
-
     const designTools = stateApi.state.designMode
         ? createDesignTools({
             onDelete,
@@ -205,8 +189,8 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
                                     <DndDraggable key={`tab-${index}-${childIndex}`}>
                                         {renderControl(child, childIndex, api, stateApi, {
                                             parentPath: buildTabPath(parentPath, index),
-                                            onSelectPath: selectPathForKids,
-                                            onDeletePath: deletePathForKids,
+                                            onSelectPath,
+                                            onDeletePath,
                                         })}
                                     </DndDraggable>
                                 ))}

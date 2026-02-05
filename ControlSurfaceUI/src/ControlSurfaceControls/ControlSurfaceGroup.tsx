@@ -97,7 +97,7 @@ export interface ControlSurfaceGroupProps extends Spec {
   parentPath?: string[];
   onSelectPath?: (path: string[], node: any) => void;
   onDeletePath?: (path: string[], node: any) => void;
-  onSetMoveDestination: (path: string[] | null) => void;
+  onSetMoveDestination: (pathOverride?: string[]) => void;
   onMoveToDestination?: () => void;
   isMoveDestination: boolean;
   onDelete?: () => void;
@@ -130,8 +130,6 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   if (!api) {
     return null;
   }
-
-  console.log(`group render with onMoveToDestination: ${!!onMoveToDestination} and onSetMoveDestination: ${!!onSetMoveDestination}`);
 
   const designTools = stateApi.state.designMode
     ? createDesignTools({

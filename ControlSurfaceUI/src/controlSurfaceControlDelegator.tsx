@@ -52,13 +52,15 @@ export const renderControlSurfaceControl = (
     const settingsProc = () => options.onSelectPath?.(currentPath, node);
 
     const isMoveDestination = isPathEqual(stateApi.state.moveDestinationPath, currentPath);
-    const setAsDestinationPath = () => {
+    const setAsDestinationPath = (pathOverride?: string[]) => {
+        const realPath = pathOverride ?? currentPath;
+        const isMoveDestination = isPathEqual(stateApi.state.moveDestinationPath, realPath);
         if (isMoveDestination) {
             stateApi.setMoveDestinationPath(null);
-            console.log(`clearing move destination path`);
+            //console.log(`clearing move destination path`);
         } else {
-            console.log(`setting move destination path to: ${JSON.stringify(currentPath)}`);
-            stateApi.setMoveDestinationPath(currentPath);
+            //console.log(`setting move destination path to: ${JSON.stringify(realPath)}`);
+            stateApi.setMoveDestinationPath(realPath);
         }
     }
 

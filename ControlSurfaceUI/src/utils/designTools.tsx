@@ -5,7 +5,7 @@ import { classes } from "../utils";
 export interface DesignToolsConfig {
     onDelete?: () => void;
     onSettings?: () => void;
-    onSetMoveDestination?: (path: string[] | null) => void;
+    onSetMoveDestination?: (pathOverride?: string[]) => void;
     onMoveToDestination?: () => void;
     includeDragHandle?: boolean;
 }
@@ -55,7 +55,7 @@ export const createDesignTools = (config: DesignToolsConfig): React.ReactNode =>
             <PropControl.DesignToolButton
                 key="set-move-destination"
                 tool="setMoveDestination"
-                onClick={() => config.onSetMoveDestination!(null)}
+                onClick={() => config.onSetMoveDestination!()}
             />
         );
     }

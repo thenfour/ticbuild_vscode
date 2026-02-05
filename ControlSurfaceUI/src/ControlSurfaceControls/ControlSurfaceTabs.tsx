@@ -18,7 +18,7 @@ import { DndContainer, DndDraggable } from "../dnd";
 import { TabPanel, Tab } from "../basic/Tabs";
 import { ControlSurfaceTabsSpec, ControlSurfaceApi } from "../defs";
 import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
-import { buildControlPath, buildTabPath } from "../controlPathBase";
+import { buildControlPath, buildTabPath, isPathEqual } from "../controlPathBase";
 import { AddControlControl } from "../AddControlControl";
 import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 import { ControlSurfaceStateApi, useControlSurfaceState } from "../hooks/ControlSurfaceState";
@@ -44,7 +44,7 @@ export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     // selectedPath?: string[] | null;
     onSelectPath?: (path: string[], node: any) => void;
     onDeletePath?: (path: string[], node: any) => void;
-    onSetMoveDestination?: (path: string[] | null) => void;
+    onSetMoveDestination?: (pathOverride?: string[]) => void;
     onMoveToDestination?: () => void;
     // onMoveUp?: () => void;
     // onMoveDown?: () => void;
@@ -84,11 +84,13 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     }
 
     // Wrap onSetMoveDestination to include the currently selected tab path
-    const wrappedSetMoveDestination = React.useCallback(() => {
+    const wrappedSetMoveDestination = React.useCallback((pathOverride?: string[]) => {
         if (onSetMoveDestination) {
             // Build path to the currently selected tab
             const tabPath = buildTabPath(parentPath, selectedTabId);
             onSetMoveDestination(tabPath);
+        } else {
+            //console.log(`[TABS] wrappedSetMoveDestination: onSetMoveDestination is undefined`);
         }
     }, [onSetMoveDestination, parentPath, selectedTabId]);
 
@@ -137,12 +139,29 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
 
     const shouldAcceptDrop = React.useCallback(() => stateApi.state.designMode, [stateApi.state.designMode]);
 
+    // move destination path is not going to equal the control path directly; calculate it.
+    let isRealMoveDestination = false;
+    if (stateApi.state.moveDestinationPath) {
+        // get parent of move destination path
+        const parentOfMoveDestinationPath = stateApi.state.moveDestinationPath.slice(0, -1);
+        //console.log(`[TABS] parentOfMoveDestinationPath: ${JSON.stringify(parentOfMoveDestinationPath)}, this control's tab path: ${JSON.stringify(buildTabPath(parentPath, selectedTabId))}`);
+        isRealMoveDestination = isPathEqual(parentOfMoveDestinationPath, parentPath);
+    }
+
+    // when the selected tab changes, and we're the move destination, we need to update the move destination path
+    React.useEffect(() => {
+        if (isRealMoveDestination) {
+            //console.log(`[TABS] useEffect: updating move destination path due to tab change to tab ${selectedTabId}`);
+            wrappedSetMoveDestination();
+        }
+    }, [selectedTabId]); // eslint-disable-line react-hooks/exhaustive-deps
+
     return (
         <div className={createPropControlClasses({
             designMode: stateApi.state.designMode,
             selected: false,
             disabled: false,
-            isMoveDestination: isMoveDestination,
+            isMoveDestination: isRealMoveDestination,
             additionalClasses: "control-surface-tabs-wrapper cs-pp-control-tabs  cs-pp-control-container"
         })}>
             {stateApi.state.designMode && designTools ? (

@@ -25,7 +25,7 @@ export interface ControlSurfacePagePropProps {
     currentPath: string[];
     onDelete: () => void;
     onSettings: () => void;
-    onSetMoveDestination?: (path: string[] | null) => void;
+    onSetMoveDestination?: (pathOverride?: string[]) => void;
     onMoveToDestination?: () => void;
     isMoveDestination: boolean;
 }

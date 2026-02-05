@@ -8,7 +8,6 @@ import { Tab, TabPanel } from "./basic/Tabs";
 import { ButtonGroup } from "./Buttons/ButtonGroup";
 import { CheckboxButton } from "./Buttons/CheckboxButton";
 import { Button } from "./Buttons/PushButton";
-import { PropControlTextBoxDemo } from "./PropControlsBase/PropControlTextBox";
 
 
 export const ComponentTester: React.FC = () => {
@@ -39,11 +38,6 @@ export const ComponentTester: React.FC = () => {
 
             {!isCollapsed && (
                 <div style={{ padding: "8px", display: "flex", flexDirection: "column", gap: "16px" }}>
-
-                    <fieldset>
-                        <legend>PropControlTextBoxDemo</legend>
-                        <PropControlTextBoxDemo />
-                    </fieldset>
 
                     <section>
                         <h3 style={{ fontSize: 11, margin: "0 0 4px 0", opacity: 0.7 }}>Buttons</h3>

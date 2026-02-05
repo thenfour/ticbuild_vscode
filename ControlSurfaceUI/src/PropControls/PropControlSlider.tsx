@@ -51,6 +51,7 @@ export const PropControlSlider: React.FC<PropControlSliderProps> = ({
             isConnected={isConnected}
             selected={selected}
             disabled={disabled}
+            isMoveDestination={false}
             validationStatus={validationStatus ?? null}
             validationSeverity={validationSeverity}
             bindingStatus={bindingStatus ?? null}

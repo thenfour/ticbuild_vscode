@@ -14,6 +14,7 @@ export interface ControlSurfaceKnobPropProps extends ControlSurfaceKnobSpec {
     onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
+    onMoveToDestination?: () => void;
 }
 
 /**
@@ -32,6 +33,7 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
     onMoveDown,
     onDelete,
     onSettings,
+    onMoveToDestination,
 }) => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
@@ -47,6 +49,7 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
             onMoveDown,
             onDelete,
             onSettings,
+            onMoveToDestination,
         })
         : null;
 
@@ -72,6 +75,7 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
             step={step}
             centerValue={min}
             size={size}
+            isMoveDestination={false}
             designMode={designMode}
             isConnected={isConnected}
             selected={selected}

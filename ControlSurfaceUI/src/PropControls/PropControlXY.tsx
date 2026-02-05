@@ -72,6 +72,7 @@ export const PropControlXY: React.FC<PropControlXYProps> = ({
             validationStatus={validationStatus ?? null}
             validationSeverity={validationSeverity}
             bindingStatus={bindingStatus ?? null}
+            isMoveDestination={false}
             bindingStatusSeverity={bindingStatusSeverity}
             label={label}
             copyTools={copyTools}

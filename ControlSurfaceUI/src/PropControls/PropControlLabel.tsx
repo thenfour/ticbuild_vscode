@@ -41,6 +41,7 @@ export const PropControlLabel: React.FC<PropControlLabelProps> = ({
     return (
         <PropControl.Shell
             designMode={designMode}
+            isMoveDestination={false}
             isConnected={isConnected}
             selected={selected}
             disabled={disabled}

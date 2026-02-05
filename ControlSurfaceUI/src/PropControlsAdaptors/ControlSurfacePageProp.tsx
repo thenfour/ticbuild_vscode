@@ -23,10 +23,11 @@ export interface ControlSurfacePagePropProps {
     stateApi: ControlSurfaceStateApi;
     options: ControlSurfaceRenderOptions;
     currentPath: string[];
-    onMoveUp: () => void;
-    onMoveDown: () => void;
     onDelete: () => void;
     onSettings: () => void;
+    onSetMoveDestination?: (path: string[] | null) => void;
+    onMoveToDestination?: () => void;
+    isMoveDestination: boolean;
 }
 
 /**
@@ -42,17 +43,18 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
     stateApi,
     options,
     currentPath,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
+    onSetMoveDestination,
+    onMoveToDestination,
+    isMoveDestination,
 }) => {
     // Create design tools
     const designTools = createDesignTools({
-        onMoveUp,
-        onMoveDown,
         onDelete,
         onSettings,
+        onMoveToDestination,
+        onSetMoveDestination,
     });
 
     const symbols = React.useMemo(() => collectSymbolsForNodes(spec.controls), [spec.controls]);
@@ -98,6 +100,7 @@ export const ControlSurfacePageProp: React.FC<ControlSurfacePagePropProps> = ({
             selected={JSON.stringify(stateApi.state.selectedControlPath) === path}
             designTools={designTools}
             copyTools={copyTools}
+            isMoveDestination={isMoveDestination}
         >
             <DndContainer
                 groupName="control-surface-controls"
@@ -144,6 +147,7 @@ export interface ControlSurfaceRootPagePropProps {
     stateApi: ControlSurfaceStateApi;
     options: ControlSurfaceRenderOptions;
     currentPath: string[];
+    isMoveDestination: boolean;
 }
 
 export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProps> = ({
@@ -153,6 +157,7 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
     stateApi,
     options,
     currentPath,
+    isMoveDestination,
 }) => {
     const symbols = React.useMemo(() => collectSymbolsForNodes(spec.controls), [spec.controls]);
 
@@ -193,6 +198,7 @@ export const ControlSurfaceRootPageProp: React.FC<ControlSurfaceRootPagePropProp
             selected={false}
             designTools={null}
             copyTools={!stateApi.state.designMode ? <PropControl.CopyButton onClick={handleCopy} /> : null}
+            isMoveDestination={isMoveDestination}
         >
             <DndContainer
                 groupName="control-surface-controls"

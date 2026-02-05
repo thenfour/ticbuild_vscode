@@ -8,10 +8,9 @@ import { createDesignTools } from "../utils/designTools";
 export interface ControlSurfaceTriggerButtonPropProps {
     spec: ControlSurfaceTriggerButtonSpec;
     path: string;
-    onMoveUp: () => void;
-    onMoveDown: () => void;
     onDelete: () => void;
     onSettings: () => void;
+    onMoveToDestination?: () => void;
 }
 
 /**
@@ -21,10 +20,9 @@ export interface ControlSurfaceTriggerButtonPropProps {
 export const ControlSurfaceTriggerButtonProp: React.FC<ControlSurfaceTriggerButtonPropProps> = ({
     spec,
     path,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
+    onMoveToDestination,
 }) => {
     const stateApi = useControlSurfaceState();
     const api = useControlSurfaceApi();
@@ -36,10 +34,9 @@ export const ControlSurfaceTriggerButtonProp: React.FC<ControlSurfaceTriggerButt
 
     // Create design tools
     const designTools = createDesignTools({
-        onMoveUp,
-        onMoveDown,
         onDelete,
         onSettings,
+        onMoveToDestination,
     });
 
     const isConnected = stateApi.state.connectionState === "connected";

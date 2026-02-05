@@ -44,6 +44,7 @@ export const useMockControlSurfaceDataSource = ({
         uiRefreshMs: 250,
         pollIntervalMs: 250,
         designMode: false,
+        moveDestinationPath: null,
         selectedControlPath: null,
         selectedPageId: selectedPageId ?? "root",
     });
@@ -67,6 +68,7 @@ export const useMockControlSurfaceDataSource = ({
             expressionResults,
             discoveredInstances,
             designMode: false,
+            moveDestinationPath: null,
             selectedControlPath: null,
             selectedPageId: selectedPageId ?? "root",
         } satisfies ControlSurfaceState;

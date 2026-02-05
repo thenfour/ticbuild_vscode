@@ -40,6 +40,7 @@ export const PropControlTriggerButton: React.FC<PropControlTriggerButtonProps> =
             designMode={designMode}
             isConnected={isConnected}
             selected={selected}
+            isMoveDestination={false}
             disabled={disabled}
             validationStatus={validationStatus ?? null}
             validationSeverity={validationSeverity}

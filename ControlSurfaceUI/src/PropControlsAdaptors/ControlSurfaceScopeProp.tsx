@@ -13,6 +13,7 @@ export interface ControlSurfaceScopePropProps extends ControlSurfaceScopeSpec {
     onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
+    onMoveToDestination?: () => void;
 }
 
 export const ControlSurfaceScopeProp: React.FC<ControlSurfaceScopePropProps> = ({
@@ -27,6 +28,7 @@ export const ControlSurfaceScopeProp: React.FC<ControlSurfaceScopePropProps> = (
     onMoveDown,
     onDelete,
     onSettings,
+    onMoveToDestination,
 }) => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
@@ -108,6 +110,7 @@ export const ControlSurfaceScopeProp: React.FC<ControlSurfaceScopePropProps> = (
             onMoveDown,
             onDelete,
             onSettings,
+            onMoveToDestination,
         })
         : null;
 

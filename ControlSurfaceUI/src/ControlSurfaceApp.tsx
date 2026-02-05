@@ -1,27 +1,24 @@
 import React from "react";
 
-import { Divider } from "./basic/Divider";
 import { ButtonGroup } from "./Buttons/ButtonGroup";
+import { CheckboxButton } from "./Buttons/CheckboxButton";
 import { Button } from "./Buttons/PushButton";
+import { ConnectionStateControl } from "./ConnectionStateControl";
+import { ControlSurfacePropertiesPanelContainer } from "./ControlSurfacePropertiesPanelContainer";
+import { ControlSurfaceRootPageProp } from "./PropControlsAdaptors/ControlSurfacePageProp";
+import { PropControl } from "./PropControlsBase/PropControlShell";
+import { Dropdown } from "./basic/Dropdown";
+import { CONTROL_PATH_ROOT, isPathEqual } from "./controlPathBase";
+import { resolveControlByPath } from "./controlPathUtils";
+import { renderControlSurfaceControl } from "./controlSurfaceControlDelegator";
 import {
-  ControlSurfaceApi,
   ControlSurfaceDataSource,
   ControlSurfaceNode,
   ControlSurfaceState,
-  ControlSurfaceViewKind,
+  ControlSurfaceViewKind
 } from "./defs";
-import { ComponentTester } from "./ComponentTester";
-import { ConnectionStateControl } from "./ConnectionStateControl";
-import { Dropdown } from "./basic/Dropdown";
-import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
-import { ControlSurfacePropertiesPanelContainer } from "./ControlSurfacePropertiesPanelContainer";
-import { CONTROL_PATH_ROOT } from "./controlPathBase";
-import { findControlPathByNode, resolveControlByPath } from "./controlPathUtils";
 import { useControlSurfaceState } from "./hooks/ControlSurfaceState";
-import { PropControl } from "./PropControlsBase/PropControlShell";
-import { ControlSurfacePageProp, ControlSurfaceRootPageProp } from "./PropControlsAdaptors/ControlSurfacePageProp";
-import { renderControlSurfaceControl } from "./controlSurfaceControlDelegator";
-import { CheckboxButton } from "./Buttons/CheckboxButton";
+import { useControlSurfaceApi } from "./hooks/VsCodeApiContext";
 
 const createWindowMessageDataSource = (): ControlSurfaceDataSource => ({
   subscribe: (listener) => {
@@ -158,6 +155,8 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
     };
   }, [resolvedDataSource, applyHostState]);
 
+  const isMoveDestination = isPathEqual(stateApi.activePagePath, stateApi.state.moveDestinationPath);
+
   return (
     <div
       className="control-surface-app"
@@ -255,8 +254,9 @@ export const ControlSurfaceApp: React.FC<ControlSurfaceAppProps> = ({
             stateApi={stateApi}
             currentPath={stateApi.activePagePath}
             renderControl={renderControlSurfaceControl}
+            isMoveDestination={isMoveDestination}
             options={{
-              parentPath: [CONTROL_PATH_ROOT],
+              parentPath: [CONTROL_PATH_ROOT], // hm i think this is not correct; pages can be ANYWHERE in the hierarchy.
               onSelectPath: (path) => setSelectedControlPath(path),
               onDeletePath: (path) => {
                 api?.postMessage({

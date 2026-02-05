@@ -52,6 +52,7 @@ export const PropControlScope: React.FC<PropControlScopeProps> = ({
             isConnected={isConnected}
             selected={selected}
             disabled={disabled}
+            isMoveDestination={false}
             validationStatus={validationStatus ?? null}
             validationSeverity={validationSeverity}
             bindingStatus={bindingStatus ?? null}

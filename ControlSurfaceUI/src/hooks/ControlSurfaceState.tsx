@@ -16,6 +16,7 @@ export interface ControlSurfaceStateApi {
     setDesignMode: React.Dispatch<React.SetStateAction<boolean>>;
     setState: React.Dispatch<React.SetStateAction<ControlSurfaceState>>;
     setSelectedControlPath: React.Dispatch<React.SetStateAction<string[] | null>>;
+    setMoveDestinationPath: React.Dispatch<React.SetStateAction<string[] | null>>;
     applyHostState: (payload: Partial<ControlSurfaceState>) => void;
 };
 
@@ -36,7 +37,9 @@ const makeState = (overrides?: Partial<ControlSurfaceState>, prev?: ControlSurfa
     selectedPageId: overrides?.selectedPageId ?? prev?.selectedPageId ?? "root",
     designMode: overrides?.designMode ?? prev?.designMode ?? false,
     selectedControlPath: overrides?.selectedControlPath ?? prev?.selectedControlPath ?? null,
+    moveDestinationPath: overrides?.moveDestinationPath ?? prev?.moveDestinationPath ?? null,
     viewId: overrides?.viewId ?? prev?.viewId,
+
 });
 
 const makeApi = (): ControlSurfaceStateApi => ({
@@ -48,6 +51,7 @@ const makeApi = (): ControlSurfaceStateApi => ({
     setDesignMode: () => { },
     setState: () => { },
     setSelectedControlPath: () => { },
+    setMoveDestinationPath: () => { },
     applyHostState: () => { },
 });
 
@@ -63,6 +67,7 @@ export const ControlSurfaceStateProvider = ({ children }: { children: React.Reac
             // keep local-only UI state; host shouldn't override these
             designMode: prev.designMode,
             selectedControlPath: prev.selectedControlPath,
+            moveDestinationPath: prev.moveDestinationPath,
         }, prev));
     }, []);
 
@@ -77,6 +82,13 @@ export const ControlSurfaceStateProvider = ({ children }: { children: React.Reac
         setState((prev) => ({
             ...prev,
             designMode: typeof value === "function" ? value(prev.designMode) : value,
+        }));
+    }, []);
+
+    const setMoveDestinationPath = React.useCallback<React.Dispatch<React.SetStateAction<string[] | null>>>((value) => {
+        setState((prev) => ({
+            ...prev,
+            moveDestinationPath: typeof value === "function" ? value(prev.moveDestinationPath) : value,
         }));
     }, []);
 
@@ -112,8 +124,9 @@ export const ControlSurfaceStateProvider = ({ children }: { children: React.Reac
         setDesignMode,
         setState,
         setSelectedControlPath,
+        setMoveDestinationPath,
         applyHostState,
-    }), [state, pageOptions, activePage, activePagePath, setSelectedPageId, setDesignMode, setSelectedControlPath, applyHostState]);
+    }), [state, pageOptions, activePage, activePagePath, setSelectedPageId, setDesignMode, setSelectedControlPath, setMoveDestinationPath, applyHostState]);
 
     return (
         <ControlSurfaceStateContext.Provider value={contextValue}>

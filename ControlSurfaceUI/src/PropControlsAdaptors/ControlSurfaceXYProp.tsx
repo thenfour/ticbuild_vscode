@@ -14,6 +14,7 @@ export interface ControlSurfaceXYPropProps extends ControlSurfaceXYSpec {
     onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
+    onMoveToDestination?: () => void;
 }
 
 /**
@@ -29,6 +30,7 @@ export const ControlSurfaceXYProp: React.FC<ControlSurfaceXYPropProps> = ({
     onMoveDown,
     onDelete,
     onSettings,
+    onMoveToDestination,
 }) => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
@@ -54,6 +56,7 @@ export const ControlSurfaceXYProp: React.FC<ControlSurfaceXYPropProps> = ({
             onMoveDown,
             onDelete,
             onSettings,
+            onMoveToDestination,
         })
         : null;
 

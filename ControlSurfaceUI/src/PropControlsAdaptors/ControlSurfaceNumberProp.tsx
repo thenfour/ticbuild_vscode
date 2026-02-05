@@ -14,6 +14,7 @@ export interface ControlSurfaceNumberPropProps extends ControlSurfaceNumberSpec 
     onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
+    onMoveToDestination?: () => void;
 }
 
 /**
@@ -31,6 +32,7 @@ export const ControlSurfaceNumberProp: React.FC<ControlSurfaceNumberPropProps> =
     onMoveDown,
     onDelete,
     onSettings,
+    onMoveToDestination,
 }) => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
@@ -46,6 +48,7 @@ export const ControlSurfaceNumberProp: React.FC<ControlSurfaceNumberPropProps> =
             onMoveDown,
             onDelete,
             onSettings,
+            onMoveToDestination,
         })
         : null;
 

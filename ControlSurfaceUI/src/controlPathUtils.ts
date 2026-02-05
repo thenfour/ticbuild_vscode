@@ -242,3 +242,36 @@ export function GetControlHierarchicalLabel(
 
   return `${parts.join("/")}`;
 }
+
+// if the source is an ancestor of (or equal to) the destination, then it's invalid.
+// example:
+// source      = root/page1/
+// destination = root/page1/groupA/
+// => invalid (source is ancestor of destination; copying would create circular dependency.
+//            we should return true).
+//
+// source      = root/page1/groupA/
+// destination = root/page1/
+// => valid (source is not ancestor of destination; this should return false).
+//
+// source      = root/page1/groupA/
+// destination = root/page1/groupA/
+// => invalid (source is equal to destination; this should return true).
+//
+// source      = root/page1/groupA/
+// destination = root/page1/groupB/
+// => valid (so this should return false).
+export function isBlockedCopyDestination(
+  destinationPath: string[],
+  sourcePath: string[],
+): boolean {
+  if (destinationPath.length < sourcePath.length) {
+    return false;
+  }
+  for (let i = 0; i < sourcePath.length; i += 1) {
+    if (destinationPath[i] !== sourcePath[i]) {
+      return false;
+    }
+  }
+  return true;
+}

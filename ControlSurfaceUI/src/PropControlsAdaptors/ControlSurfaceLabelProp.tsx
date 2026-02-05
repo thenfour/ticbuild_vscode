@@ -11,10 +11,9 @@ import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 export interface ControlSurfaceLabelPropProps {
     spec: ControlSurfaceLabelSpec;
     path: string;
-    onMoveUp: () => void;
-    onMoveDown: () => void;
     onDelete: () => void;
     onSettings: () => void;
+    onMoveToDestination?: () => void;
 }
 
 /**
@@ -24,10 +23,9 @@ export interface ControlSurfaceLabelPropProps {
 export const ControlSurfaceLabelProp: React.FC<ControlSurfaceLabelPropProps> = ({
     spec,
     path,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
+    onMoveToDestination,
 }) => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
@@ -37,10 +35,9 @@ export const ControlSurfaceLabelProp: React.FC<ControlSurfaceLabelPropProps> = (
 
     // Create design tools
     const designTools = createDesignTools({
-        onMoveUp,
-        onMoveDown,
         onDelete,
         onSettings,
+        onMoveToDestination,
     });
 
     const handleCopy = React.useCallback(() => {

@@ -45,6 +45,7 @@ export const PropControlString: React.FC<PropControlStringProps> = ({
             selected={selected}
             disabled={disabled}
             isConnected={isConnected}
+            isMoveDestination={false}
             validationStatus={validationStatus ?? null}
             validationSeverity={validationSeverity}
             bindingStatus={bindingStatus ?? null}

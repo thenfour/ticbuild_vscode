@@ -7,6 +7,8 @@ export interface DesignToolsConfig {
     onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
+    onSetMoveDestination?: (path: string[] | null) => void;
+    onMoveToDestination?: () => void;
     canMoveUp?: boolean;
     canMoveDown?: boolean;
     includeDragHandle?: boolean;
@@ -72,6 +74,26 @@ export const createDesignTools = (config: DesignToolsConfig): React.ReactNode =>
         );
     }
 
+    if (config.onSetMoveDestination) {
+        buttons.push(
+            <PropControl.DesignToolButton
+                key="set-move-destination"
+                tool="setMoveDestination"
+                onClick={() => config.onSetMoveDestination!(null)}
+            />
+        );
+    }
+
+    if (config.onMoveToDestination) {
+        buttons.push(
+            <PropControl.DesignToolButton
+                key="move-to-destination"
+                tool="moveToDestination"
+                onClick={config.onMoveToDestination}
+            />
+        );
+    }
+
     return buttons.length > 0 ? <>{buttons}</> : null;
 };
 
@@ -79,6 +101,7 @@ type CreatePropControlClassesArgs = {
     designMode: boolean;
     selected: boolean;
     disabled: boolean;
+    isMoveDestination: boolean;
     additionalClasses?: string;
 }
 
@@ -88,6 +111,7 @@ export function createPropControlClasses(args: CreatePropControlClassesArgs): st
         args.designMode ? "cs-pp-design-mode" : "",
         args.selected ? "cs-pp-control-selected" : "",
         args.disabled ? "cs-pp-control-disabled" : "",
+        args.isMoveDestination ? "cs-pp-control-move-destination" : "",
         args.additionalClasses
     );
 }

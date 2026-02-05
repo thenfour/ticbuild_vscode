@@ -35,6 +35,8 @@ export type ControlSurfaceState = {
     designMode: boolean;
     selectedControlPath: string[] | null;
 
+    moveDestinationPath: string[] | null; // path where controls are being moved to
+
     viewId?: string; // unique ID for this view (panel or sidebar)
 };
 

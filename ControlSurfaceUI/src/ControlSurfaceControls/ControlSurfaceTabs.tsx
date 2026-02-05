@@ -44,10 +44,13 @@ export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     // selectedPath?: string[] | null;
     onSelectPath?: (path: string[], node: any) => void;
     onDeletePath?: (path: string[], node: any) => void;
+    onSetMoveDestination?: (path: string[] | null) => void;
+    onMoveToDestination?: () => void;
     onMoveUp?: () => void;
     onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
+    isMoveDestination: boolean;
 }
 
 export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
@@ -64,6 +67,9 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     onMoveDown,
     onDelete,
     onSettings,
+    isMoveDestination,
+    onSetMoveDestination,
+    onMoveToDestination,
 }) => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
@@ -83,6 +89,8 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
             onMoveDown,
             onDelete,
             onSettings,
+            onSetMoveDestination,
+            onMoveToDestination,
         })
         : null;
 
@@ -127,6 +135,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
             designMode: stateApi.state.designMode,
             selected: false,
             disabled: false,
+            isMoveDestination: isMoveDestination,
             additionalClasses: "control-surface-tabs-wrapper cs-pp-control-tabs  cs-pp-control-container"
         })}>
             {stateApi.state.designMode && designTools ? (

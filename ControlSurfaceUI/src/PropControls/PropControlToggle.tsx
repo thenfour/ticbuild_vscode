@@ -43,6 +43,7 @@ export const PropControlToggle: React.FC<PropControlToggleProps> = ({
         <PropControl.Shell
             designMode={designMode}
             selected={selected}
+            isMoveDestination={false}
             isConnected={isConnected}
             disabled={disabled}
             validationStatus={validationStatus ?? null}

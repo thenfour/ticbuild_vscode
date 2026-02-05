@@ -14,6 +14,7 @@ export interface ControlSurfaceSliderPropProps extends ControlSurfaceSliderSpec 
     onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
+    onMoveToDestination?: () => void;
 }
 
 /**
@@ -31,6 +32,7 @@ export const ControlSurfaceSliderProp: React.FC<ControlSurfaceSliderPropProps> =
     onMoveDown,
     onDelete,
     onSettings,
+    onMoveToDestination,
 }) => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
@@ -46,6 +48,7 @@ export const ControlSurfaceSliderProp: React.FC<ControlSurfaceSliderPropProps> =
             onMoveDown,
             onDelete,
             onSettings,
+            onMoveToDestination,
         })
         : null;
 

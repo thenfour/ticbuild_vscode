@@ -15,6 +15,7 @@ import { ControlSurfaceToggleProp } from "./PropControlsAdaptors/ControlSurfaceT
 import { ControlSurfaceTriggerButtonProp } from "./PropControlsAdaptors/ControlSurfaceTriggerButtonProp";
 import { ControlSurfaceXYProp } from "./PropControlsAdaptors/ControlSurfaceXYProp";
 import { ControlSurfaceGroup } from "./ControlSurfaceControls/ControlSurfaceGroup";
+import { isBlockedCopyDestination } from "./controlPathUtils";
 
 export type ControlSurfaceRenderOptions = {
     parentPath: string[] | undefined; // the "root page" has no parent path.
@@ -37,97 +38,112 @@ export const renderControlSurfaceControl = (
         throw new Error("parentPath is required in ControlSurfaceRenderOptions");
     }
     const currentPath = buildControlPath(options.parentPath, index);
-    const isSelected = isPathEqual(stateApi.state.selectedControlPath, currentPath);
+    // const isSelected = isPathEqual(stateApi.state.selectedControlPath, currentPath);
 
-    const handleSelect = options.onSelectPath
-        ? (path: string[]) => options.onSelectPath?.(path, node)
-        : undefined;
+    // const handleSelect = options.onSelectPath
+    //     ? (path: string[]) => options.onSelectPath?.(path, node)
+    //     : undefined;
+
     const handleDelete = options.onDeletePath
         ? (path: string[]) => options.onDeletePath?.(path, node)
         : undefined;
 
+    const deleteProc = () => handleDelete?.(currentPath);
+    const settingsProc = () => options.onSelectPath?.(currentPath, node);
+
+    const isMoveDestination = isPathEqual(stateApi.state.moveDestinationPath, currentPath);
+    const setAsDestinationPath = () => {
+        if (isMoveDestination) {
+            stateApi.setMoveDestinationPath(null);
+            console.log(`clearing move destination path`);
+        } else {
+            console.log(`setting move destination path to: ${JSON.stringify(currentPath)}`);
+            stateApi.setMoveDestinationPath(currentPath);
+        }
+    }
+
+    const containerProps = {
+        onSetMoveDestination: setAsDestinationPath,
+        renderControl: renderControlSurfaceControl,
+        isMoveDestination,
+    };
+
+    // you can move to destination if:
+    // - there is a move destination path
+    // - it's not going to cause issues in the tree.
+    let isBlockedByTree = true;
+    if (stateApi.state.moveDestinationPath) {
+        isBlockedByTree = isBlockedCopyDestination(stateApi.state.moveDestinationPath, currentPath);
+    }
+    const canMoveToDestination = (!!stateApi.state.moveDestinationPath) && !isBlockedByTree;
+    const moveToDestinationProc = canMoveToDestination ? () => {
+        // todo;
+        console.log(`Move '${JSON.stringify(currentPath)}' to destination: ${JSON.stringify(stateApi.state.moveDestinationPath)}`);
+    } : undefined;
+
+    const commonProps = {
+        onDelete: deleteProc,
+        onSettings: settingsProc,
+        onMoveToDestination: moveToDestinationProc,
+    }
     switch (node.type) {
         case "divider":
-            // New PropControl-based implementation
             return (
                 <ControlSurfaceDividerProp
                     key={`divider-${index}`}
                     spec={node}
                     path={JSON.stringify(currentPath)}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
         case "enumButtons":
-            // New PropControl-based implementation
             return (
                 <ControlSurfaceEnumButtonsProp
                     key={`enumButtons-${index}`}
                     {...node}
                     path={currentPath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
         case "knob":
-            // New PropControl-based implementation
             return (
                 <ControlSurfaceKnobProp
                     key={`knob-${index}`}
                     {...node}
                     path={currentPath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
         case "label":
-            // New PropControl-based implementation
             return (
                 <ControlSurfaceLabelProp
                     key={`label-${index}`}
                     spec={node}
                     path={JSON.stringify(currentPath)}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
         case "number":
-            // New PropControl-based implementation
             return (
                 <ControlSurfaceNumberProp
                     key={`number-${index}`}
                     {...node}
                     path={currentPath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
         case "slider":
-            // New PropControl-based implementation
             return (
                 <ControlSurfaceSliderProp
                     key={`slider-${index}`}
                     {...node}
                     path={currentPath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
@@ -137,10 +153,7 @@ export const renderControlSurfaceControl = (
                     key={`xy-${index}`}
                     {...node}
                     path={currentPath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
@@ -150,52 +163,37 @@ export const renderControlSurfaceControl = (
                     key={`scope-${index}`}
                     {...node}
                     path={currentPath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
         case "string":
-            // New PropControl-based implementation
             return (
                 <ControlSurfaceStringProp
                     key={`string-${index}`}
                     {...node}
                     path={currentPath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
         case "toggle":
-            // New PropControl-based implementation
             return (
                 <ControlSurfaceToggleProp
                     key={`toggle-${index}`}
                     {...node}
                     path={currentPath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
         case "triggerButton":
-            // New PropControl-based implementation
             return (
                 <ControlSurfaceTriggerButtonProp
                     key={`triggerButton-${index}`}
                     spec={node}
                     path={JSON.stringify(currentPath)}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
                 />
             );
 
@@ -207,46 +205,34 @@ export const renderControlSurfaceControl = (
                     key={`${node.type}-${index}`}
                     {...node}
                     layout={node.type}
-                    renderControl={renderControlSurfaceControl}
-                    parentPath={currentPath}
                     onSelectPath={options.onSelectPath}
                     onDeletePath={options.onDeletePath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    parentPath={currentPath}
+                    {...commonProps}
+                    {...containerProps}
                 />);
         case "tabs":
             return (
                 <ControlSurfaceTabs
                     key={`${node.type}-${index}`}
                     {...node}
-                    renderControl={renderControlSurfaceControl}
                     parentPath={currentPath}
-                    onSelectPath={options.onSelectPath}
-                    onDeletePath={options.onDeletePath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
+                    {...containerProps}
                 />);
 
         case "page":
-            // New PropControl-based implementation
             return (
                 <ControlSurfacePageProp
                     key={`page-${index}`}
                     spec={node}
                     path={JSON.stringify(currentPath)}
-                    renderControl={renderControlSurfaceControl}
                     api={api}
                     stateApi={stateApi}
                     options={options}
                     currentPath={currentPath}
-                    onMoveUp={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "up" })}
-                    onMoveDown={() => api?.postMessage?.({ type: "moveControl", path: currentPath, direction: "down" })}
-                    onDelete={() => handleDelete?.(currentPath)}
-                    onSettings={() => options.onSelectPath?.(currentPath, node)}
+                    {...commonProps}
+                    {...containerProps}
                 />
             );
 

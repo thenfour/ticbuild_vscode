@@ -47,6 +47,7 @@ export const PropControlEnumButtons: React.FC<PropControlEnumButtonsProps> = ({
             isConnected={isConnected}
             selected={selected}
             disabled={disabled}
+            isMoveDestination={false}
             validationStatus={validationStatus ?? null}
             validationSeverity={validationSeverity}
             bindingStatus={bindingStatus ?? null}

@@ -30,6 +30,7 @@ export interface ControlSurfaceGroupBaseProps {
   designTools?: React.ReactNode;
   copyTools?: React.ReactNode;
   children?: React.ReactNode;
+  isMoveDestination: boolean;
 }
 
 
@@ -41,6 +42,7 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
   designTools,
   copyTools,
   children,
+  isMoveDestination,
 }) => {
 
   const [open, setOpen] = React.useState(true);
@@ -51,6 +53,7 @@ export const ControlSurfaceGroupBase: React.FC<ControlSurfaceGroupBaseProps> = (
       designMode: !!designMode,
       selected: selected,
       disabled: false,
+      isMoveDestination,
       additionalClasses: "cs-pp-control-group cs-pp-control-container"
     })}>
 
@@ -91,8 +94,9 @@ export interface ControlSurfaceGroupProps extends Spec {
   parentPath?: string[];
   onSelectPath?: (path: string[], node: any) => void;
   onDeletePath?: (path: string[], node: any) => void;
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
+  onSetMoveDestination: (path: string[] | null) => void;
+  onMoveToDestination?: () => void;
+  isMoveDestination: boolean;
   onDelete?: () => void;
   onSettings?: () => void;
 }
@@ -111,10 +115,11 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
   //selectedPath,
   onSelectPath,
   onDeletePath,
-  onMoveUp,
-  onMoveDown,
   onDelete,
   onSettings,
+  onMoveToDestination,
+  onSetMoveDestination,
+  isMoveDestination
 }) => {
   const api = useControlSurfaceApi();
   const stateApi = useControlSurfaceState();
@@ -123,12 +128,14 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
     return null;
   }
 
+  console.log(`group render with onMoveToDestination: ${!!onMoveToDestination} and onSetMoveDestination: ${!!onSetMoveDestination}`);
+
   const designTools = stateApi.state.designMode
     ? createDesignTools({
-      onMoveUp,
-      onMoveDown,
       onDelete,
       onSettings,
+      onSetMoveDestination: onSetMoveDestination,
+      onMoveToDestination: onMoveToDestination,
     })
     : null;
 
@@ -209,6 +216,7 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
         selected={selected}
         designTools={designTools}
         copyTools={copyTools}
+        isMoveDestination={isMoveDestination}
       >
         {content}
       </PropControl.Row>
@@ -223,6 +231,7 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
         selected={selected}
         designTools={designTools}
         copyTools={copyTools}
+        isMoveDestination={isMoveDestination}
       >
         {content}
       </PropControl.Column>
@@ -236,6 +245,7 @@ export const ControlSurfaceGroup: React.FC<ControlSurfaceGroupProps> = ({
       selected={selected}
       designTools={designTools}
       copyTools={copyTools}
+      isMoveDestination={isMoveDestination}
     >
       {content}
     </ControlSurfaceGroupBase>

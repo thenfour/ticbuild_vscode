@@ -9,10 +9,9 @@ import { ButtonGroup } from "../Buttons/ButtonGroup";
 export interface ControlSurfaceDividerPropProps {
     spec: ControlSurfaceDividerSpec;
     path: string;
-    onMoveUp: () => void;
-    onMoveDown: () => void;
     onDelete: () => void;
     onSettings: () => void;
+    onMoveToDestination?: () => void;
 }
 
 /**
@@ -22,19 +21,17 @@ export interface ControlSurfaceDividerPropProps {
 export const ControlSurfaceDividerProp: React.FC<ControlSurfaceDividerPropProps> = ({
     spec,
     path,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
+    onMoveToDestination,
 }) => {
     const stateApi = useControlSurfaceState();
 
     // Create design tools
     const designTools = createDesignTools({
-        onMoveUp,
-        onMoveDown,
         onDelete,
         onSettings,
+        onMoveToDestination,
     });
 
     const designMode = stateApi.state.designMode;
@@ -45,6 +42,7 @@ export const ControlSurfaceDividerProp: React.FC<ControlSurfaceDividerPropProps>
             additionalClasses: "cs-pp-control-divider",
             designMode: designMode,
             selected: selected,
+            isMoveDestination: false,
             disabled: false
         })}
     >

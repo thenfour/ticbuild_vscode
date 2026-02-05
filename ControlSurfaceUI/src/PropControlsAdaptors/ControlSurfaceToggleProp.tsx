@@ -14,6 +14,7 @@ export interface ControlSurfaceTogglePropProps extends ControlSurfaceToggleSpec 
     onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
+    onMoveToDestination?: () => void;
 }
 
 /**
@@ -28,6 +29,7 @@ export const ControlSurfaceToggleProp: React.FC<ControlSurfaceTogglePropProps> =
     onMoveDown,
     onDelete,
     onSettings,
+    onMoveToDestination,
 }) => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
@@ -43,6 +45,7 @@ export const ControlSurfaceToggleProp: React.FC<ControlSurfaceTogglePropProps> =
             onMoveDown,
             onDelete,
             onSettings,
+            onMoveToDestination,
         })
         : null;
 

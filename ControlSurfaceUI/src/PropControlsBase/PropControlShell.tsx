@@ -32,7 +32,7 @@ it's not related to design mode.
 - We display design tools (move up/down, delete, settings) in design mode as an overlay.
 
 */
-import { mdiCog, mdiDelete, mdiMenuDown, mdiMenuUp, mdiDrag, mdiContentCopy } from "@mdi/js";
+import { mdiCog, mdiDelete, mdiMenuDown, mdiMenuUp, mdiDrag, mdiContentCopy, mdiFolderStar, mdiBookArrowRight } from "@mdi/js";
 import React from "react";
 import { ButtonGroup } from "../Buttons/ButtonGroup";
 import { IconButton } from "../Buttons/IconButton";
@@ -52,7 +52,7 @@ const emptyStringToNull = (value: React.ReactNode): React.ReactNode => {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 interface PropControlDesignToolButtonProps {
-    tool: "moveUp" | "moveDown" | "delete" | "settings" | "drag";
+    tool: "moveUp" | "moveDown" | "delete" | "settings" | "drag" | "setMoveDestination" | "moveToDestination";
     onClick?: () => void;
 }
 export const PropControlDesignToolButton: React.FC<PropControlDesignToolButtonProps> = ({ tool, onClick }) => {
@@ -72,6 +72,12 @@ export const PropControlDesignToolButton: React.FC<PropControlDesignToolButtonPr
             break;
         case "settings":
             labelPath = mdiCog;
+            break;
+        case "setMoveDestination":
+            labelPath = mdiFolderStar; // You might want to use a different icon here
+            break;
+        case "moveToDestination":
+            labelPath = mdiBookArrowRight; // You might want to use a different icon here
             break;
     }
 
@@ -114,8 +120,8 @@ interface PropControlShellProps {
     copyTools?: React.ReactNode; // only show when not in design mode, on hover.
 
     isConnected: boolean; // if not connected, don't show errors.
+    isMoveDestination: boolean;
 }
-
 const PropControlShell: React.FC<PropControlShellProps> = (props) => {
 
     // treat empty string as null so we can Boolean check them.
@@ -134,6 +140,7 @@ const PropControlShell: React.FC<PropControlShellProps> = (props) => {
                     designMode: props.designMode,
                     selected: props.selected,
                     disabled: props.disabled,
+                    isMoveDestination: props.isMoveDestination,
                     additionalClasses: classes(`cs-pp-control-shell`,
                         !!validationStatus && `cs-pp-control-shell-validation-${validationSeverity}`,
                         !!bindingStatus && `cs-pp-control-shell-binding-status-${bindingStatusSeverity}`,
@@ -187,6 +194,8 @@ interface PropControlPageProps {
     copyTools?: React.ReactNode; // only show when not in design mode, on hover.
 
     children?: React.ReactNode;
+
+    isMoveDestination: boolean;
 }
 
 const PropControlPage: React.FC<PropControlPageProps> = (props) => {
@@ -200,6 +209,7 @@ const PropControlPage: React.FC<PropControlPageProps> = (props) => {
             designMode: props.designMode,
             selected: props.selected,
             disabled: false,
+            isMoveDestination: props.isMoveDestination,
             additionalClasses: "cs-pp-control-page cs-pp-control-column"
         })}
     >
@@ -229,6 +239,8 @@ interface PropControlColumnProps {
     copyTools?: React.ReactNode; // only show when not in design mode, on hover.
 
     children?: React.ReactNode;
+
+    isMoveDestination: boolean;
 }
 
 const PropControlColumn: React.FC<PropControlColumnProps> = (props) => {
@@ -242,6 +254,7 @@ const PropControlColumn: React.FC<PropControlColumnProps> = (props) => {
             designMode: props.designMode,
             selected: props.selected,
             disabled: false,
+            isMoveDestination: props.isMoveDestination,
             additionalClasses: "cs-pp-control-column"
         })}
     >
@@ -281,6 +294,8 @@ interface PropControlRowProps {
     copyTools?: React.ReactNode; // only show when not in design mode, on hover.
 
     children?: React.ReactNode;
+
+    isMoveDestination: boolean;
 }
 
 const PropControlRow: React.FC<PropControlRowProps> = (props) => {
@@ -294,6 +309,7 @@ const PropControlRow: React.FC<PropControlRowProps> = (props) => {
             designMode: props.designMode,
             selected: props.selected,
             disabled: false,
+            isMoveDestination: props.isMoveDestination,
             additionalClasses: "cs-pp-control-row"
         })}
     >

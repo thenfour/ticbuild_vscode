@@ -14,6 +14,7 @@ export interface ControlSurfaceEnumButtonsPropProps extends ControlSurfaceEnumBu
     onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
+    onMoveToDestination?: () => void;
 }
 
 /**
@@ -29,6 +30,7 @@ export const ControlSurfaceEnumButtonsProp: React.FC<ControlSurfaceEnumButtonsPr
     onMoveDown,
     onDelete,
     onSettings,
+    onMoveToDestination,
 }) => {
     const api = useControlSurfaceApi();
     const stateApi = useControlSurfaceState();
@@ -45,6 +47,7 @@ export const ControlSurfaceEnumButtonsProp: React.FC<ControlSurfaceEnumButtonsPr
             onMoveDown,
             onDelete,
             onSettings,
+            onMoveToDestination,
         })
         : null;
 

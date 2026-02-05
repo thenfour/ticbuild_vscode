@@ -29,6 +29,7 @@ export const PropControlDivider: React.FC<PropControlDividerProps> = ({
             selected={selected}
             disabled={disabled}
             validationStatus={null}
+            isMoveDestination={false}
             bindingStatus={null}
             label={null}
             value={<Divider />}

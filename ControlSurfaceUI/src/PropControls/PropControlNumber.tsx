@@ -65,6 +65,7 @@ export const PropControlNumber: React.FC<PropControlNumberProps> = ({
             isConnected={isConnected}
             selected={selected}
             disabled={disabled}
+            isMoveDestination={false}
             validationStatus={validationError}
             validationSeverity={validationError ? "error" : undefined}
             bindingStatus={bindingStatus ?? null}

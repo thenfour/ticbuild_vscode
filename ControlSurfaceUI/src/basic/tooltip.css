@@ -1,0 +1,38 @@
+/* Generic tooltip component */
+.generic-tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: var(--vscode-editorHoverWidget-background);
+    color: var(--vscode-editorHoverWidget-foreground);
+    padding: 6px 10px;
+    font-size: var(--ff-size-1x);
+    line-height: 1.4;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--vscode-editorHoverWidget-border);
+    border-radius: 4px;
+    pointer-events: none;
+    /* making it always fit on the screen makes the placement algo able to solve layout, reducing flicker.*/
+    max-width: calc(min(320px, 100vw - 16px));
+    /* max-width: calc(100vw - 16px); */
+    max-height: calc(100vh - 16px);
+    overflow: auto;
+    overflow-wrap: break-word;
+
+    word-wrap: break-word;
+}
+
+.generic-tooltip--bottom {
+    transform: translate(-50%, 0);
+}
+
+.generic-tooltip--top {
+    transform: translate(-50%, -100%);
+}
+
+.generic-tooltip--left {
+    transform: translate(-100%, -50%);
+}
+
+.generic-tooltip--right {
+    transform: translate(0, -50%);
+}

@@ -39,6 +39,7 @@ import { IconButton } from "../Buttons/IconButton";
 import { classes, IsNullOrWhitespace } from "../utils";
 import "./PropControls.css";
 import { createPropControlClasses } from "../utils/designTools";
+import { Tooltip } from "../basic/tooltip";
 
 export type PropControlSeverity = "info" | "warning" | "error" | "success";
 
@@ -82,11 +83,13 @@ export const PropControlDesignToolButton: React.FC<PropControlDesignToolButtonPr
     }
 
     return (
-        <IconButton
-            className={`cs-pp-design-tool-button cs-prop-control-design-tool-button-${tool}${tool === "drag" ? " cs-dnd-handle" : ""}`}
-            onClick={onClick}
-            iconPath={labelPath}
-        />
+        <Tooltip title={tool}>
+            <IconButton
+                className={`cs-pp-design-tool-button cs-prop-control-design-tool-button-${tool}${tool === "drag" ? " cs-dnd-handle" : ""}`}
+                onClick={onClick}
+                iconPath={labelPath}
+            />
+        </Tooltip>
     );
 };
 

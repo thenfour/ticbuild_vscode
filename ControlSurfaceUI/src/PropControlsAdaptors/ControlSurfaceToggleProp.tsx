@@ -10,8 +10,6 @@ import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceTogglePropProps extends ControlSurfaceToggleSpec {
     path: string[];
-    onMoveUp?: () => void;
-    onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
     onMoveToDestination?: () => void;
@@ -25,8 +23,6 @@ export const ControlSurfaceToggleProp: React.FC<ControlSurfaceTogglePropProps> =
     label,
     symbol,
     path,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
     onMoveToDestination,
@@ -41,8 +37,6 @@ export const ControlSurfaceToggleProp: React.FC<ControlSurfaceTogglePropProps> =
 
     const designTools = designMode
         ? createDesignTools({
-            onMoveUp,
-            onMoveDown,
             onDelete,
             onSettings,
             onMoveToDestination,

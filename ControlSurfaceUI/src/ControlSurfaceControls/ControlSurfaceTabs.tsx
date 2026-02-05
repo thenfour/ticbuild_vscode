@@ -14,18 +14,18 @@ each tab is basically a group, where the group label is rendered as a tab.
 */
 
 import React from "react";
-import { DndContainer, DndDraggable } from "../dnd";
-import { TabPanel, Tab } from "../basic/Tabs";
-import { ControlSurfaceTabsSpec, ControlSurfaceApi } from "../defs";
-import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
-import { buildControlPath, buildTabPath, isPathEqual } from "../controlPathBase";
 import { AddControlControl } from "../AddControlControl";
-import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
-import { ControlSurfaceStateApi, useControlSurfaceState } from "../hooks/ControlSurfaceState";
 import { ButtonGroup } from "../Buttons/ButtonGroup";
-import { createDesignTools, createPropControlClasses } from "../utils/designTools";
 import { PropControl } from "../PropControlsBase/PropControlShell";
+import { Tab, TabPanel } from "../basic/Tabs";
+import { buildControlPath, buildTabPath, isPathEqual } from "../controlPathBase";
+import type { ControlSurfaceRenderOptions } from "../controlSurfaceControlDelegator";
 import { collectSymbolsForTabs, copyLuaAssignmentsToClipboard } from "../controlSurfaceCopy";
+import { ControlSurfaceApi, ControlSurfaceTabsSpec } from "../defs";
+import { DndContainer, DndDraggable } from "../dnd";
+import { ControlSurfaceStateApi, useControlSurfaceState } from "../hooks/ControlSurfaceState";
+import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
+import { createDesignTools, createPropControlClasses } from "../utils/designTools";
 
 export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
     renderControl: (
@@ -33,21 +33,13 @@ export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
         index: number,
         api: ControlSurfaceApi,
         stateApi: ControlSurfaceStateApi,
-        // symbolValues: Record<string, any>,
-        // pollIntervalMs: number,
         options: ControlSurfaceRenderOptions,
     ) => JSX.Element;
-    // symbolValues: Record<string, any>;
-    // pollIntervalMs: number;
     parentPath: string[];
-    // designMode: boolean;
-    // selectedPath?: string[] | null;
     onSelectPath?: (path: string[], node: any) => void;
     onDeletePath?: (path: string[], node: any) => void;
     onSetMoveDestination?: (pathOverride?: string[]) => void;
     onMoveToDestination?: () => void;
-    // onMoveUp?: () => void;
-    // onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
     isMoveDestination: boolean;
@@ -56,15 +48,9 @@ export interface ControlSurfaceTabsProps extends ControlSurfaceTabsSpec {
 export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
     tabs,
     renderControl,
-    // symbolValues,
-    // pollIntervalMs,
     parentPath,
-    // designMode,
-    // selectedPath,
     onSelectPath,
     onDeletePath,
-    // onMoveUp,
-    // onMoveDown,
     onDelete,
     onSettings,
     isMoveDestination,
@@ -154,7 +140,7 @@ export const ControlSurfaceTabs: React.FC<ControlSurfaceTabsProps> = ({
             //console.log(`[TABS] useEffect: updating move destination path due to tab change to tab ${selectedTabId}`);
             wrappedSetMoveDestination();
         }
-    }, [selectedTabId]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [selectedTabId]);
 
     return (
         <div className={createPropControlClasses({

@@ -1,10 +1,6 @@
 import React from "react";
-import { PropControl, PropControlSeverity } from "./PropControlShell"
-import { ButtonGroup } from "../Buttons/ButtonGroup";
-import { Button } from "../Buttons/PushButton";
-import { CheckboxButton } from "../Buttons/CheckboxButton";
-import { Dropdown } from "../basic/Dropdown";
 import { TextInput } from "../basic/TextInput";
+import { PropControl, PropControlSeverity } from "./PropControlShell";
 
 
 

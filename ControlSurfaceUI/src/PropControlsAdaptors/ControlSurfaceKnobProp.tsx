@@ -10,8 +10,6 @@ import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceKnobPropProps extends ControlSurfaceKnobSpec {
     path: string[];
-    onMoveUp?: () => void;
-    onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
     onMoveToDestination?: () => void;
@@ -29,8 +27,6 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
     step = 0.01,
     size = "medium",
     path,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
     onMoveToDestination,
@@ -45,8 +41,6 @@ export const ControlSurfaceKnobProp: React.FC<ControlSurfaceKnobPropProps> = ({
 
     const designTools = designMode
         ? createDesignTools({
-            onMoveUp,
-            onMoveDown,
             onDelete,
             onSettings,
             onMoveToDestination,

@@ -10,8 +10,6 @@ import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceEnumButtonsPropProps extends ControlSurfaceEnumButtonsSpec {
     path: string[];
-    onMoveUp?: () => void;
-    onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
     onMoveToDestination?: () => void;
@@ -26,8 +24,6 @@ export const ControlSurfaceEnumButtonsProp: React.FC<ControlSurfaceEnumButtonsPr
     symbol,
     options,
     path,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
     onMoveToDestination,
@@ -43,8 +39,6 @@ export const ControlSurfaceEnumButtonsProp: React.FC<ControlSurfaceEnumButtonsPr
 
     const designTools = designMode
         ? createDesignTools({
-            onMoveUp,
-            onMoveDown,
             onDelete,
             onSettings,
             onMoveToDestination,

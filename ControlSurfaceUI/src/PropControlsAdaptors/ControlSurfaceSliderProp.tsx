@@ -10,8 +10,6 @@ import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceSliderPropProps extends ControlSurfaceSliderSpec {
     path: string[];
-    onMoveUp?: () => void;
-    onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
     onMoveToDestination?: () => void;
@@ -28,8 +26,6 @@ export const ControlSurfaceSliderProp: React.FC<ControlSurfaceSliderPropProps> =
     max = 100,
     step = 1,
     path,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
     onMoveToDestination,
@@ -44,8 +40,6 @@ export const ControlSurfaceSliderProp: React.FC<ControlSurfaceSliderPropProps> =
 
     const designTools = designMode
         ? createDesignTools({
-            onMoveUp,
-            onMoveDown,
             onDelete,
             onSettings,
             onMoveToDestination,

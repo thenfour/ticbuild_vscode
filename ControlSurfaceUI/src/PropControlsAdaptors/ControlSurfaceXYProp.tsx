@@ -10,8 +10,6 @@ import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceXYPropProps extends ControlSurfaceXYSpec {
     path: string[];
-    onMoveUp?: () => void;
-    onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
     onMoveToDestination?: () => void;
@@ -26,8 +24,6 @@ export const ControlSurfaceXYProp: React.FC<ControlSurfaceXYPropProps> = ({
     x,
     y,
     path,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
     onMoveToDestination,
@@ -52,8 +48,6 @@ export const ControlSurfaceXYProp: React.FC<ControlSurfaceXYPropProps> = ({
 
     const designTools = designMode
         ? createDesignTools({
-            onMoveUp,
-            onMoveDown,
             onDelete,
             onSettings,
             onMoveToDestination,

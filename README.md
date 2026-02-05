@@ -197,3 +197,13 @@ code --install-extension ./ticbuild-preproc-highlight-0.0.4.vsix
 # uninstall
 code --uninstall-extension tridentloop.ticbuild-vs-code
 ```
+
+# Release history
+
+## `v0.0.4` / `2026-02-05`
+
+- Remoting and control surfaces initial support
+
+## `v0.0.2` / `2026-01-26`
+
+- Initial version with only syntax highlighting.

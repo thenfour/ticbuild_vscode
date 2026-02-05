@@ -10,8 +10,6 @@ import { useControlSurfaceApi } from "../hooks/VsCodeApiContext";
 
 export interface ControlSurfaceNumberPropProps extends ControlSurfaceNumberSpec {
     path: string[];
-    onMoveUp?: () => void;
-    onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
     onMoveToDestination?: () => void;
@@ -28,8 +26,6 @@ export const ControlSurfaceNumberProp: React.FC<ControlSurfaceNumberPropProps> =
     max = 100,
     step = 0.1,
     path,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
     onMoveToDestination,
@@ -44,8 +40,6 @@ export const ControlSurfaceNumberProp: React.FC<ControlSurfaceNumberPropProps> =
 
     const designTools = designMode
         ? createDesignTools({
-            onMoveUp,
-            onMoveDown,
             onDelete,
             onSettings,
             onMoveToDestination,

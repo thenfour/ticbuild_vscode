@@ -9,8 +9,6 @@ import { makePlotSeriesKey, SCOPE_SERIES_COLORS } from "../plotUtils";
 
 export interface ControlSurfaceScopePropProps extends ControlSurfaceScopeSpec {
     path: string[];
-    onMoveUp?: () => void;
-    onMoveDown?: () => void;
     onDelete?: () => void;
     onSettings?: () => void;
     onMoveToDestination?: () => void;
@@ -24,8 +22,6 @@ export const ControlSurfaceScopeProp: React.FC<ControlSurfaceScopePropProps> = (
     height,
     series,
     path,
-    onMoveUp,
-    onMoveDown,
     onDelete,
     onSettings,
     onMoveToDestination,
@@ -106,8 +102,6 @@ export const ControlSurfaceScopeProp: React.FC<ControlSurfaceScopePropProps> = (
 
     const designTools = designMode
         ? createDesignTools({
-            onMoveUp,
-            onMoveDown,
             onDelete,
             onSettings,
             onMoveToDestination,

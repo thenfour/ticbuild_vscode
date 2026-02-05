@@ -77,8 +77,12 @@ export const renderControlSurfaceControl = (
     }
     const canMoveToDestination = (!!stateApi.state.moveDestinationPath) && !isBlockedByTree;
     const moveToDestinationProc = canMoveToDestination ? () => {
-        // todo;
-        console.log(`Move '${JSON.stringify(currentPath)}' to destination: ${JSON.stringify(stateApi.state.moveDestinationPath)}`);
+        api.postMessage({
+            type: "reorderControl",
+            sourcePath: currentPath,
+            targetParentPath: stateApi.state.moveDestinationPath,
+            targetIndex: -1, // -1 means append to end, will be clamped by backend
+        });
     } : undefined;
 
     const commonProps = {

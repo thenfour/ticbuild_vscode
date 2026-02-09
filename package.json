@@ -2,7 +2,7 @@
   "name": "ticbuild-vs-code",
   "description": "ticbuild extension for VS Code - control surface and syntax highlighting for TIC-80 development & debugging",
   "displayName": "TIC-80 ticbuild development & debugging control surface",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "./out/extension.js",
   "author": {
     "name": "Carl Corcoran"

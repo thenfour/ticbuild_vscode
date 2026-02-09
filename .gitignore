@@ -7,6 +7,9 @@ out/
 dist/
 *.vsix
 
+# but allow vsix files in releases
+!releases/*.vsix
+
 # written automatically
 .ticbuild/devtools.schema.json
 

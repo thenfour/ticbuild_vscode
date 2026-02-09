@@ -200,6 +200,10 @@ code --uninstall-extension tridentloop.ticbuild-vs-code
 
 # Release history
 
+## `v0.0.5` / `2026-02-09`
+
+- Language extension providers, providing info about macros and other symbols across the project
+
 ## `v0.0.4` / `2026-02-05`
 
 - Remoting and control surfaces initial support

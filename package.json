@@ -95,6 +95,31 @@
           "type": "number",
           "default": 3000,
           "description": "Timeout in milliseconds for connecting to TIC-80 remoting."
+        },
+        "tic80.language.signatureHelp": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable TIC-80 signature help for Lua."
+        },
+        "tic80.language.completion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable TIC-80 completion items for Lua."
+        },
+        "tic80.language.hover": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable TIC-80 hover help for Lua."
+        },
+        "tic80.language.definition": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable TIC-80 definition/declaration for Lua."
+        },
+        "tic80.language.documentSymbols": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable TIC-80 document symbols for Lua."
         }
       }
     },

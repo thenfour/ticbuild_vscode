@@ -28,6 +28,10 @@ export class SymbolIndexManager implements vscode.Disposable {
         this.workspaceRoot = workspaceRoot;
     }
 
+    logDebug(message: string): void {
+        this.output.appendLine(`[symbols] ${message}`);
+    }
+
     dispose(): void {
         if (this.watcher) {
             this.watcher.dispose();
@@ -75,51 +79,35 @@ export class SymbolIndexManager implements vscode.Disposable {
     }
 
     getSymbolByName(name: string): IndexedSymbol | null {
-        if (!this.projectIndex || !this.projectIndex.globalIndex) {
+        if (!this.projectIndex) {
             return null;
         }
 
-        const refs = this.projectIndex.globalIndex.symbolsByName[name];
-        if (!refs || refs.length === 0) {
-            return null;
+        const globalIndex = this.projectIndex.globalIndex;
+        if (globalIndex) {
+            const refs = globalIndex.symbolsByName[name];
+            if (refs && refs.length > 0) {
+                const ref = refs[0];
+                const fileIndex = this.projectIndex.files[ref.file];
+                if (fileIndex) {
+                    const symbol = fileIndex.symbols[ref.symbolId];
+                    if (symbol) {
+                        return { symbol, fileIndex };
+                    }
+                }
+            }
         }
 
-        const ref = refs[0];
-        const fileIndex = this.projectIndex.files[ref.file];
-        if (!fileIndex) {
-            return null;
-        }
-
-        const symbol = fileIndex.symbols[ref.symbolId];
-        if (!symbol) {
-            return null;
-        }
-
-        return { symbol, fileIndex };
+        return this.findGlobalSymbolByName(name);
     }
 
     getFunctionSignature(functionName: string): FunctionSignatureInfo | null {
-        if (!this.projectIndex || !this.projectIndex.globalIndex) {
+        const resolved = this.getSymbolByName(functionName);
+        if (!resolved) {
             return null;
         }
 
-        const refs = this.projectIndex.globalIndex.symbolsByName[functionName];
-        if (!refs || refs.length === 0) {
-            return null;
-        }
-
-        const ref = refs[0];
-        const fileIndex = this.projectIndex.files[ref.file];
-        if (!fileIndex) {
-            return null;
-        }
-
-        const symbol = fileIndex.symbols[ref.symbolId];
-        if (!symbol || symbol.kind !== 'function') {
-            return null;
-        }
-
-        return this.getFunctionSignatureForSymbol(symbol, fileIndex);
+        return this.getFunctionSignatureForSymbol(resolved.symbol, resolved.fileIndex);
     }
 
     getFunctionSignatureForSymbol(symbol: SymbolDefinition, fileIndex: FileIndex): FunctionSignatureInfo | null {
@@ -245,6 +233,7 @@ export class SymbolIndexManager implements vscode.Disposable {
     private async refreshLatestIndex(): Promise<void> {
         const files = await vscode.workspace.findFiles('**/symbols.index.json');
         if (files.length === 0) {
+            this.logDebug('No symbols.index.json files found.');
             return;
         }
 
@@ -264,6 +253,7 @@ export class SymbolIndexManager implements vscode.Disposable {
         }
 
         if (latestUri) {
+            this.logDebug(`Loading latest symbol index: ${latestUri.fsPath}`);
             await this.loadIndexFromUri(latestUri);
         }
     }
@@ -276,6 +266,7 @@ export class SymbolIndexManager implements vscode.Disposable {
 
             this.projectIndex = parsed;
             this.latestIndexUri = uri;
+            this.logDebug(`Loaded symbol index (schema ${parsed.schemaVersion}) from ${uri.fsPath}`);
         } catch (error) {
             this.output.appendLine(`[symbols] Failed to load symbol index: ${String(error)}`);
         }
@@ -303,6 +294,22 @@ export class SymbolIndexManager implements vscode.Disposable {
         }
 
         return params;
+    }
+
+    private findGlobalSymbolByName(name: string): IndexedSymbol | null {
+        if (!this.projectIndex) {
+            return null;
+        }
+
+        for (const fileIndex of Object.values(this.projectIndex.files)) {
+            for (const symbol of Object.values(fileIndex.symbols)) {
+                if (symbol.name === name && symbol.visibility === 'global') {
+                    return { symbol, fileIndex };
+                }
+            }
+        }
+
+        return null;
     }
 
     private getUriForFileIndex(fileIndex: FileIndex): vscode.Uri | null {

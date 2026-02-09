@@ -16,18 +16,25 @@ export class Tic80SignatureHelpProvider implements vscode.SignatureHelpProvider 
     ): vscode.ProviderResult<vscode.SignatureHelp> {
         const lineText = document.lineAt(position.line).text;
         const textBeforeCursor = lineText.substring(0, position.character);
+        this.indexManager.logDebug(
+            `SignatureHelp at ${document.uri.fsPath}:${position.line + 1}:${position.character + 1} (lang=${document.languageId}, scheme=${document.uri.scheme})`
+        );
 
         const functionCallMatch = this.findFunctionCall(textBeforeCursor);
         if (!functionCallMatch) {
+            this.indexManager.logDebug('No function call match found on current line.');
             return null;
         }
 
         const { functionName, parameterIndex } = functionCallMatch;
+        this.indexManager.logDebug(`Function call detected: ${functionName} (param index ${parameterIndex})`);
         const signatureInfo = this.indexManager.getFunctionSignature(functionName);
         if (!signatureInfo) {
+            this.indexManager.logDebug(`No signature info found for ${functionName}.`);
             return null;
         }
 
+        this.indexManager.logDebug(`Signature info resolved for ${functionName}.`);
         return this.buildSignatureHelp(signatureInfo, parameterIndex);
     }
 

@@ -55,42 +55,81 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(symbolIndexManager);
 
   const luaSelector: vscode.DocumentSelector = { language: 'lua' };
+  const languageProviderDisposables: vscode.Disposable[] = [];
+
+  const registerLanguageProviders = (): void => {
+    while (languageProviderDisposables.length > 0) {
+      languageProviderDisposables.pop()?.dispose();
+    }
+
+    const config = vscode.workspace.getConfiguration('tic80');
+    const enableSignature = config.get<boolean>('language.signatureHelp', true);
+    const enableCompletion = config.get<boolean>('language.completion', true);
+    const enableHover = config.get<boolean>('language.hover', true);
+    const enableDefinition = config.get<boolean>('language.definition', true);
+    const enableDocumentSymbols = config.get<boolean>('language.documentSymbols', true);
+
+    if (enableSignature) {
+      languageProviderDisposables.push(
+        vscode.languages.registerSignatureHelpProvider(
+          luaSelector,
+          new Tic80SignatureHelpProvider(symbolIndexManager),
+          '(', ','
+        )
+      );
+    }
+    if (enableCompletion) {
+      languageProviderDisposables.push(
+        vscode.languages.registerCompletionItemProvider(
+          luaSelector,
+          new Tic80CompletionProvider(symbolIndexManager)
+        )
+      );
+    }
+    if (enableHover) {
+      languageProviderDisposables.push(
+        vscode.languages.registerHoverProvider(
+          luaSelector,
+          new Tic80HoverProvider(symbolIndexManager)
+        )
+      );
+    }
+    if (enableDefinition) {
+      const definitionProvider = new Tic80DefinitionProvider(symbolIndexManager);
+      languageProviderDisposables.push(
+        vscode.languages.registerDefinitionProvider(
+          luaSelector,
+          definitionProvider
+        )
+      );
+      languageProviderDisposables.push(
+        vscode.languages.registerDeclarationProvider(
+          luaSelector,
+          definitionProvider
+        )
+      );
+    }
+    if (enableDocumentSymbols) {
+      languageProviderDisposables.push(
+        vscode.languages.registerDocumentSymbolProvider(
+          luaSelector,
+          new Tic80DocumentSymbolProvider(symbolIndexManager)
+        )
+      );
+    }
+
+    for (const disposable of languageProviderDisposables) {
+      context.subscriptions.push(disposable);
+    }
+  };
+
+  registerLanguageProviders();
   context.subscriptions.push(
-    vscode.languages.registerSignatureHelpProvider(
-      luaSelector,
-      new Tic80SignatureHelpProvider(symbolIndexManager),
-      '(', ','
-    )
-  );
-  context.subscriptions.push(
-    vscode.languages.registerCompletionItemProvider(
-      luaSelector,
-      new Tic80CompletionProvider(symbolIndexManager)
-    )
-  );
-  context.subscriptions.push(
-    vscode.languages.registerHoverProvider(
-      luaSelector,
-      new Tic80HoverProvider(symbolIndexManager)
-    )
-  );
-  context.subscriptions.push(
-    vscode.languages.registerDefinitionProvider(
-      luaSelector,
-      new Tic80DefinitionProvider(symbolIndexManager)
-    )
-  );
-  context.subscriptions.push(
-    vscode.languages.registerDeclarationProvider(
-      luaSelector,
-      new Tic80DefinitionProvider(symbolIndexManager)
-    )
-  );
-  context.subscriptions.push(
-    vscode.languages.registerDocumentSymbolProvider(
-      luaSelector,
-      new Tic80DocumentSymbolProvider(symbolIndexManager)
-    )
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('tic80.language')) {
+        registerLanguageProviders();
+      }
+    })
   );
 
   // State persistence keys

@@ -13,7 +13,8 @@
   },
   "activationEvents": [
     "onStartupFinished",
-    "onWebviewPanel:tic80ControlSurfacePanel"
+    "onWebviewPanel:tic80ControlSurfacePanel",
+    "onLanguage:lua"
   ],
   "repository": {
     "type": "git",

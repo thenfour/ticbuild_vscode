@@ -29,6 +29,12 @@ import { ControlSurfaceRegistry } from './views/ControlSurfaceRegistry';
 import { ControlSurfaceSidebarProvider } from './views/ControlSurfaceSidebarProvider';
 import { ensureDevtoolsSchemaForWorkspace } from './devtoolsModel';
 import { ControlSurfaceMessageHandler } from './controlSurface/ControlSurfaceMessageHandler';
+import { SymbolIndexManager } from './language/SymbolIndexManager';
+import { Tic80SignatureHelpProvider } from './language/Tic80SignatureHelpProvider';
+import { Tic80CompletionProvider } from './language/Tic80CompletionProvider';
+import { Tic80HoverProvider } from './language/Tic80HoverProvider';
+import { Tic80DefinitionProvider } from './language/Tic80DefinitionProvider';
+import { Tic80DocumentSymbolProvider } from './language/Tic80DocumentSymbolProvider';
 
 function generatePanelId(): string {
   return `panel-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -43,6 +49,49 @@ export function activate(context: vscode.ExtensionContext): void {
   const workspaceRoot = getWorkspaceRoot();
   void ensureDevtoolsSchemaForWorkspace(workspaceRoot, output);
   const controlSurfaceRegistry = new ControlSurfaceRegistry();
+
+  const symbolIndexManager = new SymbolIndexManager(output, workspaceRoot);
+  void symbolIndexManager.initialize();
+  context.subscriptions.push(symbolIndexManager);
+
+  const luaSelector: vscode.DocumentSelector = { language: 'lua' };
+  context.subscriptions.push(
+    vscode.languages.registerSignatureHelpProvider(
+      luaSelector,
+      new Tic80SignatureHelpProvider(symbolIndexManager),
+      '(', ','
+    )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      luaSelector,
+      new Tic80CompletionProvider(symbolIndexManager)
+    )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider(
+      luaSelector,
+      new Tic80HoverProvider(symbolIndexManager)
+    )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerDefinitionProvider(
+      luaSelector,
+      new Tic80DefinitionProvider(symbolIndexManager)
+    )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerDeclarationProvider(
+      luaSelector,
+      new Tic80DefinitionProvider(symbolIndexManager)
+    )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerDocumentSymbolProvider(
+      luaSelector,
+      new Tic80DocumentSymbolProvider(symbolIndexManager)
+    )
+  );
 
   // State persistence keys
   const STATE_KEY_PANELS = 'tic80.controlSurface.panels';

@@ -1,0 +1,1 @@
+--#macro A() => "macro" -- with a comment.

@@ -240,6 +240,35 @@ code --install-extension ./ticbuild-preproc-highlight-0.0.4.vsix
 code --uninstall-extension tridentloop.ticbuild-vs-code
 ```
 
+# Compatibility with LuaLS
+
+LuaLS is the Lua language server used by various plugins including [sumneko.lua](https://marketplace.visualstudio.com/items?itemName=sumneko.lua).
+
+This plugin is super useful because it picks up the LuaCATS declarations (`.d.lua`)
+for better completions and intellisense. However those plugins conflict with
+this plugin's syntax highlighting.
+
+**How to fix:**
+
+Add to `.vscode/settings.json` (or manually set in vscode settings):
+
+```jsonc
+{
+  "Lua.semantic.enable": false,
+}
+```
+
+A heavier-handed solution is to disable semantic highlighing for Lua entirely;
+maybe there are other Lua texmate extensions with the same issue:
+
+```jsonc
+{
+  "[lua]": {
+    "editor.semanticHighlighting.enabled": false,
+  },
+}
+```
+
 # Release history
 
 ## `v0.0.6` / future

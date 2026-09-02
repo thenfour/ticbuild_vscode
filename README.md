@@ -283,9 +283,10 @@ maybe there are other Lua texmate extensions with the same issue:
 
 # Release history
 
-## `v0.0.6` / future
+## `v0.0.6` / `2026-09-02`
 
 - #9 Added more settings to disable extension features
+- #10 Add syntax highlighting for typescript
 
 ## `v0.0.5` / `2026-02-09`
 

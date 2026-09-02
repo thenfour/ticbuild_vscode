@@ -11,10 +11,16 @@ export const POLLER_LOG_THROTTLE_MS = 1000;
 
 export const CONFIG_REMOTE_HOST = 'remote.host';
 export const CONFIG_REMOTE_PORT = 'remote.port';
+export const CONFIG_REMOTE_AUTO_CONNECT = 'remote.autoConnect';
+export const CONFIG_REMOTE_DISCOVERY_ENABLED = 'remote.discovery.enabled';
+export const CONFIG_REMOTE_SHOW_STATUS_BAR = 'remote.showStatusBar';
 export const CONFIG_POLL_HZ = 'pollHz';
 export const CONFIG_CONNECT_TIMEOUT_MS = 'connectTimeoutMs';
 export const CONFIG_UI_REFRESH_MS = 'uiRefreshMs';
 export const CONFIG_DISCOVERY_REFRESH_MS = 'discoveryRefreshMs';
+export const CONFIG_LANGUAGE_ENABLED = 'language.enabled';
+export const CONFIG_CONTROL_SURFACE_ENABLED = 'controlSurface.enabled';
+export const CONFIG_DEVTOOLS_AUTO_CONFIGURE_SCHEMA = 'devtools.autoConfigureSchema';
 
 export const REMOTING_HELLO_V1 = 'tic-80 remoting v1';
 

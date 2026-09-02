@@ -64,8 +64,22 @@
   },
   "contributes": {
     "configuration": {
-      "title": "TIC-80 Remoting",
+      "title": "TIC-80 ticbuild",
       "properties": {
+        "tic80.controlSurface.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "order": 1,
+          "description": "Enable the TIC-80 control surface, remoting, watches, discovery, and related commands."
+        },
+        "tic80.language.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "order": 2,
+          "description": "Enable ticbuild-aware Lua language features. Syntax highlighting is contributed separately and is not affected."
+        },
         "tic80.remote.host": {
           "type": "string",
           "default": "127.0.0.1",
@@ -75,6 +89,30 @@
           "type": "number",
           "default": 9977,
           "description": "Default TIC-80 remoting port."
+        },
+        "tic80.remote.autoConnect": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "description": "Automatically connect to TIC-80 sessions announced in the current workspace."
+        },
+        "tic80.remote.discovery.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "description": "Discover local TIC-80 instances for the attach picker and control surface."
+        },
+        "tic80.remote.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "description": "Show TIC-80 remoting connection status in the status bar."
+        },
+        "tic80.devtools.autoConfigureSchema": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "description": "Create devtools.schema.json and add its $schema reference to an existing .ticbuild/devtools.json file."
         },
         "tic80.pollHz": {
           "type": "number",
@@ -126,23 +164,28 @@
     "commands": [
       {
         "command": "tic80.attach",
-        "title": "TIC-80: Attach..."
+        "title": "TIC-80: Attach...",
+        "enablement": "config.tic80.controlSurface.enabled"
       },
       {
         "command": "tic80.reloadDevtools",
-        "title": "TIC-80: Reload Devtools Config"
+        "title": "TIC-80: Reload Devtools Config",
+        "enablement": "config.tic80.controlSurface.enabled"
       },
       {
         "command": "tic80.addPanel",
-        "title": "TIC-80: Add Panel"
+        "title": "TIC-80: Add Panel",
+        "enablement": "config.tic80.controlSurface.enabled"
       },
       {
         "command": "tic80.removePanel",
-        "title": "TIC-80: Remove Panel"
+        "title": "TIC-80: Remove Panel",
+        "enablement": "config.tic80.controlSurface.enabled"
       },
       {
         "command": "tic80.detach",
-        "title": "TIC-80: Detach"
+        "title": "TIC-80: Detach",
+        "enablement": "config.tic80.controlSurface.enabled"
       }
     ],
     "grammars": [
@@ -172,26 +215,32 @@
           "id": "tic80ControlSurfaceActivity",
           "name": "Control Surface",
           "type": "webview",
-          "icon": "resources/desktop-classic.svg"
+          "icon": "resources/desktop-classic.svg",
+          "when": "config.tic80.controlSurface.enabled"
         }
       ]
     },
     "menus": {
       "commandPalette": [
         {
-          "command": "tic80.attach"
+          "command": "tic80.attach",
+          "when": "config.tic80.controlSurface.enabled"
         },
         {
-          "command": "tic80.reloadDevtools"
+          "command": "tic80.reloadDevtools",
+          "when": "config.tic80.controlSurface.enabled"
         },
         {
-          "command": "tic80.addPanel"
+          "command": "tic80.addPanel",
+          "when": "config.tic80.controlSurface.enabled"
         },
         {
-          "command": "tic80.removePanel"
+          "command": "tic80.removePanel",
+          "when": "config.tic80.controlSurface.enabled"
         },
         {
-          "command": "tic80.detach"
+          "command": "tic80.detach",
+          "when": "config.tic80.controlSurface.enabled"
         }
       ]
     }

@@ -6,10 +6,16 @@ import { WatchSystem } from './watches/WatchSystem';
 
 import {
   CONFIG_CONNECT_TIMEOUT_MS,
+  CONFIG_CONTROL_SURFACE_ENABLED,
+  CONFIG_DEVTOOLS_AUTO_CONFIGURE_SCHEMA,
   CONFIG_DISCOVERY_REFRESH_MS,
+  CONFIG_LANGUAGE_ENABLED,
   CONFIG_POLL_HZ,
+  CONFIG_REMOTE_AUTO_CONNECT,
+  CONFIG_REMOTE_DISCOVERY_ENABLED,
   CONFIG_REMOTE_HOST,
   CONFIG_REMOTE_PORT,
+  CONFIG_REMOTE_SHOW_STATUS_BAR,
   CONFIG_UI_REFRESH_MS,
   DEFAULT_CONNECT_TIMEOUT_MS,
   DEFAULT_DISCOVERY_REFRESH_MS,
@@ -41,21 +47,33 @@ function generatePanelId(): string {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-  const output = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
-  const statusBar =
-    vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10);
-
-  const session = new RemoteSessionManager(output);
   const workspaceRoot = getWorkspaceRoot();
-  void ensureDevtoolsSchemaForWorkspace(workspaceRoot, output);
-  const controlSurfaceRegistry = new ControlSurfaceRegistry();
+  let output: vscode.OutputChannel | undefined;
+  let symbolIndexManager: SymbolIndexManager | undefined;
+  let controlSurfaceFeatures: ControlSurfaceFeatures | undefined;
 
-  const symbolIndexManager = new SymbolIndexManager(output, workspaceRoot);
-  void symbolIndexManager.initialize();
-  context.subscriptions.push(symbolIndexManager);
+  const getOutput = (): vscode.OutputChannel => {
+    if (!output) {
+      output = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
+    }
+    return output;
+  };
+
+  context.subscriptions.push(new vscode.Disposable(() => {
+    output?.dispose();
+    output = undefined;
+  }));
 
   const luaSelector: vscode.DocumentSelector = { language: 'lua' };
   const languageProviderDisposables: vscode.Disposable[] = [];
+
+  const disposeLanguageFeatures = (): void => {
+    while (languageProviderDisposables.length > 0) {
+      languageProviderDisposables.pop()?.dispose();
+    }
+    symbolIndexManager?.dispose();
+    symbolIndexManager = undefined;
+  };
 
   const registerLanguageProviders = (): void => {
     while (languageProviderDisposables.length > 0) {
@@ -63,11 +81,29 @@ export function activate(context: vscode.ExtensionContext): void {
     }
 
     const config = vscode.workspace.getConfiguration('tic80');
+    const languageEnabled = config.get<boolean>(CONFIG_LANGUAGE_ENABLED, true);
     const enableSignature = config.get<boolean>('language.signatureHelp', true);
     const enableCompletion = config.get<boolean>('language.completion', true);
     const enableHover = config.get<boolean>('language.hover', true);
     const enableDefinition = config.get<boolean>('language.definition', true);
     const enableDocumentSymbols = config.get<boolean>('language.documentSymbols', true);
+
+    const anyProviderEnabled = enableSignature
+      || enableCompletion
+      || enableHover
+      || enableDefinition
+      || enableDocumentSymbols;
+
+    if (!languageEnabled || !anyProviderEnabled) {
+      symbolIndexManager?.dispose();
+      symbolIndexManager = undefined;
+      return;
+    }
+
+    if (!symbolIndexManager) {
+      symbolIndexManager = new SymbolIndexManager(getOutput(), workspaceRoot);
+      void symbolIndexManager.initialize();
+    }
 
     if (enableSignature) {
       languageProviderDisposables.push(
@@ -118,9 +154,6 @@ export function activate(context: vscode.ExtensionContext): void {
       );
     }
 
-    for (const disposable of languageProviderDisposables) {
-      context.subscriptions.push(disposable);
-    }
   };
 
   registerLanguageProviders();
@@ -131,6 +164,59 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     })
   );
+  context.subscriptions.push(new vscode.Disposable(disposeLanguageFeatures));
+
+  const updateControlSurfaceFeatures = (): void => {
+    if (getBooleanConfig(CONFIG_CONTROL_SURFACE_ENABLED, true)) {
+      if (!controlSurfaceFeatures) {
+        controlSurfaceFeatures = activateControlSurfaceFeatures(
+          context,
+          getOutput(),
+          workspaceRoot,
+        );
+      }
+      return;
+    }
+
+    if (controlSurfaceFeatures) {
+      controlSurfaceFeatures.closePanels();
+      controlSurfaceFeatures.dispose();
+      controlSurfaceFeatures = undefined;
+    }
+  };
+
+  updateControlSurfaceFeatures();
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration(`tic80.${CONFIG_CONTROL_SURFACE_ENABLED}`)) {
+        updateControlSurfaceFeatures();
+      }
+    }),
+    new vscode.Disposable(() => {
+      controlSurfaceFeatures?.dispose();
+      controlSurfaceFeatures = undefined;
+    }),
+  );
+}
+
+interface ControlSurfaceFeatures extends vscode.Disposable {
+  closePanels(): void;
+}
+
+function activateControlSurfaceFeatures(
+  context: vscode.ExtensionContext,
+  output: vscode.OutputChannel,
+  workspaceRoot: string | undefined,
+): ControlSurfaceFeatures {
+  const subscriptions: vscode.Disposable[] = [];
+  const statusBar =
+    vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10);
+  const session = new RemoteSessionManager(output);
+  const controlSurfaceRegistry = new ControlSurfaceRegistry();
+
+  if (getBooleanConfig(CONFIG_DEVTOOLS_AUTO_CONFIGURE_SCHEMA, true)) {
+    void ensureDevtoolsSchemaForWorkspace(workspaceRoot, output);
+  }
 
   // State persistence keys
   const STATE_KEY_PANELS = 'tic80.controlSurface.panels';
@@ -141,7 +227,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const activitySidebarId = 'activity-sidebar';
 
   // Register webview panel serializer for proper persistence across sessions
-  context.subscriptions.push(
+  subscriptions.push(
     vscode.window.registerWebviewPanelSerializer('tic80ControlSurfacePanel', {
       async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any): Promise<void> {
         try {
@@ -165,12 +251,12 @@ export function activate(context: vscode.ExtensionContext): void {
 
           webviewPanel.onDidDispose(() => {
             controlSurfaceRegistry.removeById(id);
-          }, undefined, context.subscriptions);
+          }, undefined, subscriptions);
 
           webviewPanel.webview.onDidReceiveMessage(
             (message: { type?: string }) => controlSurfaceMessageHandler.handleMessage(message, webviewPanel.webview),
             undefined,
-            context.subscriptions,
+            subscriptions,
           );
 
           webviewPanel.webview.html = buildControlSurfaceWebviewHtml(
@@ -251,6 +337,11 @@ export function activate(context: vscode.ExtensionContext): void {
   let discoveredInstances: Array<{ host: string; port: number; label?: string; description?: string; detail?: string; cartPath?: string; metaTitle?: string; metaVersion?: string; startedAt?: string }> = [];
 
   const refreshDiscoveredInstances = async () => {
+    if (!getBooleanConfig(CONFIG_REMOTE_DISCOVERY_ENABLED, true)) {
+      discoveredInstances = [];
+      return;
+    }
+
     const config = vscode.workspace.getConfiguration('tic80');
     const timeoutMs = config.get<number>(
       CONFIG_CONNECT_TIMEOUT_MS,
@@ -258,6 +349,10 @@ export function activate(context: vscode.ExtensionContext): void {
     );
 
     const instances = await discoverRunningInstancesBase(timeoutMs);
+    if (!getBooleanConfig(CONFIG_REMOTE_DISCOVERY_ENABLED, true)) {
+      discoveredInstances = [];
+      return;
+    }
     discoveredInstances = instances.map((instance) => {
       const label = formatInstanceLabel({
         host: instance.host,
@@ -333,8 +428,7 @@ export function activate(context: vscode.ExtensionContext): void {
   };
 
 
-  context.subscriptions.push(
-    output,
+  subscriptions.push(
     statusBar,
     session,
     watchSystem,
@@ -342,14 +436,12 @@ export function activate(context: vscode.ExtensionContext): void {
     activityProvider,
   );
 
-  context.subscriptions.push(
+  subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       'tic80ControlSurfaceActivity',
       activityProvider,
     ),
   );
-
-  statusBar.show();
 
   const updateStatus = () => {
     const snapshot = session.snapshot;
@@ -372,6 +464,15 @@ export function activate(context: vscode.ExtensionContext): void {
       statusBar.command = 'tic80.attach';
       statusBar.tooltip =
         snapshot.lastError ? `Last error: ${snapshot.lastError}` : undefined;
+    }
+  };
+
+  const updateStatusBarVisibility = () => {
+    if (getBooleanConfig(CONFIG_REMOTE_SHOW_STATUS_BAR, true)) {
+      updateStatus();
+      statusBar.show();
+    } else {
+      statusBar.hide();
     }
   };
 
@@ -408,6 +509,10 @@ export function activate(context: vscode.ExtensionContext): void {
       discoveryTimer = undefined;
     }
 
+    if (!getBooleanConfig(CONFIG_REMOTE_DISCOVERY_ENABLED, true)) {
+      return;
+    }
+
     const intervalMs = getDiscoveryRefreshMs();
     if (!Number.isFinite(intervalMs) || intervalMs <= 0) {
       return;
@@ -429,51 +534,65 @@ export function activate(context: vscode.ExtensionContext): void {
     }, intervalMs);
   };
 
-  updateStatus();
+  let autoConnectDisposable: vscode.Disposable | undefined;
+  let discoveryWatcherDispose: (() => void) | undefined;
+
+  const updateAutoConnectWatcher = () => {
+    autoConnectDisposable?.dispose();
+    autoConnectDisposable = undefined;
+
+    if (getBooleanConfig(CONFIG_REMOTE_AUTO_CONNECT, true)) {
+      autoConnectDisposable = setupAutoConnectWatcher({
+        session,
+        output,
+        getWorkspaceRoot,
+      });
+    }
+  };
+
+  const updateDiscoveryWatcher = () => {
+    discoveryWatcherDispose?.();
+    discoveryWatcherDispose = undefined;
+
+    if (getBooleanConfig(CONFIG_REMOTE_DISCOVERY_ENABLED, true)) {
+      discoveryWatcherDispose = watchDiscoverySessionFiles(() => {
+        void refreshDiscoveredInstances().then(() => scheduleUiRefresh());
+      });
+    }
+  };
+
+  updateStatusBarVisibility();
   updateContextKeys();
   updatePoller();
   updateUiRefreshTimer();
   updateDiscoveryRefreshTimer();
+  updateDiscoveryWatcher();
+  updateAutoConnectWatcher();
   expressionMonitor.start();
   plotSubscriptionManager.start();
-  void refreshDiscoveredInstances().then(() => scheduleUiRefresh());
+  if (getBooleanConfig(CONFIG_REMOTE_DISCOVERY_ENABLED, true)) {
+    void refreshDiscoveredInstances().then(() => scheduleUiRefresh());
+  }
 
-  setupAutoConnectWatcher({
-    context,
-    session,
-    output,
-    getWorkspaceRoot,
-  });
-
-  session.onDidChangeState(() => {
-    updateStatus();
+  subscriptions.push(session.onDidChangeState(() => {
+    updateStatusBarVisibility();
     updateContextKeys();
     updatePoller();
     scheduleUiRefresh();
     expressionMonitor.handleSessionStateChange();
     plotSubscriptionManager.handleSessionStateChange();
-  });
+  }));
 
-  context.subscriptions.push(
+  subscriptions.push(
     watchSystem.store.onDidChange(() => scheduleUiRefresh()),
   );
-  context.subscriptions.push(
+  subscriptions.push(
     controlSurfaceRegistry.onDidChange(() => {
       scheduleUiRefresh();
     }),
   );
 
-  const discoveryWatcherDispose = watchDiscoverySessionFiles(() => {
-    void refreshDiscoveredInstances().then(() => scheduleUiRefresh());
-  });
-
-  context.subscriptions.push(
-    new vscode.Disposable(() => {
-      discoveryWatcherDispose();
-    }),
-  );
-
-  context.subscriptions.push(
+  subscriptions.push(
     new vscode.Disposable(() => {
       if (refreshTimer) {
         clearInterval(refreshTimer);
@@ -483,10 +602,12 @@ export function activate(context: vscode.ExtensionContext): void {
       }
       expressionMonitor.dispose();
       plotSubscriptionManager.dispose();
+      autoConnectDisposable?.dispose();
+      discoveryWatcherDispose?.();
     }),
   );
 
-  context.subscriptions.push(
+  subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration(`tic80.${CONFIG_POLL_HZ}`)) {
         updatePoller();
@@ -497,10 +618,32 @@ export function activate(context: vscode.ExtensionContext): void {
       if (event.affectsConfiguration(`tic80.${CONFIG_DISCOVERY_REFRESH_MS}`)) {
         updateDiscoveryRefreshTimer();
       }
+      if (event.affectsConfiguration(`tic80.${CONFIG_REMOTE_AUTO_CONNECT}`)) {
+        updateAutoConnectWatcher();
+      }
+      if (event.affectsConfiguration(`tic80.${CONFIG_REMOTE_DISCOVERY_ENABLED}`)) {
+        discoveredInstances = [];
+        updateDiscoveryRefreshTimer();
+        updateDiscoveryWatcher();
+        if (getBooleanConfig(CONFIG_REMOTE_DISCOVERY_ENABLED, true)) {
+          void refreshDiscoveredInstances().then(() => scheduleUiRefresh());
+        } else {
+          scheduleUiRefresh();
+        }
+      }
+      if (event.affectsConfiguration(`tic80.${CONFIG_REMOTE_SHOW_STATUS_BAR}`)) {
+        updateStatusBarVisibility();
+      }
+      if (
+        event.affectsConfiguration(`tic80.${CONFIG_DEVTOOLS_AUTO_CONFIGURE_SCHEMA}`)
+        && getBooleanConfig(CONFIG_DEVTOOLS_AUTO_CONFIGURE_SCHEMA, true)
+      ) {
+        void ensureDevtoolsSchemaForWorkspace(workspaceRoot, output);
+      }
     }),
   );
 
-  context.subscriptions.push(
+  subscriptions.push(
     vscode.commands.registerCommand(
       'tic80.attach',
       async () => {
@@ -636,11 +779,11 @@ export function activate(context: vscode.ExtensionContext): void {
 
         panel.onDidDispose(() => {
           controlSurfaceRegistry.removeById(id);
-        }, undefined, context.subscriptions);
+        }, undefined, subscriptions);
         panel.webview.onDidReceiveMessage(
           (message: { type?: string }) => controlSurfaceMessageHandler.handleMessage(message, panel.webview),
           undefined,
-          context.subscriptions,
+          subscriptions,
         );
         panel.webview.html = buildControlSurfaceWebviewHtml(
           panel.webview,
@@ -711,10 +854,34 @@ export function activate(context: vscode.ExtensionContext): void {
         session.disconnect('User detached');
       }),
   );
-} // activate
+
+  let disposed = false;
+  return {
+    closePanels: () => {
+      for (const panel of controlSurfaceRegistry.getPanels()) {
+        panel.panel?.dispose();
+      }
+    },
+    dispose: () => {
+      if (disposed) {
+        return;
+      }
+      disposed = true;
+      while (subscriptions.length > 0) {
+        subscriptions.pop()?.dispose();
+      }
+      void vscode.commands.executeCommand('setContext', 'tic80.remote.connected', false);
+      void vscode.commands.executeCommand('setContext', 'tic80.remote.disconnected', false);
+    },
+  };
+}
 
 export function deactivate(): void {
   return;
+}
+
+function getBooleanConfig(key: string, fallback: boolean): boolean {
+  return vscode.workspace.getConfiguration('tic80').get<boolean>(key, fallback);
 }
 
 function getPollHz(): number {
@@ -753,6 +920,10 @@ async function getAttachTargets(
   defaultPort: number,
   timeoutMs: number,
 ): Promise<AttachPickItem[]> {
+  if (!getBooleanConfig(CONFIG_REMOTE_DISCOVERY_ENABLED, true)) {
+    return [];
+  }
+
   const discovered = await discoverRunningInstances(timeoutMs);
   const targets: AttachPickItem[] = [...discovered];
 

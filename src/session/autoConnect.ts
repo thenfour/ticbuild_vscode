@@ -18,35 +18,53 @@ interface TicbuildSessionRecord {
 }
 
 export interface AutoConnectOptions {
-    context: vscode.ExtensionContext;
     session: RemoteSessionManager;
     output: vscode.OutputChannel;
     getWorkspaceRoot: () => string | undefined;
 }
 
-export function setupAutoConnectWatcher(options: AutoConnectOptions): void {
-    const { context } = options;
+interface AutoConnectState {
+    autoConnectedTarget?: string;
+    autoConnectInProgress: boolean;
+    disposed: boolean;
+}
+
+export function setupAutoConnectWatcher(options: AutoConnectOptions): vscode.Disposable {
     const folder = vscode.workspace.workspaceFolders?.[0];
     if (!folder) {
-        return;
+        return new vscode.Disposable(() => { });
     }
 
     const pattern = new vscode.RelativePattern(folder, getSessionGlob());
     const watcher = vscode.workspace.createFileSystemWatcher(pattern);
-    context.subscriptions.push(watcher);
 
     const state = {
         autoConnectedTarget: undefined as string | undefined,
         autoConnectInProgress: false,
+        disposed: false,
     };
 
-    const onChange = () => void scanAndAutoConnect(options, state);
+    const onChange = () => {
+        if (!state.disposed) {
+            void scanAndAutoConnect(options, state);
+        }
+    };
 
-    watcher.onDidCreate(onChange, undefined, context.subscriptions);
-    watcher.onDidChange(onChange, undefined, context.subscriptions);
-    watcher.onDidDelete(onChange, undefined, context.subscriptions);
+    const subscriptions = [
+        watcher,
+        watcher.onDidCreate(onChange),
+        watcher.onDidChange(onChange),
+        watcher.onDidDelete(onChange),
+    ];
 
     void scanAndAutoConnect(options, state);
+
+    return new vscode.Disposable(() => {
+        state.disposed = true;
+        for (const subscription of subscriptions) {
+            subscription.dispose();
+        }
+    });
 }
 
 export function clearAutoConnectTarget(state: { autoConnectedTarget?: string }): void {
@@ -98,10 +116,10 @@ function compareSessions(a: { startedAt: Date }, b: { startedAt: Date }): number
 
 async function scanAndAutoConnect(
     options: AutoConnectOptions,
-    state: { autoConnectedTarget?: string; autoConnectInProgress: boolean },
+    state: AutoConnectState,
 ): Promise<void> {
     const { session, output, getWorkspaceRoot } = options;
-    if (state.autoConnectInProgress) {
+    if (state.disposed || state.autoConnectInProgress) {
         return;
     }
     const workspaceRoot = getWorkspaceRoot();
@@ -113,6 +131,9 @@ async function scanAndAutoConnect(
     try {
         entries = await fs.readdir(sessionDir);
     } catch (error) {
+        if (state.disposed) {
+            return;
+        }
         if (state.autoConnectedTarget) {
             output.appendLine('[session] No session files found. Disconnecting.');
             session.disconnect('Auto-disconnect (session files removed)');
@@ -163,6 +184,9 @@ async function scanAndAutoConnect(
     state.autoConnectInProgress = true;
     try {
         for (const candidate of candidates) {
+            if (state.disposed) {
+                return;
+            }
             const target = getSessionTarget(candidate.record);
             if (state.autoConnectedTarget === target && session.isConnected()) {
                 return;
@@ -180,10 +204,17 @@ async function scanAndAutoConnect(
                     DEFAULT_CONNECT_TIMEOUT_MS,
                 );
                 await session.connect(candidate.record.host, candidate.record.port, timeoutMs);
+                if (state.disposed) {
+                    session.disconnect('Auto-connect disabled');
+                    return;
+                }
                 state.autoConnectedTarget = target;
                 output.appendLine(`[session] Auto-connected to ${target}`);
                 return;
             } catch (error) {
+                if (state.disposed) {
+                    return;
+                }
                 const message = error instanceof Error ? error.message : String(error);
                 output.appendLine(`[session] Auto-connect failed for ${target}: ${message}`);
                 try {

@@ -54,6 +54,48 @@ Select `TIC-80: Attach.` and you can specify a running instance.
 
 Select `TIC-80: Add Panel` to add a control surface.
 
+# Feature settings
+
+The extension's active features can be enabled independently. Changes take effect
+immediately.
+
+- `tic80.language.enabled` controls ticbuild-aware Lua completion, hover,
+  signature help, definitions, declarations, document symbols, and symbol-index
+  watching. The individual `tic80.language.*` settings can refine this further.
+- `tic80.controlSurface.enabled` controls the control-surface UI, remoting,
+  watches, discovery, polling, status, and related commands.
+- `tic80.remote.autoConnect` controls automatic attachment to sessions announced
+  in the current workspace. Manual attachment remains available.
+- `tic80.remote.discovery.enabled` controls local TIC-80 discovery, including the
+  initial scan, refresh timer, and filesystem watcher.
+- `tic80.remote.showStatusBar` controls the remoting status-bar item.
+- `tic80.devtools.autoConfigureSchema` controls whether the extension creates
+  `devtools.schema.json` and adds its `$schema` reference to an existing
+  `.ticbuild/devtools.json` file.
+
+For syntax highlighting without any active extension features:
+
+```jsonc
+{
+  "tic80.language.enabled": false,
+  "tic80.controlSurface.enabled": false
+}
+```
+
+For the control surface without ticbuild-aware Lua language providers:
+
+```jsonc
+{
+  "tic80.language.enabled": false,
+  "tic80.controlSurface.enabled": true
+}
+```
+
+The ticbuild preprocessor highlighting is currently a static VS Code grammar
+contribution, so it remains active whenever this extension is enabled. Packaging
+the grammar as a separate syntax extension is required to support a control-surface
+installation with no ticbuild highlighting.
+
 # Control Surfaces
 
 A ticbuild project can define a control surface for your cart. A control surface is

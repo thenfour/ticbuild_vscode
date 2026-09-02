@@ -1,99 +1,99 @@
 .pp-root {
-    /* establish variables at controls root */
-    --cs-pp-control-label-width: 135px;
-    --cs-pp-control-default-width: calc(min(90vw, 500px));
+  /* establish variables at controls root */
+  --cs-pp-control-label-width: 135px;
+  --cs-pp-control-default-width: calc(min(90vw, 500px));
 }
 
 .cs-pp-control {
-    border: 1px solid transparent;
-    box-sizing: border-box; /* include border in width */
-    overflow: visible;
+  border: 1px solid transparent;
+  box-sizing: border-box; /* include border in width */
+  overflow: visible;
 }
 
 /* any container controls should be able to expand to children. */
 .cs-pp-control:not(.cs-pp-control-container) {
-    width: var(--cs-pp-control-default-width);
+  width: var(--cs-pp-control-default-width);
 }
 
 /* control containers should allow expanding to fit children, but only
 the width of the children and nothing more (width:auto is expanding to the
 full width available).*/
 .cs-pp-control-container {
-    width: fit-content;
-    max-width: 100%;
-    align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+  align-self: flex-start;
 }
 
 .pp-root .cs-pp-control-column {
-    display:flex;
-    flex-direction: column;
-    gap: 12px;
-    width: auto;
-    max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: auto;
+  max-width: none;
 }
 
-
 .pp-root .cs-pp-control-column .cs-pp-control-column-content {
-    display:flex;
-    flex-direction: column;
-    gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .pp-root .cs-pp-control-row {
-    display:flex;
-    flex-direction: column;
-    gap: 12px;
-    width: auto;
-    position:relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: auto;
+  position: relative;
 }
 .pp-root .cs-pp-control-row .cs-pp-control-row-content {
-    display:flex;
-    flex-direction: row;
-    gap: 8px;
-    width: auto;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: auto;
 }
 
 .cs-pp-control-shell {
-    display: flex;
-    padding:3px; /* we will use the background as a fake "border"; padding indicates the border thickness */
-    box-sizing: border-box; /* include padding in width */
-    background-color: transparent;
-    position:relative; /* allow floating tool controls */
-    overflow: visible;
+  display: flex;
+  padding: 3px; /* we will use the background as a fake "border"; padding indicates the border thickness */
+  box-sizing: border-box; /* include padding in width */
+  background-color: transparent;
+  position: relative; /* allow floating tool controls */
+  overflow: visible;
 }
 
-.cs-pp-control-shell .cs-pp-control-shell-inner{
-    display: flex;
-    flex-direction: column;
-    flex:1; /* fill space to make sure the fake border effect is consistent */
-    background-color: var(--vscode-editor-background); /* cancel out the outer background to create border effect */
+.cs-pp-control-shell .cs-pp-control-shell-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* fill space to make sure the fake border effect is consistent */
+  background-color: var(
+    --vscode-editor-background
+  ); /* cancel out the outer background to create border effect */
 }
 
 .cs-pp-control:hover {
-    /* border-color: var(--vscode-focusBorder); */
-    /* border-color: var(--vscode-panel-border); */
-    /* border-color: #f0f; */
-    
+  /* border-color: var(--vscode-focusBorder); */
+  /* border-color: var(--vscode-panel-border); */
+  /* border-color: #f0f; */
 }
 
 .cs-pp-control-shell-labelvaluerow {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .cs-pp-control-shell-label {
-    width: var(--cs-pp-control-label-width);
-    font-size: 12px;
-    color: var(--vscode-descriptionForeground);
-    padding-left:4px;
+  width: var(--cs-pp-control-label-width);
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  padding-left: 4px;
 }
 
 .cs-pp-control-shell-value {
-    flex: 1;
-    display: flex;
-    gap: 8px;
-    align-items: center;
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 /* 
@@ -111,26 +111,30 @@ full width available).*/
 
 .cs-pp-control-shell .cs-pp-control-shell-binding-status,
 .cs-pp-control-shell .cs-pp-control-shell-validation-status {
-    display:flex;
-    justify-content: flex-end;
+  display: flex;
+  justify-content: flex-end;
+  font-size: 11px;
 }
 
-
-.cs-pp-control-shell.cs-pp-control-shell-binding-status-error .cs-pp-control-shell-binding-status,
-.cs-pp-control-shell.cs-pp-control-shell-validation-error .cs-pp-control-shell-validation-status {
-    color: var(--vscode-editorError-foreground);
+.cs-pp-control-shell.cs-pp-control-shell-binding-status-error
+  .cs-pp-control-shell-binding-status,
+.cs-pp-control-shell.cs-pp-control-shell-validation-error
+  .cs-pp-control-shell-validation-status {
+  color: var(--vscode-editorError-foreground);
 }
 
-
-.cs-pp-control-shell.cs-pp-control-shell-binding-status-warning .cs-pp-control-shell-binding-status,
-.cs-pp-control-shell.cs-pp-control-shell-validation-warning .cs-pp-control-shell-validation-status {
-    color: var(--vscode-editorWarning-foreground);
+.cs-pp-control-shell.cs-pp-control-shell-binding-status-warning
+  .cs-pp-control-shell-binding-status,
+.cs-pp-control-shell.cs-pp-control-shell-validation-warning
+  .cs-pp-control-shell-validation-status {
+  color: var(--vscode-editorWarning-foreground);
 }
 
-
-.cs-pp-control-shell.cs-pp-control-shell-binding-status-info .cs-pp-control-shell-binding-status,
-.cs-pp-control-shell.cs-pp-control-shell-validation-info .cs-pp-control-shell-validation-status {
-    color: var(--vscode-editorInfo-foreground);
+.cs-pp-control-shell.cs-pp-control-shell-binding-status-info
+  .cs-pp-control-shell-binding-status,
+.cs-pp-control-shell.cs-pp-control-shell-validation-info
+  .cs-pp-control-shell-validation-status {
+  color: var(--vscode-editorInfo-foreground);
 }
 
 .cs-pp-control-page,
@@ -138,34 +142,32 @@ full width available).*/
 .cs-pp-control-group,
 .cs-pp-control-tabs,
 .cs-pp-control-row {
-    position:relative;
-    overflow: visible;
-    /* give min width so even when no children or collapsed, the width isn't weirdly small */
-    min-width: var(--cs-pp-control-default-width);
+  position: relative;
+  overflow: visible;
+  /* give min width so even when no children or collapsed, the width isn't weirdly small */
+  min-width: var(--cs-pp-control-default-width);
 }
- 
 
-.cs-pp-control-page-label
-{
-    font-size: 22px;
-    font-weight: 600;
-    margin-top: 18px;
-    margin-bottom: 0;
+.cs-pp-control-page-label {
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 18px;
+  margin-bottom: 0;
 }
 
 .cs-pp-design-tools {
-    position:absolute;
-    top:3px;
-    right:3px;
-    opacity: 0;
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  opacity: 0;
 }
 
 .cs-pp-copy-tools {
-    position:absolute;
-    top:3px;
-    left:3px;
-    opacity: 0;
-    pointer-events: none;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  opacity: 0;
+  pointer-events: none;
 }
 /* 
 .cs-pp-control:hover:not(:has(.cs-pp-control:hover)) .cs-pp-design-tools {
@@ -173,16 +175,14 @@ full width available).*/
 } */
 
 /* 1) show tools for the deepest hovered control-column */
-.cs-pp-control:hover:not(:has(.cs-pp-control:hover))
-  .cs-pp-design-tools {
+.cs-pp-control:hover:not(:has(.cs-pp-control:hover)) .cs-pp-design-tools {
   opacity: 1;
   pointer-events: auto;
 }
 
-.cs-pp-control:hover:not(:has(.cs-pp-control:hover))
-    .cs-pp-copy-tools {
-    opacity: 1;
-    pointer-events: auto;
+.cs-pp-control:hover:not(:has(.cs-pp-control:hover)) .cs-pp-copy-tools {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* 2) but don't cross a nested .cs-pp-control-column boundary */
@@ -194,104 +194,98 @@ full width available).*/
 }
 
 .cs-pp-control:hover:not(:has(.cs-pp-control:hover))
-    .cs-pp-control
-    .cs-pp-copy-tools {
-    opacity: 0;
-    pointer-events: none;
+  .cs-pp-control
+  .cs-pp-copy-tools {
+  opacity: 0;
+  pointer-events: none;
 }
 
-
-.cs-pp-control:hover:not(:has(.cs-pp-control:hover))
- {
+.cs-pp-control:hover:not(:has(.cs-pp-control:hover)) {
   background-color: var(--vscode-settings-rowHoverBackground);
-      border-color: var(--vscode-panel-border);
-
+  border-color: var(--vscode-panel-border);
 }
 
 /* 2) but don't cross a nested .cs-pp-control-column boundary */
-.cs-pp-control:hover:not(:has(.cs-pp-control:hover))
-  .cs-pp-control{
-    background-color: transparent;
-        border-color: transparent;
-
+.cs-pp-control:hover:not(:has(.cs-pp-control:hover)) .cs-pp-control {
+  background-color: transparent;
+  border-color: transparent;
 }
 
-
 .cs-pp-control-divider {
-    padding: 12px 0; /* makes sure this control is big enough to make it easy to hovero ver it.*/
-    position: relative;
+  padding: 12px 0; /* makes sure this control is big enough to make it easy to hovero ver it.*/
+  position: relative;
 }
 
 .cs-pp-control-divider .cs-pp-control-divider-line {
-    border-top: 1px solid var(--vscode-panel-border);
-    /* margin: 12px 0; */
+  border-top: 1px solid var(--vscode-panel-border);
+  /* margin: 12px 0; */
 }
 
 .cs-pp-control.cs-pp-control-group {
-    padding: 6px;
-    margin:16px 0;
-    border: 1px solid var(--vscode-panel-border);
-    border-radius: 4px;
-    min-width: var(--cs-pp-control-default-width);
+  padding: 6px;
+  margin: 16px 0;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+  min-width: var(--cs-pp-control-default-width);
 }
 
 .cs-pp-control.cs-pp-control-group .cs-pp-group-label {
-
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  cursor: pointer;
 }
 
-
 .cs-pp-control.cs-pp-control-group .cs-pp-group-expanded-content {
-    margin-top: 8px;
-    display:flex;
-    flex-direction: column;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* give empty groups a usable drop target size */
-.cs-pp-control.cs-pp-control-group .cs-pp-group-expanded-content .cs-dnd-container {
-    min-width: var(--cs-pp-control-default-width);
-    min-height: 24px;
+.cs-pp-control.cs-pp-control-group
+  .cs-pp-group-expanded-content
+  .cs-dnd-container {
+  min-width: var(--cs-pp-control-default-width);
+  min-height: 24px;
 }
 
 .cs-pp-control.cs-pp-control-tabs {
-    margin:16px 0;
+  margin: 16px 0;
 }
 
 .cs-pp-control-selected {
-    /* border-color: var(--vscode-focusBorder);
+  /* border-color: var(--vscode-focusBorder);
     box-shadow: 0 0 6px var(--vscode-focusBorder); */
-    /* selection = border; movedest = outline*/
-    border: 1px dashed var(--vscode-focusBorder) !important;
+  /* selection = border; movedest = outline*/
+  border: 1px dashed var(--vscode-focusBorder) !important;
 }
 
 .cs-pp-control-move-destination {
-    /* // --vscode-diffEditor-moveActive-border
+  /* // --vscode-diffEditor-moveActive-border
     // --vscode-inputValidation-infoBorder */
-    /* border-color: var(--vscode-diffEditor-moveActive-border); */
-    /* selection = border; movedest = outline*/
-    outline: 1px dashed var(--vscode-diffEditor-moveActive-border);
+  /* border-color: var(--vscode-diffEditor-moveActive-border); */
+  /* selection = border; movedest = outline*/
+  outline: 1px dashed var(--vscode-diffEditor-moveActive-border);
 
-    /* box-shadow: 0 0 6px var(--vscode-diffEditor-moveActive-border); */
+  /* box-shadow: 0 0 6px var(--vscode-diffEditor-moveActive-border); */
 }
 
 .cs-dnd-handle {
-    cursor: grab;
+  cursor: grab;
 }
 
 .cs-dnd-handle:active {
-    cursor: grabbing;
+  cursor: grabbing;
 }
 
 /* react-smooth-dnd wrappers can clip absolute-positioned tool buttons */
 .smooth-dnd-container,
 .smooth-dnd-draggable-wrapper,
 .smooth-dnd-draggable {
-    overflow: visible !important;
-    pointer-events: auto !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
 
-    /* this is really the only place i can easily add gaps because smooth-dnd render in tree as table/tablecell*/
-    padding: 0 3px;
+  /* this is really the only place i can easily add gaps because smooth-dnd render in tree as table/tablecell*/
+  padding: 0 3px;
 }

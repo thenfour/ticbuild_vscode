@@ -22,6 +22,7 @@ export class SymbolIndexManager implements vscode.Disposable {
     private watcher?: vscode.FileSystemWatcher;
     private latestIndexUri?: vscode.Uri;
     private projectIndex?: ProjectIndex;
+    private disposed = false;
 
     constructor(output: vscode.OutputChannel, workspaceRoot?: string) {
         this.output = output;
@@ -29,17 +30,28 @@ export class SymbolIndexManager implements vscode.Disposable {
     }
 
     logDebug(message: string): void {
-        this.output.appendLine(`[symbols] ${message}`);
+        if (!this.disposed) {
+            this.output.appendLine(`[symbols] ${message}`);
+        }
     }
 
     dispose(): void {
+        this.disposed = true;
         if (this.watcher) {
             this.watcher.dispose();
+            this.watcher = undefined;
         }
     }
 
     async initialize(): Promise<void> {
+        if (this.disposed) {
+            return;
+        }
         await this.refreshLatestIndex();
+
+        if (this.disposed) {
+            return;
+        }
 
         this.watcher = vscode.workspace.createFileSystemWatcher('**/symbols.index.json');
         this.watcher.onDidCreate((uri) => void this.onIndexFileChanged(uri));
@@ -261,6 +273,9 @@ export class SymbolIndexManager implements vscode.Disposable {
     private async loadIndexFromUri(uri: vscode.Uri): Promise<void> {
         try {
             const content = await vscode.workspace.fs.readFile(uri);
+            if (this.disposed) {
+                return;
+            }
             const json = Buffer.from(content).toString('utf8');
             const parsed = JSON.parse(json) as ProjectIndex;
 
@@ -268,7 +283,9 @@ export class SymbolIndexManager implements vscode.Disposable {
             this.latestIndexUri = uri;
             this.logDebug(`Loaded symbol index (schema ${parsed.schemaVersion}) from ${uri.fsPath}`);
         } catch (error) {
-            this.output.appendLine(`[symbols] Failed to load symbol index: ${String(error)}`);
+            if (!this.disposed) {
+                this.output.appendLine(`[symbols] Failed to load symbol index: ${String(error)}`);
+            }
         }
     }
 

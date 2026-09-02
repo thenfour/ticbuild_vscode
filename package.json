@@ -48,6 +48,7 @@
   ],
   "scripts": {
     "typecheck": "tsc -p ./ --noEmit",
+    "test:grammar": "node ./scripts/test-grammar.js",
     "compile": "npm run typecheck && node ./esbuild.js",
     "watch": "node ./esbuild.js --watch",
     "vscode:prepublish": "npm run compile"
@@ -60,7 +61,9 @@
     "@types/vscode": "^1.80.0",
     "esbuild": "^0.20.2",
     "typescript": "^5.3.3",
-    "vscode": "^1.1.37"
+    "vscode": "^1.1.37",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.3.2"
   },
   "contributes": {
     "configuration": {

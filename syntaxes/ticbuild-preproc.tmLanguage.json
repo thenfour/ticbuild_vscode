@@ -6,16 +6,16 @@
   "patterns": [
     {
       "name": "meta.preprocessor.ticbuild",
-      "begin": "^(\\s*--#)\\s*",
+      "begin": "^(\\s*)(--#)\\s*(?=(?:macro|endmacro|minify|define|undef|if|ifdef|ifndef|else|endif|pragma|include|error|warning)\\b)",
       "beginCaptures": {
-        "1": {
+        "2": {
           "name": "punctuation.definition.comment.lua"
         }
       },
       "end": "$",
       "patterns": [
         {
-          "match": "(?i)\\G(warning|error)\\b\\s*(.*)$",
+          "match": "\\G(warning|error)\\b\\s*(.*)$",
           "captures": {
             "1": {
               "name": "meta.preprocessor.ticbuild.directive"
@@ -27,15 +27,12 @@
         },
         {
           "name": "meta.preprocessor.ticbuild.directive",
-          "match": "(?i)\\G(?:if|elif|elseif|else|endif|ifdef|ifndef|define|undef|include|pragma)\\b"
+          "match": "\\G(?:macro|endmacro|minify|define|undef|if|ifdef|ifndef|else|endif|pragma|include)\\b"
         },
         {
           "name": "comment.line.double-dash.lua",
-          "match": "--.*$",
+          "match": "(--).*$",
           "captures": {
-            "0": {
-              "name": "comment.line.double-dash.lua"
-            },
             "1": {
               "name": "punctuation.definition.comment.lua"
             }

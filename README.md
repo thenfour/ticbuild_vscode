@@ -12,7 +12,7 @@ the perfect variables, and to monitor variables over time.
 
 ![alt text](.attachments/image-3.png)
 
-## Adds syntax highlighting to Lua preprocessing done by ticbuild
+## Adds syntax highlighting to Lua and TypeScript preprocessing done by ticbuild
 
 ![alt text](.attachments/image.png)
 
@@ -34,8 +34,16 @@ This project is free, a labor of love; if you find it useful, please support by 
 
 # Usage
 
-After installing, you should see syntax highlighting for Lua preprocessor (used by
-ticbuild)
+After installing, you should see syntax highlighting for ticbuild preprocessor
+directives in Lua, TypeScript, and TSX files.
+
+```lua
+--#macro FLOORDIV(a,b) => a//b -- with a comment
+```
+
+```ts
+//#macro FLOORDIV(a,b) => a//b -- with a comment
+```
 
 You can also attach to a running instance of TIC-80 for control surface support.
 To do this, <kbd>F5</kbd> on a ticbuild project to launch the cart in watch mode.
@@ -230,14 +238,18 @@ for dev we launch in a browser, but mock the data and vscodeapi.
 
 ```bash
 
-# install
+# install via download
 code --install-extension tridentloop.ticbuild-vs-code
 
 # install from command line (install by file)
-code --install-extension ./ticbuild-preproc-highlight-0.0.4.vsix
+code --install-extension ./ticbuild-vs-code-0.0.6.vsix
 
 # uninstall
 code --uninstall-extension tridentloop.ticbuild-vs-code
+
+# create vsix package
+vsce package
+
 ```
 
 # Compatibility with LuaLS

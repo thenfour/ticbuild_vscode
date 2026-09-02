@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-  "name": "ticbuild VS Code support",
+  "name": "ticbuild Lua and TypeScript preprocessor support",
   "scopeName": "source.ticbuild.preproc.injection",
-  "injectionSelector": "L:source.lua, L:source.lua.embedded, L:comment.line.double-dash.lua, L:meta.embedded.block.lua",
+  "injectionSelector": "L:source.lua, L:source.lua.embedded, L:comment.line.double-dash.lua, L:meta.embedded.block.lua, L:source.ts, L:source.tsx, L:comment.line.double-slash.ts, L:meta.embedded.block.typescript, L:meta.embedded.block.typescriptreact",
   "patterns": [
     {
       "name": "meta.preprocessor.ticbuild",
@@ -13,6 +13,26 @@
         }
       },
       "end": "$",
+      "patterns": [
+        { "include": "#directive-body" }
+      ]
+    },
+    {
+      "name": "meta.preprocessor.ticbuild",
+      "begin": "^(\\s*)(//(?:--)?#)\\s*(?=(?:macro|endmacro|minify|define|undef|if|ifdef|ifndef|else|endif|pragma|include|error|warning)\\b)",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.comment.ts"
+        }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#directive-body" }
+      ]
+    }
+  ],
+  "repository": {
+    "directive-body": {
       "patterns": [
         {
           "match": "\\G(warning|error)\\b\\s*(.*)$",
@@ -40,5 +60,5 @@
         }
       ]
     }
-  ]
+  }
 }

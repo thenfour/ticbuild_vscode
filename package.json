@@ -198,6 +198,8 @@
         "injectTo": [
           "source.lua",
           "source.lua.embedded",
+          "source.ts",
+          "source.tsx",
           "meta.embedded.block.lua",
           "text.html.markdown"
         ]

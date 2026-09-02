@@ -78,7 +78,7 @@ For syntax highlighting without any active extension features:
 ```jsonc
 {
   "tic80.language.enabled": false,
-  "tic80.controlSurface.enabled": false
+  "tic80.controlSurface.enabled": false,
 }
 ```
 
@@ -87,7 +87,7 @@ For the control surface without ticbuild-aware Lua language providers:
 ```jsonc
 {
   "tic80.language.enabled": false,
-  "tic80.controlSurface.enabled": true
+  "tic80.controlSurface.enabled": true,
 }
 ```
 
@@ -241,6 +241,10 @@ code --uninstall-extension tridentloop.ticbuild-vs-code
 ```
 
 # Release history
+
+## `v0.0.6` / future
+
+- #9 Added more settings to disable extension features
 
 ## `v0.0.5` / `2026-02-09`
 
